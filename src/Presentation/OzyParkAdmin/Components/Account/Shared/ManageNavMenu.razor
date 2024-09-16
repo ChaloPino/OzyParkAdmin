@@ -1,0 +1,26 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using OzyParkAdmin.Domain.Seguridad.Usuarios
+
+@inject SignInManager<Usuario> SignInManager
+
+<MudNavMenu>
+    <MudNavLink Icon="@Icons.Material.Filled.Home" Match="NavLinkMatch.All" Href="/">Home</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.Person" Match="NavLinkMatch.All" Href="Account/Manage">Perfil</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.Email" Href="Account/Manage/Email">Email</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.Password" Href="Account/Manage/ChangePassword">Password</MudNavLink>
+    @if (hasExternalLogins)
+    {
+        <MudNavLink Icon="@Icons.Material.Filled.Login" Href="Account/Manage/ExternalLogins">Inicios de sesión</MudNavLink>
+    }
+    <MudNavLink Icon="@Icons.Material.Filled.VerifiedUser" Href="Account/Manage/TwoFactorAuthentication">Autenticación doble-factor</MudNavLink>
+    <MudNavLink Icon="@Icons.Material.Filled.Person2" Href="Account/Manage/PersonalData">Datos personales</MudNavLink>
+</MudNavMenu>
+
+@code {
+    private bool hasExternalLogins;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    }
+}

@@ -1,0 +1,58 @@
+﻿@using MudBlazor.Interfaces
+@typeparam T
+
+<MudStack Row="true" AlignItems="AlignItems.Center">
+    <IfThenElse Condition="State">
+        <Then>
+            <MudIconButton Icon="@TrueIcon" Color="@TrueColor" Size="@Size" OnClick="ChangeStatus" />
+            <MudText Color="@TrueColor" Typo="Typo.body2">@TrueLabel</MudText>
+        </Then>
+        <Else>
+            <MudIconButton Icon="@FalseIcon" Color="@FalseColor" Size="@Size" OnClick="ChangeStatus" />
+            <MudText Color="@FalseColor" Typo="Typo.body2">@FalseLabel</MudText>
+        </Else>
+    </IfThenElse>
+</MudStack>
+
+@code {
+    [CascadingParameter]
+    private MudDataGrid<T>? DataGrid { get; set; }
+
+    [Parameter]
+    public bool State { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> StateChanged { get; set; }
+
+    [Parameter]
+    public Color TrueColor { get; set; } = Color.Success;
+
+    [Parameter]
+    public string TrueIcon { get; set; } = Icons.Material.Filled.Check;
+
+    [Parameter]
+    public string TrueLabel { get; set; } = "Sí";
+
+    [Parameter]
+    public Color FalseColor { get; set; } = Color.Error;
+
+    [Parameter]
+    public string FalseIcon { get; set; } = Icons.Material.Filled.Remove;
+
+    [Parameter]
+    public string FalseLabel { get; set; } = "No";
+
+    [Parameter]
+    public Size Size { get; set; } = Size.Small;
+
+    private async Task ChangeStatus()
+    {
+        State = !State;
+        await StateChanged.InvokeAsync(State);
+
+        if (DataGrid is not null)
+        {
+            ((IMudStateHasChanged)DataGrid).StateHasChanged();
+        }
+    }
+}

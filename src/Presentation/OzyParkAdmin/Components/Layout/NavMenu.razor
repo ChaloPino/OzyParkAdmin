@@ -1,0 +1,12 @@
+﻿<MudNavMenu>
+    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Home">Home</MudNavLink>
+    <AuthorizeView>
+        <Authorized>
+            <AuthorizedNavGroup Icon="@Icons.Material.Outlined.Settings" Title="Mantenedores" Resource="Mantenedores">
+                <AuthorizedNavGroup Icon="@Icons.Material.Outlined.People" Title="Seguridad" Resource="Seguridad">
+                    <AuthorizedNavLink Href="Mantenedores/Seguridad/Usuarios" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.People">Usuarios</AuthorizedNavLink>
+                </AuthorizedNavGroup>
+            </AuthorizedNavGroup>
+        </Authorized>
+    </AuthorizeView>
+</MudNavMenu>

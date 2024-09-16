@@ -1,0 +1,18 @@
+﻿@typeparam T
+
+@JoinedItems
+
+@code {
+    [Parameter]
+    public IEnumerable<T> Items { get; set; } = [];
+
+    [Parameter]
+    public Func<T, string>? Selector { get; set; }
+
+    [Parameter]
+    public string Separator { get; set; } = ", ";
+
+    private string JoinedItems => Selector is not null
+        ? string.Join(Separator, Items.Select(Selector))
+        : string.Join(Separator, Items);
+}

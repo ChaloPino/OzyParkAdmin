@@ -1,0 +1,219 @@
+﻿@using System.Security.Claims
+@using OzyParkAdmin.Application
+@using OzyParkAdmin.Application.CentrosCosto.List
+@using OzyParkAdmin.Application.Franquicias.List
+@using OzyParkAdmin.Application.Seguridad.Roles.List
+@using OzyParkAdmin.Application.Seguridad.Usuarios.Lock
+@using OzyParkAdmin.Application.Seguridad.Usuarios.Search
+@using OzyParkAdmin.Application.Seguridad.Usuarios.Unlock
+@using OzyParkAdmin.Application.Seguridad.Usuarios
+@using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Entidades
+@using OzyParkAdmin.Domain.Franquicias
+@using OzyParkAdmin.Domain.Seguridad.Roles
+@using OzyParkAdmin.Domain.Seguridad.Usuarios
+@using OzyParkAdmin.Domain.Shared
+@using System.Collections.ObjectModel
+@page "/Mantenedores/Seguridad/Usuarios"
+@inject IMediator Mediator
+@inject ISnackbar Snackbar
+<PageTitle>Usuarios</PageTitle>
+
+<MudText Typo="Typo.h4">Usuarios</MudText>
+
+
+<MudDataGrid @ref="dataGrid" T="UsuarioViewModel" ReadOnly="false" Striped="true" Hover="true"
+             ServerData="LoadUsuariosAsync" SortMode="SortMode.Multiple" 
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterRow"
+             EditMode="DataGridEditMode.Form" EditTrigger="DataGridEditTrigger.Manual" EditDialogOptions="dialogOptions"
+             CanceledEditingItem="CancelEditing" CommittedItemChanges="SaveUsuarioAsync">
+    <ToolBarContent>
+        <MudSpacer />
+        <SearchControl @bind-SearchText="searchText" /> 
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddUsuarioAsync">Nuevo usuario</MudButton>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.UserName" Title="Username">
+            <EditTemplate>
+                <MudTextField Label="Username" @bind-Value="context.Item.UserName" Margin="@Margin.Dense"
+                              Required="true" Variant="@Variant.Outlined" Disabled="!context.Item.IsNew" Class="mt-4" />
+            </EditTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.FriendlyName" Title="Nombre" />
+        <PropertyColumn Property="x => x.Email" Title="Email" Required="false" />
+        <PropertyColumn Property="x => x.Roles" Filterable="false" Title="Roles">
+            <CellTemplate>
+                <JoinView Items="context.Item.Roles" Selector="x => x.Nombre" />
+            </CellTemplate>
+            <EditTemplate>
+                <MudSelect @bind-SelectedValues="context.Item.Roles" MultiSelection="true"
+                           Label="Roles" Required="false" ToStringFunc="(x) => x.Nombre" Class="mt-4">
+                    <ForIn Items="roles" Context="rol">
+                        <MudSelectItem T="UsuarioRolModel" Value="rol"></MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+            </EditTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.CentrosCosto" Filterable="false" Title="Centros de costo">
+            <CellTemplate>
+                <JoinView Items="context.Item.CentrosCosto" Selector="x => x.Nombre" />
+            </CellTemplate>
+            <EditTemplate>
+                <MudSelect @bind-SelectedValues="context.Item.CentrosCosto" MultiSelection="true"
+                           Label="Centros de costo" Required="false" ToStringFunc="(x) => x.Nombre" Class="mt-4">
+                    <ForIn Items="centrosCosto" Context="centroCosto">
+                        <MudSelectItem T="UsuarioCentroCostoModel" Value="centroCosto"></MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+            </EditTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Franquicias" Hidden="true" Filterable="false" Editable="true" Title="Franquicias">
+            <EditTemplate>
+                <MudSelect @bind-SelectedValues="context.Item.Franquicias" MultiSelection="true"
+                           Label="Franquicias" Required="false" ToStringFunc="(x) => x.Nombre" Class="mt-4">
+                    <ForIn Items="franquicias" Context="franquicia">
+                        <MudSelectItem T="UsuarioFranquiciaModel" Value="franquicia"></MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+            </EditTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.IsLockedout" Title="Estado">
+            <CellTemplate>
+                <StateControl State="context.Item.IsLockedout" StateChanged="async (lockout) => await ChangeStatusAsync(context, lockout)"
+                              TrueIcon="@Icons.Material.Filled.Lock" TrueColor="Color.Error" TrueLabel="Bloqueado"  
+                              FalseIcon="@Icons.Material.Outlined.LockOpen" FalseColor="Color.Success" FalseLabel="Desbloqueado" />
+            </CellTemplate>
+            <FilterTemplate>
+                <LockoutoutFilter FilterContext="context" />
+            </FilterTemplate>
+        </PropertyColumn>
+        <TemplateColumn>
+            <CellTemplate>
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="context.Actions.StartEditingItemAsync" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="UsuarioViewModel" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    private static readonly DialogOptions dialogOptions = new()
+        {
+            Position = DialogPosition.Center,
+            FullWidth = true,
+            BackdropClick = false,
+        };
+
+    private ClaimsPrincipal? user;
+    private MudDataGrid<UsuarioViewModel> dataGrid = default!;
+    private string? searchText;
+    private List<UsuarioFranquiciaModel> franquicias = [];
+    private List<UsuarioCentroCostoModel> centrosCosto = [];
+    private List<UsuarioRolModel> roles = [];
+    private ObservableGridData<UsuarioViewModel>? currentUsers;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationState).User;
+        await LoadReferencesAsync();
+    }
+
+    private async Task LoadReferencesAsync()
+    {
+        Task[] loadingTasks =  [ LoadRolesAsync(), LoadCentrosCostoAsync(), LoadFranquiciasAsync() ];
+        await Task.WhenAll(loadingTasks);
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        ResultListOf<Rol> result = await Mediator.SendRequest(new ListRoles(user!));
+        roles = result.Items.ToModel();
+    }
+
+    private async Task LoadCentrosCostoAsync()
+    {
+        ResultListOf<CentroCosto> result = await Mediator.SendRequest(new ListCentrosCosto(user!));
+        centrosCosto = result.Items.ToModel();
+    }
+
+    private async Task LoadFranquiciasAsync()
+    {
+        ResultListOf<Franquicia> result = await Mediator.SendRequest(new ListFranquicias(user!));
+        franquicias = result.Items.ToModel();
+    }
+
+    private async Task<GridData<UsuarioViewModel>> LoadUsuariosAsync(GridState<UsuarioViewModel> state)
+    {
+        SearchUsers searchUsers = state.ToSearchUsers(user!, searchText);
+        PagedList<UsuarioInfo> usuarios = await Mediator.SendRequest(searchUsers);
+        currentUsers = usuarios.ToGridData(dataGrid);
+        return currentUsers;
+    }
+
+    private async Task AddUsuarioAsync()
+    {
+        UsuarioViewModel newUsuario = new() { IsNew = true };
+        currentUsers?.Add(newUsuario);
+        await new CellContext<UsuarioViewModel>(dataGrid, newUsuario).Actions.StartEditingItemAsync();
+    }
+
+    private void CancelEditing(UsuarioViewModel usuario)
+    {
+        if (usuario.IsNew)
+        {
+            currentUsers?.Remove(usuario);
+        }
+    }
+
+    private async Task SaveUsuarioAsync(UsuarioViewModel usuario)
+    {
+        IUserChangeable changeStatus = usuario.IsNew
+            ? usuario.ToCreate()
+            : usuario.ToUpdate();
+
+        var result = await Mediator.SendRequest(changeStatus);
+        UpdateUsuario(usuario, result, usuario.IsNew ? "crear usuario" : "actualizar usuario");
+    }
+
+    private async Task ChangeStatusAsync(CellContext<UsuarioViewModel> context, bool lockout)
+    {
+        var usuario = context.Item;
+        IUserChangeable changeStatus = lockout
+            ? new LockUser(usuario.Id)
+            : new UnlockUser(usuario.Id);
+
+        var result = await Mediator.SendRequest(changeStatus);
+        UpdateUsuario(usuario, result, "desbloquear usuario");
+    }
+
+
+    private void UpdateUsuario(UsuarioViewModel currentUser, ResultOf<UsuarioInfo> result, string action)
+    {
+        result.Switch(
+            onSuccess: (usuario) => UpdateUsuario(currentUser, usuario),
+            onFailure: (failure) => Snackbar.AddFailure(failure, action)
+        );
+    }
+
+    private void UpdateUsuario(UsuarioViewModel currentUser, UsuarioInfo usuario)
+    {
+        if (currentUser.IsNew)
+        {
+            currentUser.IsNew = false;
+            currentUser.Id = usuario.Id;
+            currentUser.UserName = usuario.UserName;
+        }
+
+        currentUser.FriendlyName = usuario.FriendlyName;
+        currentUser.Email = usuario.Email;
+        currentUser.IsLockedout = usuario.IsLockedout;
+        currentUser.Roles = usuario.Roles.ToModel();
+        currentUser.CentrosCosto = usuario.CentrosCosto.ToModel();
+        currentUser.Franquicias = usuario.Franquicias.ToModel();
+    }
+}

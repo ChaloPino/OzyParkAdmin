@@ -1,0 +1,7 @@
+﻿@using MassTransit
+@using MassTransit.Mediator
+@using Microsoft.AspNetCore.Authorization
+@using OzyParkAdmin.Application.Identity
+@using OzyParkAdmin.Components.Layout
+@layout OzyParkAdmin.Components.Layout.AdminLayout
+@attribute [Authorize(Policy = AuthorizationConstants.PermissionPolicy)]

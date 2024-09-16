@@ -1,0 +1,38 @@
+﻿@typeparam T
+
+<CascadingValue IsFixed="true" Value="this">
+    @ChildContent
+</CascadingValue>
+
+@foreach (CaseWhen<T> caseWhen in cases)
+{
+    if (caseWhen.Evaluate(Value))
+    {
+        evaluated = true;
+        @caseWhen.ChildContent
+        break;
+    }
+}
+
+@if (!evaluated)
+{
+    @Default
+}
+
+@code {
+    private List<CaseWhen<T>> cases = [];
+    private bool evaluated = false;
+
+    [Parameter]
+    public T? Value { get; set; }
+
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? Default { get; set; }
+
+    internal void AddCase(CaseWhen<T> caseWhen)
+    {
+        cases.Add(caseWhen);
+    }
+}

@@ -1,0 +1,21 @@
+﻿@typeparam T
+
+@code {
+    [CascadingParameter]
+    private SwitchCase<T> SwitchCase { get; set; } = default!;
+
+    [Parameter]
+    public Func<T?, bool> Condition { get; set; } = (value) => false;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        SwitchCase.AddCase(this);
+        base.OnInitialized();
+    }
+
+    internal bool Evaluate(T? value) =>
+        Condition(value);
+}

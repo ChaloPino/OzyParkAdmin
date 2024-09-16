@@ -1,0 +1,13 @@
+﻿@if (Condition)
+{
+    @Then
+}
+
+@code {
+    [Parameter]
+    public bool Condition { get; set; }
+
+    [Parameter]
+    public RenderFragment? Then { get; set; }
+
+}

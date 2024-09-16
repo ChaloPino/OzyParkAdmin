@@ -1,0 +1,21 @@
+﻿@using OzyParkAdmin.Application.Identity
+<AuthorizeView Policy="@AuthorizationConstants.PermissionPolicy" Resource="Href">
+    <Authorized>
+        <MudNavLink Href="@Href" Match="@Match" Icon="@Icon">
+            @ChildContent
+        </MudNavLink>
+    </Authorized>
+</AuthorizeView>
+@code {
+    [Parameter]
+    public string? Href { get; set; }
+
+    [Parameter]
+    public NavLinkMatch Match { get; set; }
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

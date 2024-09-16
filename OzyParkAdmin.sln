@@ -1,0 +1,92 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5F6C6DEF-4740-4997-96B6-10A54D004D8B}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingBlocks", "{6BC2EB95-2AA6-4FF8-B90D-763B596FD950}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{E4B64A4A-1008-4517-94E1-7E0D2F7766D0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{D602820D-6428-4791-8CDD-06A3A5A33DC5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{E02A00FE-1C02-4E13-85EE-43C9DB28844C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{50BB8DFC-FDD6-4C72-90D6-B95BE9AA0A64}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A98512D5-8496-44E2-8298-E77628C2FE13}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OzyParkAdmin.Domain", "src\Domain\OzyParkAdmin.Domain\OzyParkAdmin.Domain.csproj", "{B44178D9-6CAE-4292-87A5-5CBB1AB25A75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin", "src\Presentation\OzyParkAdmin\OzyParkAdmin.csproj", "{458FEDD6-0707-4183-9E15-D2AA3CB0993C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.Infrastructure", "src\Infrastructure\OzyParkAdmin.Infrastructure\OzyParkAdmin.Infrastructure.csproj", "{9EEC7A83-843F-40B4-8185-A7133601D8ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.Application", "src\Application\OzyParkAdmin.Application\OzyParkAdmin.Application.csproj", "{AEB75335-71FA-42F7-85B2-7D24D12CE86D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.UnionType.Generator", "src\BuildingBlocks\OzyParkAdmin.UnionType.Generator\OzyParkAdmin.UnionType.Generator.csproj", "{8128BB81-A0B2-42BF-8DBB-10B9A4456062}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5BEA5D19-8F12-40B9-8538-54F4FC429945}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingBlocks", "{C0D5BC8F-D05D-42C3-BF0F-C04EEA02CDB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.UnionType.Generator.Tests", "test\BuildingBlocks\OzyParkAdmin.UnionType.Generator.Tests\OzyParkAdmin.UnionType.Generator.Tests.csproj", "{B5315748-D702-4142-AC9C-377B7B08D0D1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B44178D9-6CAE-4292-87A5-5CBB1AB25A75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B44178D9-6CAE-4292-87A5-5CBB1AB25A75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B44178D9-6CAE-4292-87A5-5CBB1AB25A75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B44178D9-6CAE-4292-87A5-5CBB1AB25A75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{458FEDD6-0707-4183-9E15-D2AA3CB0993C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{458FEDD6-0707-4183-9E15-D2AA3CB0993C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{458FEDD6-0707-4183-9E15-D2AA3CB0993C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{458FEDD6-0707-4183-9E15-D2AA3CB0993C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EEC7A83-843F-40B4-8185-A7133601D8ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EEC7A83-843F-40B4-8185-A7133601D8ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EEC7A83-843F-40B4-8185-A7133601D8ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EEC7A83-843F-40B4-8185-A7133601D8ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEB75335-71FA-42F7-85B2-7D24D12CE86D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEB75335-71FA-42F7-85B2-7D24D12CE86D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEB75335-71FA-42F7-85B2-7D24D12CE86D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEB75335-71FA-42F7-85B2-7D24D12CE86D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8128BB81-A0B2-42BF-8DBB-10B9A4456062}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8128BB81-A0B2-42BF-8DBB-10B9A4456062}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8128BB81-A0B2-42BF-8DBB-10B9A4456062}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8128BB81-A0B2-42BF-8DBB-10B9A4456062}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5315748-D702-4142-AC9C-377B7B08D0D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5315748-D702-4142-AC9C-377B7B08D0D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5315748-D702-4142-AC9C-377B7B08D0D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5315748-D702-4142-AC9C-377B7B08D0D1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6BC2EB95-2AA6-4FF8-B90D-763B596FD950} = {A98512D5-8496-44E2-8298-E77628C2FE13}
+		{E4B64A4A-1008-4517-94E1-7E0D2F7766D0} = {A98512D5-8496-44E2-8298-E77628C2FE13}
+		{D602820D-6428-4791-8CDD-06A3A5A33DC5} = {A98512D5-8496-44E2-8298-E77628C2FE13}
+		{E02A00FE-1C02-4E13-85EE-43C9DB28844C} = {A98512D5-8496-44E2-8298-E77628C2FE13}
+		{50BB8DFC-FDD6-4C72-90D6-B95BE9AA0A64} = {A98512D5-8496-44E2-8298-E77628C2FE13}
+		{B44178D9-6CAE-4292-87A5-5CBB1AB25A75} = {E02A00FE-1C02-4E13-85EE-43C9DB28844C}
+		{458FEDD6-0707-4183-9E15-D2AA3CB0993C} = {E4B64A4A-1008-4517-94E1-7E0D2F7766D0}
+		{9EEC7A83-843F-40B4-8185-A7133601D8ED} = {50BB8DFC-FDD6-4C72-90D6-B95BE9AA0A64}
+		{AEB75335-71FA-42F7-85B2-7D24D12CE86D} = {D602820D-6428-4791-8CDD-06A3A5A33DC5}
+		{8128BB81-A0B2-42BF-8DBB-10B9A4456062} = {6BC2EB95-2AA6-4FF8-B90D-763B596FD950}
+		{C0D5BC8F-D05D-42C3-BF0F-C04EEA02CDB9} = {5BEA5D19-8F12-40B9-8538-54F4FC429945}
+		{B5315748-D702-4142-AC9C-377B7B08D0D1} = {C0D5BC8F-D05D-42C3-BF0F-C04EEA02CDB9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0DF334DA-2037-438E-AA38-1A8FC52EF07D}
+	EndGlobalSection
+EndGlobal

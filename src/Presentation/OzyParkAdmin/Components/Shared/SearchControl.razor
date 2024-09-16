@@ -1,0 +1,26 @@
+﻿@typeparam T
+
+<MudTextField T="string" Value="SearchText" ValueChanged="SearchChangedAsync" Placeholder="Buscar" Adornment="Adornment.Start" Immediate="true"
+              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+
+@code {
+    [CascadingParameter]
+    public MudDataGrid<T>? DataGrid { get; set; }
+
+    [Parameter]
+    public string? SearchText { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SearchTextChanged { get; set; }
+
+    private async Task SearchChangedAsync(string searchText)
+    {
+        SearchText = searchText;
+        await SearchTextChanged.InvokeAsync(searchText);
+
+        if (DataGrid is not null)
+        {
+            await DataGrid.ReloadServerData();
+        }
+    }
+}

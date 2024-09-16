@@ -1,0 +1,32 @@
+﻿@using System.Numerics
+@typeparam TInteger where TInteger : struct, IBinaryInteger<TInteger>
+
+@if (From <= To)
+{
+    for (TInteger i = From; i < To; i += Step)
+    {
+        @ChildContent?.Invoke(i)
+    }    
+}
+else
+{
+    for (TInteger i = From; i >= To; i -= Step)
+    {
+        @ChildContent?.Invoke(i)
+    }
+}
+
+
+@code {
+    [Parameter]
+    public TInteger From { get; set; } = TInteger.Zero;
+
+    [Parameter]
+    public TInteger To { get; set; } = TInteger.Zero;
+
+    [Parameter]
+    public TInteger Step { get; set; } = TInteger.One;
+
+    [Parameter]
+    public RenderFragment<TInteger>? ChildContent{ get; set; }
+}

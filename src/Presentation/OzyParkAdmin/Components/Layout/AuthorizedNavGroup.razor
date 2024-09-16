@@ -1,0 +1,27 @@
+﻿@using OzyParkAdmin.Application.Identity
+<AuthorizeView Policy="@AuthorizationConstants.PermissionPolicy" Resource="FullResource">
+    <Authorized>
+        <MudNavGroup Icon="@Icon" Title="@Title">
+            <CascadingValue IsFixed="true" Value="this">
+                @ChildContent
+            </CascadingValue>
+        </MudNavGroup>
+    </Authorized>
+</AuthorizeView>
+@code {
+    [CascadingParameter]
+    public AuthorizedNavGroup? NavGroup { get; set; }
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string Resource { get; set; } = string.Empty;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string? FullResource => NavGroup is null ? $"group:{Resource}" : $"group:{NavGroup.Resource}/{Resource}";
+}

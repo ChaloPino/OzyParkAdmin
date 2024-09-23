@@ -11,6 +11,7 @@ using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Seguridad.Roles;
 using OzyParkAdmin.Infrastructure.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using OzyParkAdmin.Domain.Servicios;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -28,7 +29,7 @@ public static class OzyParkAdminHostApplicationExtensions
     public static IHostApplicationBuilder AddOzyParkAdmin(this IHostApplicationBuilder builder)
     {
         string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-        builder.Services.AddDbContext<OzyParkAdminContext>(options =>
+        builder.Services.AddDbContextPool<IOzyParkAdminContext, OzyParkAdminContext>(options =>
             options.UseSqlServer(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -62,6 +63,7 @@ public static class OzyParkAdminHostApplicationExtensions
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<UsuarioService>();
+        services.AddScoped<ServicioManager>();
         return services;
     }
 }

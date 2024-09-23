@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using OzyParkAdmin.Domain.Seguridad.Roles;
+using System.Reflection.PortableExecutable;
 using System.Security.Claims;
 
 namespace OzyParkAdmin.Domain.Seguridad.Usuarios;
@@ -94,6 +95,11 @@ public sealed class Usuario
     public string FriendlyName { get; private set; } = string.Empty;
 
     /// <summary>
+    /// El rut del usuario.
+    /// </summary>
+    public string? Rut { get; private set; }
+
+    /// <summary>
     /// Si el usuario debe cambiar su contraseña en el siguiente inicio de sesión.
     /// </summary>
     public bool ChangePasswordNextLogon { get; private set; }
@@ -135,12 +141,13 @@ public sealed class Usuario
     /// <param name="friendlyName">El nombre completo del usuario.</param>
     /// <param name="email">La dirección de correo electrónico del usuario.</param>
     /// <returns>El nuevo usuario creado.</returns>
-    public static Usuario Create(string userName, string friendlyName, string? email)
+    public static Usuario Create(string userName, string friendlyName, string? rut, string? email)
     {
         return new Usuario
         {
             UserName = userName,
             FriendlyName = friendlyName,
+            Rut = rut,
             Email = email,
             ChangePasswordNextLogon = false,
         };
@@ -269,6 +276,11 @@ public sealed class Usuario
     internal void SetFriendlyName(string friendlyName)
     {
         FriendlyName = friendlyName;
+    }
+
+    internal void SetRut(string? rut)
+    {
+        Rut = rut;
     }
 
     internal void NeedToChangePassword(bool needed)

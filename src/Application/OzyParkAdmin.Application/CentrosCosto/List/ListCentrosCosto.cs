@@ -8,4 +8,4 @@ namespace OzyParkAdmin.Application.CentrosCosto.List;
 /// Lista todos los centros de costo activo.
 /// </summary>
 /// <param name="User">El usuario que realiza la consulta.</param>
-public sealed record ListCentrosCosto(ClaimsPrincipal User) : Request<ResultListOf<CentroCosto>>;
+public sealed record ListCentrosCosto(ClaimsPrincipal User) : Request<ResultListOf<CentroCostoInfo>>;

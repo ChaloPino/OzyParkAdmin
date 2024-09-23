@@ -4,11 +4,25 @@
 <MudStack Row="true" AlignItems="AlignItems.Center">
     <IfThenElse Condition="State">
         <Then>
-            <MudIconButton Icon="@TrueIcon" Color="@TrueColor" Size="@Size" OnClick="ChangeStatus" />
+            <IfThenElse Condition="CanChangeStatus">
+                <Then>
+                    <MudIconButton Icon="@TrueIcon" Color="@TrueColor" Size="@Size" OnClick="ChangeStatus" />
+                </Then>
+                <Else>
+                    <MudIcon Icon="@TrueIcon" Color="@TrueColor" Size="@Size" />
+                </Else>
+            </IfThenElse>
             <MudText Color="@TrueColor" Typo="Typo.body2">@TrueLabel</MudText>
         </Then>
         <Else>
-            <MudIconButton Icon="@FalseIcon" Color="@FalseColor" Size="@Size" OnClick="ChangeStatus" />
+            <IfThenElse Condition="CanChangeStatus">
+                <Then>
+                    <MudIconButton Icon="@FalseIcon" Color="@FalseColor" Size="@Size" OnClick="ChangeStatus" />
+                </Then>
+                <Else>
+                    <MudIcon Icon="@FalseIcon" Color="@FalseColor" Size="@Size" />
+                </Else>
+            </IfThenElse>
             <MudText Color="@FalseColor" Typo="Typo.body2">@FalseLabel</MudText>
         </Else>
     </IfThenElse>
@@ -44,6 +58,9 @@
 
     [Parameter]
     public Size Size { get; set; } = Size.Small;
+
+    [Parameter]
+    public bool CanChangeStatus { get; set; }
 
     private async Task ChangeStatus()
     {

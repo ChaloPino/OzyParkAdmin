@@ -7,7 +7,7 @@ namespace OzyParkAdmin.Application.CentrosCosto.List;
 /// <summary>
 /// El handler de <see cref="ListCentrosCosto"/>.
 /// </summary>
-public sealed class ListCentrosCostoHandler : MediatorRequestHandler<ListCentrosCosto, ResultListOf<CentroCosto>>
+public sealed class ListCentrosCostoHandler : MediatorRequestHandler<ListCentrosCosto, ResultListOf<CentroCostoInfo>>
 {
     private readonly ICentroCostoRepository _repository;
 
@@ -22,7 +22,7 @@ public sealed class ListCentrosCostoHandler : MediatorRequestHandler<ListCentros
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<CentroCosto>> Handle(ListCentrosCosto request, CancellationToken cancellationToken)
+    protected override async Task<ResultListOf<CentroCostoInfo>> Handle(ListCentrosCosto request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         return await _repository.ListCentrosCostoAsync(request.User.GetCentrosCosto(), cancellationToken);

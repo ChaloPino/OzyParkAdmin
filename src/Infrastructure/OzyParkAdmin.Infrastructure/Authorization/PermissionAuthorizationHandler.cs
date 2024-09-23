@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Infrastructure.Seguridad.Permisos;
+using System.Reflection.Metadata.Ecma335;
 
 namespace OzyParkAdmin.Infrastructure.Authorization;
 
@@ -49,6 +51,13 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
             {
                 context.Succeed(requirement);
             }
+
+            return;
+        }
+
+        if (context.Resource is HttpContext)
+        {
+            context.Succeed(requirement);
         }
     }
 
@@ -72,12 +81,12 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
 
     private string? GetResource(AuthorizationHandlerContext context)
     {
-        if (context.Resource is string resource)
+        if (context.Resource is null)
         {
-            return resource;
+            return GetCurrentAddress();
         }
 
-        return GetCurrentAddress();
+        return context.Resource is string resource ? resource : null;
     }
 
     private string? GetCurrentAddress()

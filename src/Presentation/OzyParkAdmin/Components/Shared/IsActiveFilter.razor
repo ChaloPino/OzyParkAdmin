@@ -1,0 +1,88 @@
+﻿@typeparam T
+@using MudBlazor.Interfaces
+
+<MudStack Row="true">
+    <MudSelect T="bool?" Value="isActive" ValueChanged="IsActiveFilterChangedAsync" FullWidth="true" Dense="true" Margin="Margin.Dense">
+        <MudSelectItem T="bool?" Value="@(null)">Todos</MudSelectItem>
+        <MudSelectItem T="bool?" Value="@(true)">Habilitado</MudSelectItem>
+        <MudSelectItem T="bool?" Value="@(false)">Deshabilitado</MudSelectItem>
+    </MudSelect>
+
+    <MudMenu Icon="@Icons.Material.Filled.FilterAlt" Size="Size.Small" Dense="true">
+        <ForIn Items="Operators" Context="o">
+            <IfThen Condition="!string.IsNullOrWhiteSpace(o)">
+                <Then>
+                    <MudMenuItem Style="@ChosenOperatorStyle(o)" OnClick="async () => await ChangeOperatorAsync(o)">es</MudMenuItem>
+                </Then>
+            </IfThen>
+        </ForIn>
+    </MudMenu>
+    <MudIconButton Class="align-self-center" Icon="@Icons.Material.Filled.FilterAltOff" Size="Size.Small" OnClick="ClearFilterAsync" />
+</MudStack>
+
+@code {
+    private bool? isActive;
+
+    [CascadingParameter]
+    private MudDataGrid<T> DataGrid { get; set; } = default!;
+
+    [Parameter]
+    public FilterContext<T>? FilterContext { get; set; }
+
+    private string[] Operators => [FilterOperator.Boolean.Is];
+
+    private string? Operator => FilterContext?.FilterDefinition?.Operator ?? Operators.FirstOrDefault();
+
+    private string ChosenOperatorStyle(string o)
+    {
+        return o == Operator ? "color:var(--mud-palette-primary-text);background-color:var(--mud-palette-primary)" : "";
+    }
+
+    private async Task ChangeOperatorAsync(string o)
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            FilterContext.FilterDefinition.Operator = o;
+            await ApplyFilterAsync(FilterContext.FilterDefinition);
+        }
+    }
+
+    private async Task IsActiveFilterChangedAsync(bool? value)
+    {
+        isActive = value;
+
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            if (isActive is not null)
+            {
+                FilterContext.FilterDefinition.Value = isActive;
+                await ApplyFilterAsync(FilterContext.FilterDefinition);
+            }
+            else
+            {
+                await ClearFilterAsync();
+            }
+        }
+    }
+
+    private async Task ApplyFilterAsync(IFilterDefinition<T> filterDefinition)
+    {
+        if (DataGrid.FilterDefinitions.All(x => x.Id != filterDefinition.Id))
+        {
+            DataGrid.FilterDefinitions.Add(filterDefinition);
+        }
+
+        await DataGrid.ReloadServerData();
+
+        DataGrid.GroupItems();
+        ((IMudStateHasChanged)DataGrid).StateHasChanged();
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            await FilterContext.Actions.ClearFilterAsync(FilterContext.FilterDefinition);
+        }
+    }
+}

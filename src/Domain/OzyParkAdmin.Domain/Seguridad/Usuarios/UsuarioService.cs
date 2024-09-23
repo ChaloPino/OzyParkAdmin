@@ -42,15 +42,16 @@ public class UsuarioService
     /// </summary>
     /// <param name="username">Nombre de usuario.</param>
     /// <param name="friendlyName">Nombre completo del usuario.</param>
+    /// <param name="rut">El rut del usuario.</param>
     /// <param name="email">Dirección de correo electrónico del usuario.</param>
     /// <param name="roles">Roles asociados al usuario.</param>
     /// <param name="centrosCosto">Centros de costo asociados al usuario.</param>
     /// <param name="franquicias">Franquicias asociados al usuario.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>Resultado de la creación de un usuario.</returns>
-    public async Task<ResultOf<UsuarioInfo>> CreateUserAsync(string  username, string friendlyName, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
+    public async Task<ResultOf<UsuarioInfo>> CreateUserAsync(string  username, string friendlyName, string? rut, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
     {
-        Usuario usuario = Usuario.Create(username, friendlyName, email);
+        Usuario usuario = Usuario.Create(username, friendlyName, rut, email);
 
         IdentityResult result = await _userManager.CreateAsync(usuario);
 
@@ -81,7 +82,7 @@ public class UsuarioService
         }
 
         IEnumerable<Rol> rolesPersisted = await _rolRepository.FinRolesByUserAsync(usuario.Id, cancellationToken);
-        IEnumerable<CentroCosto> centrosCostoPersisted = await _centroCostoRepository.ListCentrosCostoAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
+        IEnumerable<CentroCostoInfo> centrosCostoPersisted = await _centroCostoRepository.ListCentrosCostoAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
         IEnumerable<Franquicia> franquiciasPersisted = await _faranquiciaRepository.ListFranquiciasAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
 
         return usuario.ToInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToList());
@@ -93,13 +94,14 @@ public class UsuarioService
     /// <param name="userId">Id del usuario a actualizar.</param>
     /// <param name="username">Nombre de usuario.</param>
     /// <param name="friendlyName">Nombre completo del usuario.</param>
+    /// <param name="rut">El rut del usuario.</param>
     /// <param name="email">Dirección de correo electrónico del usuario.</param>
     /// <param name="roles">Roles asociados al usuario.</param>
     /// <param name="centrosCosto">Centros de costo asociados al usuario.</param>
     /// <param name="franquicias">Franquicias asociados al usuario.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>Resultado de la creación de un usuario.</returns>
-    public async Task<ResultOf<UsuarioInfo>> UpdateUserAsync(Guid userId, string username, string friendlyName, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
+    public async Task<ResultOf<UsuarioInfo>> UpdateUserAsync(Guid userId, string username, string friendlyName, string? rut, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
     {
         Usuario? usuario = await _userManager.FindByIdAsync(userId.ToString());
 
@@ -111,6 +113,7 @@ public class UsuarioService
         usuario.SetUserName(username);
         usuario.SetEmail(email);
         usuario.SetFriendlyName(friendlyName);
+        usuario.SetRut(rut);
 
         IEnumerable<Rol> rolesPersisted = await _rolRepository.FinRolesByUserAsync(usuario.Id, cancellationToken);
 
@@ -194,7 +197,7 @@ public class UsuarioService
         }
 
         rolesPersisted = await _rolRepository.FinRolesByUserAsync(usuario.Id, cancellationToken);
-        IEnumerable<CentroCosto> centrosCostoPersisted = await _centroCostoRepository.ListCentrosCostoAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
+        IEnumerable<CentroCostoInfo> centrosCostoPersisted = await _centroCostoRepository.ListCentrosCostoAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
         IEnumerable<Franquicia> franquiciasPersisted = await _faranquiciaRepository.ListFranquiciasAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
 
         return usuario.ToInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToList());

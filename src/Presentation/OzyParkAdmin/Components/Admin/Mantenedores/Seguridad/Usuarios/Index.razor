@@ -1,4 +1,5 @@
-﻿@using System.Security.Claims
+﻿@page "/Mantenedores/Seguridad/Usuarios"
+@using System.Security.Claims
 @using OzyParkAdmin.Application
 @using OzyParkAdmin.Application.CentrosCosto.List
 @using OzyParkAdmin.Application.Franquicias.List
@@ -7,6 +8,7 @@
 @using OzyParkAdmin.Application.Seguridad.Usuarios.Search
 @using OzyParkAdmin.Application.Seguridad.Usuarios.Unlock
 @using OzyParkAdmin.Application.Seguridad.Usuarios
+@using OzyParkAdmin.Components.Admin.Shared
 @using OzyParkAdmin.Domain.CentrosCosto
 @using OzyParkAdmin.Domain.Entidades
 @using OzyParkAdmin.Domain.Franquicias
@@ -14,7 +16,6 @@
 @using OzyParkAdmin.Domain.Seguridad.Usuarios
 @using OzyParkAdmin.Domain.Shared
 @using System.Collections.ObjectModel
-@page "/Mantenedores/Seguridad/Usuarios"
 @inject IMediator Mediator
 @inject ISnackbar Snackbar
 <PageTitle>Usuarios</PageTitle>
@@ -39,7 +40,8 @@
                               Required="true" Variant="@Variant.Outlined" Disabled="!context.Item.IsNew" Class="mt-4" />
             </EditTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.FriendlyName" Title="Nombre" />
+        <PropertyColumn Property="x => x.FriendlyName" Title="Nombre" Required="true" />
+        <PropertyColumn Property="x => x.Rut" Title="Rut" />
         <PropertyColumn Property="x => x.Email" Title="Email" Required="false" />
         <PropertyColumn Property="x => x.Roles" Filterable="false" Title="Roles">
             <CellTemplate>
@@ -62,7 +64,7 @@
                 <MudSelect @bind-SelectedValues="context.Item.CentrosCosto" MultiSelection="true"
                            Label="Centros de costo" Required="false" ToStringFunc="(x) => x.Nombre" Class="mt-4">
                     <ForIn Items="centrosCosto" Context="centroCosto">
-                        <MudSelectItem T="UsuarioCentroCostoModel" Value="centroCosto"></MudSelectItem>
+                        <MudSelectItem T="CentroCostoModel" Value="centroCosto"></MudSelectItem>
                     </ForIn>
                 </MudSelect>
             </EditTemplate>
@@ -72,7 +74,7 @@
                 <MudSelect @bind-SelectedValues="context.Item.Franquicias" MultiSelection="true"
                            Label="Franquicias" Required="false" ToStringFunc="(x) => x.Nombre" Class="mt-4">
                     <ForIn Items="franquicias" Context="franquicia">
-                        <MudSelectItem T="UsuarioFranquiciaModel" Value="franquicia"></MudSelectItem>
+                        <MudSelectItem T="FranquiciaModel" Value="franquicia"></MudSelectItem>
                     </ForIn>
                 </MudSelect>
             </EditTemplate>
@@ -81,7 +83,8 @@
             <CellTemplate>
                 <StateControl State="context.Item.IsLockedout" StateChanged="async (lockout) => await ChangeStatusAsync(context, lockout)"
                               TrueIcon="@Icons.Material.Filled.Lock" TrueColor="Color.Error" TrueLabel="Bloqueado"  
-                              FalseIcon="@Icons.Material.Outlined.LockOpen" FalseColor="Color.Success" FalseLabel="Desbloqueado" />
+                              FalseIcon="@Icons.Material.Outlined.LockOpen" FalseColor="Color.Success" FalseLabel="Desbloqueado"
+                              CanChangeStatus="true"/>
             </CellTemplate>
             <FilterTemplate>
                 <LockoutoutFilter FilterContext="context" />
@@ -109,8 +112,8 @@
     private ClaimsPrincipal? user;
     private MudDataGrid<UsuarioViewModel> dataGrid = default!;
     private string? searchText;
-    private List<UsuarioFranquiciaModel> franquicias = [];
-    private List<UsuarioCentroCostoModel> centrosCosto = [];
+    private List<FranquiciaModel> franquicias = [];
+    private List<CentroCostoModel> centrosCosto = [];
     private List<UsuarioRolModel> roles = [];
     private ObservableGridData<UsuarioViewModel>? currentUsers;
 
@@ -137,7 +140,7 @@
 
     private async Task LoadCentrosCostoAsync()
     {
-        ResultListOf<CentroCosto> result = await Mediator.SendRequest(new ListCentrosCosto(user!));
+        ResultListOf<CentroCostoInfo> result = await Mediator.SendRequest(new ListCentrosCosto(user!));
         centrosCosto = result.Items.ToModel();
     }
 
@@ -188,7 +191,7 @@
             : new UnlockUser(usuario.Id);
 
         var result = await Mediator.SendRequest(changeStatus);
-        UpdateUsuario(usuario, result, "desbloquear usuario");
+        UpdateUsuario(usuario, result, lockout ? "bloquear usuario" : "desbloquear usuario");
     }
 
 

@@ -4,20 +4,21 @@
     @ChildContent
 </CascadingValue>
 
-@foreach (CaseWhen<T> caseWhen in cases)
-{
-    if (caseWhen.Evaluate(Value))
+<CascadingValue IsFixed="true" Value="this">
+    @foreach (CaseWhen<T> caseWhen in cases)
     {
-        evaluated = true;
-        @caseWhen.ChildContent
-        break;
+        if (caseWhen.Evaluate(Value))
+        {
+            evaluated = true;
+            @caseWhen.ChildContent
+            break;
+        }
     }
-}
-
-@if (!evaluated)
-{
-    @Default
-}
+    @if (!evaluated)
+    {
+        @Default
+    }
+</CascadingValue>
 
 @code {
     private List<CaseWhen<T>> cases = [];
@@ -26,6 +27,7 @@
     [Parameter]
     public T? Value { get; set; }
 
+    [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
     [Parameter]

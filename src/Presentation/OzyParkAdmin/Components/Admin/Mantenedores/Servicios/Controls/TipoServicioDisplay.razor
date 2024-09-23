@@ -1,0 +1,19 @@
+﻿@using OzyParkAdmin.Domain.Servicios
+
+<SwitchCase Value="TipoServicio">
+    <CaseWhen T="TipoServicio" Condition="(t) => t == TipoServicio.SoloIda">
+        Solo ida
+    </CaseWhen>
+    <CaseWhen T="TipoServicio" Condition="(t) => t == TipoServicio.IdaVuelta">
+        Ida y Vuelta
+    </CaseWhen>
+    <CaseWhen T="TipoServicio" Condition="(t) => t == TipoServicio.Ilimitado">
+        Ilimitado
+    </CaseWhen>
+</SwitchCase>
+
+
+@code {
+    [Parameter]
+    public TipoServicio TipoServicio { get; set; }
+}

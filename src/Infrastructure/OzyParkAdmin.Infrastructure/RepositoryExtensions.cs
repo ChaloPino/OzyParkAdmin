@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Infrastructure.Shared;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -9,6 +10,8 @@ internal static class RepositoryExtensions
 {
     public static IServiceCollection AddRepositories(this IServiceCollection services, params Assembly[] assemblies)
     {
+        services.TryAddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
         foreach (var assembly in assemblies)
         {
             ScanAssembly(assembly, services);

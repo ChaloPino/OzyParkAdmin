@@ -1,5 +1,6 @@
 ﻿using OzyParkAdmin.Domain.Shared.Expressions;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Numerics;
 
@@ -20,8 +21,8 @@ public class NumberFilterExpression<T, TNumber> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
-    public NumberFilterExpression(Expression<Func<T, TNumber?>> member, string @operator, TNumber value)
-        : base(CreatePredicate(member, @operator, value).Reduce())
+    public NumberFilterExpression(Expression<Func<T, TNumber?>> member, string @operator, IConvertible value)
+        : base(CreatePredicate(member, @operator, Convert(value)).Reduce())
     {
     }
 
@@ -31,8 +32,8 @@ public class NumberFilterExpression<T, TNumber> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
-    public NumberFilterExpression(Expression<Func<T, TNumber>> member, string @operator, TNumber value)
-        : base(CreatePredicate(member, @operator, value).Reduce())
+    public NumberFilterExpression(Expression<Func<T, TNumber>> member, string @operator, IConvertible value)
+        : base(CreatePredicate(member, @operator, Convert(value)).Reduce())
     {
     }
 
@@ -55,6 +56,9 @@ public class NumberFilterExpression<T, TNumber> : FilterExpression<T>
         : base(CreatePredicate(member, @operator, default).Reduce())
     {
     }
+
+    private static TNumber Convert(IConvertible value) =>
+        (TNumber)value.ToType(typeof(TNumber), CultureInfo.InvariantCulture);
 
     private static FilterOperationExpression<T> CreatePredicate(Expression<Func<T, TNumber?>> member, string @operator, TNumber value)
     {

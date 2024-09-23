@@ -1,0 +1,138 @@
+﻿@using OzyParkAdmin.Components.Admin.Shared
+@using System.Collections.ObjectModel
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <MudDataGrid T="ZonaTramoModel" Items="zonasTramos" EditMode="DataGridEditMode.Cell" ReadOnly="false">
+            <ToolBarContent>
+                <MudSpacer />
+                <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCentroCosto">Nueva zona</MudButton>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="x => x.Tramo" Title="Tramo">
+                    <EditTemplate>
+                        <MudSelect @bind-Value="context.Item.Tramo" Margin="Margin.Dense"
+                                   Label="Tramo" Variant="Variant.Outlined" Required="true" Class="mt-4"
+                                   ToStringFunc="x => x?.Nombre">
+                            <ForIn Items="Tramos" Context="tramo">
+                                <MudSelectItem T="TramoModel" Value="tramo" />
+                            </ForIn>
+                        </MudSelect>
+                    </EditTemplate>
+                    <CellTemplate>
+                        @context.Item.Tramo?.Nombre
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.Zona" Title="Zona">
+                    <EditTemplate>
+                        <MudSelect @bind-Value="context.Item.Zona" Margin="Margin.Dense"
+                                   Label="Zona" Variant="Variant.Outlined" Required="true" Class="mt-4"
+                                   ToStringFunc="x => x?.Nombre">
+                            <ForIn Items="Zonas" Context="zona">
+                                <MudSelectItem T="ZonaModel" Value="zona" />
+                            </ForIn>
+                        </MudSelect>
+                    </EditTemplate>
+                    <CellTemplate>
+                        @context.Item.Tramo?.Nombre
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.EsRetorno" Title="Retorno">
+                    <EditTemplate>
+                        <MudSwitch @bind-Value="context.Item.EsRetorno" Label="Retorno" Color="Color.Primary" Class="mt-4" />
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.EsCombinacion" Title="Combinación">
+                    <EditTemplate>
+                        <MudSwitch @bind-Value="context.Item.EsCombinacion" Label="Combinación" Color="Color.Primary" Class="mt-4" />
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.Orden" Title="Orden" Required="true" />
+                <PropertyColumn Property="x => x.EsActivo" Title="Estado">
+                    <EditTemplate>
+                        <MudSwitch @bind-Value="context.Item.EsActivo" Label="Habilitado" Color="Color.Primary" Class="mt-4" />
+                    </EditTemplate>
+                </PropertyColumn>
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudTooltip Text="Eliminar">
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="() => RemoveCentroCosto(context.Item)" />
+                        </MudTooltip>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private ObservableCollection<ZonaTramoModel> zonasTramos = [];
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public ServicioViewModel? Servicio { get; set; }
+
+    [Parameter]
+    public IEnumerable<TramoModel> Tramos { get; set; } = [];
+
+    [Parameter]
+    public IEnumerable<ZonaModel> Zonas { get; set; } = [];
+
+    [Parameter]
+    public Func<ServicioViewModel, Task<bool>>? CommitChanges { get; set; }
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Servicio is not null)
+        {
+            zonasTramos = new(Servicio.Zonas);
+        }
+    }
+
+    private void AddCentroCosto()
+    {
+        zonasTramos.Add(new ZonaTramoModel() { EsActivo = true });
+    }
+
+    private void RemoveCentroCosto(ZonaTramoModel zona)
+    {
+        zonasTramos.Remove(zona);
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        zonasTramos = [];
+        await ChangeIsOpen(false);
+    }
+
+    private async Task CommitItemChangesAsync()
+    {
+        if (Servicio is not null && CommitChanges is not null)
+        {
+            Servicio.Zonas = [.. zonasTramos];
+            bool result = await CommitChanges(Servicio);
+
+            if (result)
+            {
+                await ChangeIsOpen(false);
+            }
+        }
+    }
+}

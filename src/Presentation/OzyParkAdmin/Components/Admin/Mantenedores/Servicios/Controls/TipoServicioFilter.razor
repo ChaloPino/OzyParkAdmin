@@ -1,0 +1,89 @@
+﻿@using MudBlazor.Interfaces
+@using OzyParkAdmin.Domain.Servicios;
+
+<MudStack Row="true">
+    <MudSelect T="TipoServicio?" Value="tipoServicio" ValueChanged="TipoServicioFilterChangedAsync" FullWidth="true" Dense="true" Margin="Margin.Dense">
+        <MudSelectItem T="TipoServicio?" Value="@(null)">Todos</MudSelectItem>
+        <MudSelectItem T="TipoServicio?" Value="TipoServicio.SoloIda">Solo ida</MudSelectItem>
+        <MudSelectItem T="TipoServicio?" Value="TipoServicio.IdaVuelta">Ida y vuelta</MudSelectItem>
+        <MudSelectItem T="TipoServicio?" Value="TipoServicio.Ilimitado">Ilimitado</MudSelectItem>
+    </MudSelect>
+
+    <MudMenu Icon="@Icons.Material.Filled.FilterAlt" Size="Size.Small" Dense="true">
+        <ForIn Items="Operators" Context="o">
+            <IfThen Condition="!string.IsNullOrWhiteSpace(o)">
+                <Then>
+                    <MudMenuItem Style="@ChosenOperatorStyle(o)" OnClick="async () => await ChangeOperatorAsync(o)">es</MudMenuItem>
+                </Then>
+            </IfThen>
+        </ForIn>
+    </MudMenu>
+    <MudIconButton Class="align-self-center" Icon="@Icons.Material.Filled.FilterAltOff" Size="Size.Small" OnClick="ClearFilterAsync" />
+</MudStack>
+
+@code {
+    private TipoServicio? tipoServicio;
+
+    [CascadingParameter]
+    private MudDataGrid<ServicioViewModel> DataGrid { get; set; } = default!;
+
+    [Parameter]
+    public FilterContext<ServicioViewModel>? FilterContext { get; set; }
+
+    private string[] Operators => [FilterOperator.Enum.Is, FilterOperator.Enum.IsNot];
+
+    private string? Operator => FilterContext?.FilterDefinition?.Operator ?? Operators.FirstOrDefault();
+
+    private string ChosenOperatorStyle(string o)
+    {
+        return o == Operator ? "color:var(--mud-palette-primary-text);background-color:var(--mud-palette-primary)" : "";
+    }
+
+    private async Task ChangeOperatorAsync(string o)
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            FilterContext.FilterDefinition.Operator = o;
+            await ApplyFilterAsync(FilterContext.FilterDefinition);
+        }
+    }
+
+    private async Task TipoServicioFilterChangedAsync(TipoServicio? value)
+    {
+        tipoServicio = value;
+
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            if (tipoServicio is not null)
+            {
+                FilterContext.FilterDefinition.Value = tipoServicio;
+                await ApplyFilterAsync(FilterContext.FilterDefinition);
+            }
+            else
+            {
+                await ClearFilterAsync();
+            }
+        }
+    }
+
+    private async Task ApplyFilterAsync(IFilterDefinition<ServicioViewModel> filterDefinition)
+    {
+        if (DataGrid.FilterDefinitions.All(x => x.Id != filterDefinition.Id))
+        {
+            DataGrid.FilterDefinitions.Add(filterDefinition);
+        }
+
+        await DataGrid.ReloadServerData();
+
+        DataGrid.GroupItems();
+        ((IMudStateHasChanged)DataGrid).StateHasChanged();
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            await FilterContext.Actions.ClearFilterAsync(FilterContext.FilterDefinition);
+        }
+    }
+}

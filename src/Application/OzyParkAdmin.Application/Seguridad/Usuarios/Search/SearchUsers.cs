@@ -13,5 +13,5 @@ namespace OzyParkAdmin.Application.Seguridad.Usuarios.Search;
 /// <param name="FilterExpressions">Las expressiones de filtrado.</param>
 /// <param name="SortExpressions">Las expresiones de ordenamiento.</param>
 /// <param name="Page">La página actual.</param>
-/// <param name="PageSize">El tamaño de la paginación.</param>
+/// <param name="PageSize">El tamaño de la página actual.</param>
 public sealed record SearchUsers(ClaimsPrincipal User, string? SearchText, FilterExpressionCollection<Usuario> FilterExpressions, SortExpressionCollection<Usuario> SortExpressions, int Page, int PageSize) : Request<PagedList<UsuarioInfo>>;

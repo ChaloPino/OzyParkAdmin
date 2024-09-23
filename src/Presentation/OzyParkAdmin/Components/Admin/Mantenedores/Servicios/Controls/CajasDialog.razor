@@ -1,0 +1,111 @@
+﻿@using OzyParkAdmin.Components.Admin.Shared
+@using System.Collections.ObjectModel
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <MudDataGrid T="CajaServicioModel" Items="cajasPorServicio" EditMode="DataGridEditMode.Cell" ReadOnly="false">
+            <ToolBarContent>
+                <MudSpacer />
+                <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCentroCosto">Nueva caja</MudButton>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="x => x.Caja" Title="Caja">
+                    <EditTemplate>
+                        <MudSelect @bind-Value="context.Item.Caja" Margin="Margin.Dense"
+                                   Label="Caja" Variant="Variant.Outlined" Required="true" Class="mt-4"
+                                   ToStringFunc="x => x?.Nombre">
+                            <ForIn Items="Cajas" Context="caja">
+                                <MudSelectItem T="CajaModel" Value="caja" />
+                            </ForIn>
+                        </MudSelect>
+                    </EditTemplate>
+                    <CellTemplate>
+                        @context.Item.Caja?.Nombre
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.NoUsaZona" Title="Nombre del servicio">
+                    <EditTemplate>
+                        <MudSwitch @bind-Value="context.Item.NoUsaZona" Label="No usa zona" Class="mt-4" Color="Color.Primary" />
+                    </EditTemplate>
+                </PropertyColumn>
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudTooltip Text="Eliminar">
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="() => RemoveCentroCosto(context.Item)" />
+                        </MudTooltip>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private ObservableCollection<CajaServicioModel> cajasPorServicio = [];
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public ServicioViewModel? Servicio { get; set; }
+
+    [Parameter]
+    public IEnumerable<CajaModel> Cajas { get; set; } = [];
+
+    [Parameter]
+    public Func<ServicioViewModel, Task<bool>>? CommitChanges { get; set; }
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Servicio is not null)
+        {
+            cajasPorServicio = new(Servicio.Cajas);
+        }
+    }
+
+    private void AddCentroCosto()
+    {
+        cajasPorServicio.Add(new CajaServicioModel());
+    }
+
+    private void RemoveCentroCosto(CajaServicioModel caja)
+    {
+        cajasPorServicio.Remove(caja);
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        cajasPorServicio = [];
+        await ChangeIsOpen(false);
+    }
+
+    private async Task CommitItemChangesAsync()
+    {
+        if (Servicio is not null && CommitChanges is not null)
+        {
+            Servicio.Cajas = [..cajasPorServicio];
+
+            bool result = await CommitChanges(Servicio);
+
+            if (result)
+            {
+                await ChangeIsOpen(false);
+            }
+        }
+    }
+}

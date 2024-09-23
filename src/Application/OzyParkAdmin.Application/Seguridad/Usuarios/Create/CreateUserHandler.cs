@@ -29,6 +29,7 @@ public sealed class CreateUserHandler : MediatorRequestHandler<CreateUser, Resul
         ResultOf<UsuarioInfo> result = await _usuarioCreator.CreateUserAsync(
             request.UserName,
             request.FriendlyName,
+            request.Rut,
             request.Email,
             request.Roles,
             request.CentroCostos,

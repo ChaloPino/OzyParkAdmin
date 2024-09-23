@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Components.Admin.Mantenedores.Seguridad.Usuarios;
+﻿using OzyParkAdmin.Components.Admin.Shared;
+
+namespace OzyParkAdmin.Components.Admin.Mantenedores.Seguridad.Usuarios;
 
 /// <summary>
 /// Representa el view-model para el usuario.
@@ -20,6 +22,11 @@ public sealed record UsuarioViewModel
     public string FriendlyName { get; set; } = string.Empty;
 
     /// <summary>
+    /// El rut del usiario.
+    /// </summary>
+    public string? Rut { get; set; }
+
+    /// <summary>
     /// La dirección de correo electrónico del usuario.
     /// </summary>
     public string? Email { get; set; }
@@ -32,12 +39,12 @@ public sealed record UsuarioViewModel
     /// <summary>
     /// La lista de centros de costo.
     /// </summary>
-    public IEnumerable<UsuarioCentroCostoModel> CentrosCosto { get; set; } = [];
+    public IEnumerable<CentroCostoModel> CentrosCosto { get; set; } = [];
 
     /// <summary>
     /// La lista de franquicias.
     /// </summary>
-    public IEnumerable<UsuarioFranquiciaModel> Franquicias { get; set; } = [];
+    public IEnumerable<FranquiciaModel> Franquicias { get; set; } = [];
 
     /// <summary>
     /// Si el usuario está bloqueado.

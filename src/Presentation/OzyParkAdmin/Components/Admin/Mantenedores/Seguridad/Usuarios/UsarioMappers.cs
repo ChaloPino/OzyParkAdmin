@@ -3,8 +3,7 @@ using MudBlazor.Interfaces;
 using OzyParkAdmin.Application.Seguridad.Usuarios.Create;
 using OzyParkAdmin.Application.Seguridad.Usuarios.Search;
 using OzyParkAdmin.Application.Seguridad.Usuarios.Update;
-using OzyParkAdmin.Domain.CentrosCosto;
-using OzyParkAdmin.Domain.Franquicias;
+using OzyParkAdmin.Components.Admin.Shared;
 using OzyParkAdmin.Domain.Seguridad.Roles;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
@@ -33,6 +32,7 @@ internal static class UsarioMappers
         {
             nameof(UsuarioViewModel.UserName) => new StringFilterExpression<Usuario>(x => x.UserName, filterDefinition.Operator!, (string?)filterDefinition.Value),
             nameof(UsuarioViewModel.FriendlyName) => new StringFilterExpression<Usuario>(x => x.FriendlyName, filterDefinition.Operator!, (string?)filterDefinition.Value),
+            nameof(UsuarioViewModel.Rut) => new StringFilterExpression<Usuario>(x => x.Rut, filterDefinition.Operator!, (string?)filterDefinition.Value),
             nameof(UsuarioViewModel.Email) => new StringFilterExpression<Usuario>(x => x.Email, filterDefinition.Operator!, (string?)filterDefinition.Value),
             nameof(UsuarioViewModel.IsLockedout) => CreateFilterExpressionForLockout(filterDefinition),
             _ => throw new UnreachableException(),
@@ -59,6 +59,7 @@ internal static class UsarioMappers
         {
             nameof(UsuarioViewModel.UserName) => new SortExpression<Usuario, string>(x => x.UserName, sortDefinition.Descending),
             nameof(UsuarioViewModel.FriendlyName) => new SortExpression<Usuario, string>(x => x.FriendlyName, sortDefinition.Descending),
+            nameof(UsuarioViewModel.Rut) => new SortExpression<Usuario, string>(x => x.Rut, sortDefinition.Descending),
             nameof(UsuarioViewModel.Email) => new SortExpression<Usuario, string>(x => x.Email, sortDefinition.Descending),
             nameof(UsuarioViewModel.IsLockedout) => new SortExpression<Usuario, DateTime?>(x => x.LockoutEndDateUtc, sortDefinition.Descending),
             _ => throw new UnreachableException(),
@@ -76,6 +77,7 @@ internal static class UsarioMappers
             Id = usuario.Id,
             UserName = usuario.UserName,
             FriendlyName = usuario.FriendlyName,
+            Rut = usuario.Rut,
             Email = usuario.Email,
             IsLockedout = usuario.IsLockedout,
             Roles = usuario.Roles.ToModel(),
@@ -89,21 +91,10 @@ internal static class UsarioMappers
     private static UsuarioRolModel ToModel(Rol rol) =>
         new() { Id = rol.Id, Nombre = rol.Name };
 
-    public static List<UsuarioCentroCostoModel> ToModel(this IEnumerable<CentroCosto> centrosCosto) =>
-        centrosCosto.Select(ToModel).ToList();
-
-    private static UsuarioCentroCostoModel ToModel(CentroCosto centroCosto) =>
-        new() { Id = centroCosto.Id, Nombre = centroCosto.Descripcion };
-
-    public static List<UsuarioFranquiciaModel> ToModel(this IEnumerable<Franquicia> franquicias) =>
-        franquicias.Select(ToModel).ToList();
-
-    private static UsuarioFranquiciaModel ToModel(Franquicia franquicia) =>
-        new() { Id = franquicia.Id, Nombre = franquicia.Nombre };
 
     public static CreateUser ToCreate(this UsuarioViewModel model) =>
-        new(model.UserName, model.FriendlyName, model.Email, [.. model.Roles.Select(x => x.Nombre)], [.. model.CentrosCosto.Select(x => x.Id)], [.. model.Franquicias.Select(x => x.Id)]);
+        new(model.UserName, model.FriendlyName, model.Rut, model.Email, [.. model.Roles.Select(x => x.Nombre)], [.. model.CentrosCosto.Select(x => x.Id)], [.. model.Franquicias.Select(x => x.Id)]);
 
     public static UpdateUser ToUpdate(this UsuarioViewModel model) =>
-        new(model.Id, model.UserName, model.FriendlyName, model.Email, [.. model.Roles.Select(x => x.Nombre)], [.. model.CentrosCosto.Select(x => x.Id)], [.. model.Franquicias.Select(x => x.Id)]);
+        new(model.Id, model.UserName, model.FriendlyName, model.Rut, model.Email, [.. model.Roles.Select(x => x.Nombre)], [.. model.CentrosCosto.Select(x => x.Id)], [.. model.Franquicias.Select(x => x.Id)]);
 }

@@ -69,6 +69,11 @@ public sealed class PuntoVenta
     public int? BodegaId { get; private set; }
 
     /// <summary>
+    /// Zona de origen asociado al punto de venta.
+    /// </summary>
+    public int? ZonaOrigenId { get; private set; }
+
+    /// <summary>
     /// Crea un nuevo punto de venta.
     /// </summary>
     /// <param name="id">Identificador único.</param>
@@ -81,6 +86,7 @@ public sealed class PuntoVenta
     /// <param name="canalVenta">Canal de venta.</param>
     /// <param name="esRedInterna">Si es de la red interna.</param>
     /// <param name="bodegaId">Bodega asociada.</param>
+    /// <param name="zonaOrigenId">Zona asociada.</param>
     /// <returns>Un nuevo <see cref="PuntoVenta"/>.</returns>
     public static PuntoVenta Crear(
         int id,
@@ -92,7 +98,8 @@ public sealed class PuntoVenta
         TimeSpan horaTermino,
         CanalVenta canalVenta,
         bool esRedInterna,
-        int? bodegaId) =>
+        int? bodegaId,
+        int? zonaOrigenId) =>
         new()
         {
             Id = id,
@@ -105,6 +112,7 @@ public sealed class PuntoVenta
             CanalVenta = canalVenta,
             EsRedInterna = esRedInterna,
             BodegaId = bodegaId,
+            ZonaOrigenId = zonaOrigenId,
             FechaCreacion = DateTime.Now,
             EsActivo = true,
         };

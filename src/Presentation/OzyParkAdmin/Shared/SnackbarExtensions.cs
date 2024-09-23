@@ -68,6 +68,6 @@ internal static class SnackbarExtensions
 
     private static string AggregateError(string current, ValidationError error)
     {
-        return $"{current}<li>{error}</li>";
+        return $"{current}<li>{error.ErrorMessage}</li>";
     }
 }

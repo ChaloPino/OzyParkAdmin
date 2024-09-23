@@ -29,6 +29,7 @@ public sealed class UpdateUserHandler : MediatorRequestHandler<UpdateUser, Resul
             request.Id,
             request.UserName,
             request.FriendlyName,
+            request.Rut,
             request.Email,
             request.Roles,
             request.CentroCostos,

@@ -1,0 +1,107 @@
+﻿@using OzyParkAdmin.Components.Admin.Shared
+@using System.Collections.ObjectModel
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <MudDataGrid T="CentroCostoServicioModel" Items="centrosCostoPorServicio" EditMode="DataGridEditMode.Cell" ReadOnly="false">
+            <ToolBarContent>
+                <MudSpacer />
+                <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCentroCosto">Nuevo centro costo</MudButton>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="x => x.CentroCosto" Title="Centro de costo">
+                    <EditTemplate>
+                        <MudSelect @bind-Value="context.Item.CentroCosto" Margin="Margin.Dense"
+                                   Label="Centro de costo" Variant="Variant.Outlined" Required="true" Class="mt-4"
+                                   ToStringFunc="x => x?.Nombre">
+                            <ForIn Items="CentrosCosto" Context="centroCosto">
+                                <MudSelectItem T="CentroCostoModel" Value="centroCosto" />
+                            </ForIn>
+                        </MudSelect>
+                    </EditTemplate>
+                    <CellTemplate>
+                        @context.Item.CentroCosto?.Nombre
+                    </CellTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.Nombre" Title="Nombre del servicio" Required="false" />
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudTooltip Text="Eliminar">
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="() => RemoveCentroCosto(context.Item)" />
+                        </MudTooltip>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private ObservableCollection<CentroCostoServicioModel> centrosCostoPorServicio = [];
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public ServicioViewModel? Servicio { get; set; }
+
+    [Parameter]
+    public IEnumerable<CentroCostoModel> CentrosCosto { get; set; } = [];
+
+    [Parameter]
+    public Func<ServicioViewModel, Task<bool>>? CommitChanges { get; set; }
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Servicio is not null)
+        {
+            centrosCostoPorServicio = new(Servicio.CentrosCosto);
+        }
+    }
+
+    private void AddCentroCosto()
+    {
+        centrosCostoPorServicio.Add(new CentroCostoServicioModel());
+    }
+
+    private void RemoveCentroCosto(CentroCostoServicioModel centroCosto)
+    {
+        centrosCostoPorServicio.Remove(centroCosto);
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        centrosCostoPorServicio = [];
+        await ChangeIsOpen(false);
+    }
+
+    private async Task CommitItemChangesAsync()
+    {
+        if (Servicio is not null && CommitChanges is not null)
+        {
+            Servicio.CentrosCosto = [.. centrosCostoPorServicio];
+            bool result = await CommitChanges(Servicio);
+
+            if (result)
+            {
+                await ChangeIsOpen(false);
+            }
+        }
+
+    }
+}

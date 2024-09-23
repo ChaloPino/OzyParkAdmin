@@ -30,6 +30,11 @@ public sealed record UsuarioInfo
     public string? Email { get; set; }
 
     /// <summary>
+    /// El rut del usuario.
+    /// </summary>
+    public string? Rut { get; set; }
+
+    /// <summary>
     /// Si el usuario está bloqueado.
     /// </summary>
     public bool IsLockedout { get; set; }
@@ -47,5 +52,5 @@ public sealed record UsuarioInfo
     /// <summary>
     /// Centros de costo asociados al usuario.
     /// </summary>
-    public List<CentroCosto> CentrosCosto { get; set; } = [];
+    public List<CentroCostoInfo> CentrosCosto { get; set; } = [];
 }

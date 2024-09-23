@@ -74,20 +74,11 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
         return usuarios.Select(x => ToUsuarioInfo(x, roles, centrosCosto, franquicias));
     }
 
-    private static UsuarioInfo ToUsuarioInfo(Usuario usuario, List<Rol> roles, List<CentroCosto> centrosCosto, List<Franquicia> franquicias)
-    {
-        return new UsuarioInfo
-        {
-            Id = usuario.Id,
-            UserName = usuario.UserName,
-            FriendlyName = usuario.FriendlyName,
-            Email = usuario.Email,
-            IsLockedout = usuario.LockoutEndDateUtc is not null,
-            Roles = roles.Where(x => ContieneRol(usuario, x)).ToList(),
-            CentrosCosto = centrosCosto.Where(x => ContieneCentroCosto(usuario, x)).ToList(),
-            Franquicias = franquicias.Where(x => ContieneFranquicia(usuario, x)).ToList(),
-        };
-    }
+    private static UsuarioInfo ToUsuarioInfo(Usuario usuario, List<Rol> roles, List<CentroCosto> centrosCosto, List<Franquicia> franquicias) =>
+        usuario.ToInfo(
+            roles.Where(x => ContieneRol(usuario, x)).ToList(),
+            centrosCosto.Where(x => ContieneCentroCosto(usuario, x)).ToList(),
+            franquicias.Where(x => ContieneFranquicia(usuario, x)).ToList());
 
     private static bool ContieneRol(Usuario usuario, Rol rol) =>
         usuario.Roles.Any(x => x.RoleId == rol.Id);

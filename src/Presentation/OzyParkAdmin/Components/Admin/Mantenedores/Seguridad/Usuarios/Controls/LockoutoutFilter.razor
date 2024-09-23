@@ -31,7 +31,6 @@
 
     private string? Operator => FilterContext?.FilterDefinition?.Operator ?? Operators.FirstOrDefault();
 
-
     private string ChosenOperatorStyle(string o)
     {
         return o == Operator ? "color:var(--mud-palette-primary-text);background-color:var(--mud-palette-primary)" : "";

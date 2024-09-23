@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using OzyParkAdmin.Infrastructure.Identity;
+using OzyParkAdmin.Application;
 
 namespace OzyParkAdmin.Infrastructure;
 
@@ -10,19 +10,36 @@ namespace OzyParkAdmin.Infrastructure;
 /// Crea una nueva instancia.
 /// </remarks>
 /// <param name="options">Las opciones a ser usadas por <see cref="OzyParkAdminContext"/>.</param>
-public sealed class OzyParkAdminContext(DbContextOptions<OzyParkAdminContext> options) : DbContext(options)
+public sealed class OzyParkAdminContext(DbContextOptions<OzyParkAdminContext> options) : DbContext(options), IOzyParkAdminContext
 {
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OzyParkAdminContext).Assembly);
-        //modelBuilder.ApplyConfiguration(new UsuarioConfiguration());
-        //modelBuilder.ApplyConfiguration(new RolConfiguration());
-        //modelBuilder.ApplyConfiguration(new ClaimUsuarioConfiguration());
-        //modelBuilder.ApplyConfiguration(new UsuarioRolConfiguration());
-        //modelBuilder.ApplyConfiguration(new UsuarioLoginConfiguration());
-        //modelBuilder.ApplyConfiguration(new UsuarioTokenConfiguration());
-        //modelBuilder.ApplyConfiguration(new CentroCostoUsuarioConfiguration());
-        //modelBuilder.ApplyConfiguration(new FranquiciaUsuarioConfiguration());
+    }
+
+    void IOzyParkAdminContext.Add<TEntity>(TEntity entity)
+    {
+        Add(entity);
+    }
+
+    async Task IOzyParkAdminContext.AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken)
+    {
+        await AddAsync(entity, cancellationToken).ConfigureAwait(false);
+    }
+
+    void IOzyParkAdminContext.Attach<TEntity>(TEntity entity)
+    {
+        Attach(entity);
+    }
+
+    void IOzyParkAdminContext.Remove<TEntity>(TEntity entity)
+    {
+        Remove(entity);
+    }
+
+    void IOzyParkAdminContext.Update<TEntity>(TEntity entity)
+    {
+        Update(entity);
     }
 }

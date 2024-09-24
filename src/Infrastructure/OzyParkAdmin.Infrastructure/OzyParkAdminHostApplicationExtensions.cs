@@ -12,6 +12,7 @@ using OzyParkAdmin.Domain.Seguridad.Roles;
 using OzyParkAdmin.Infrastructure.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using OzyParkAdmin.Domain.Servicios;
+using OzyParkAdmin.Infrastructure.Layout;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -62,6 +63,7 @@ public static class OzyParkAdminHostApplicationExtensions
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
+        services.AddScoped<LayoutService>();
         services.AddScoped<UsuarioService>();
         services.AddScoped<ServicioManager>();
         services.AddScoped<ServicioValidator>();

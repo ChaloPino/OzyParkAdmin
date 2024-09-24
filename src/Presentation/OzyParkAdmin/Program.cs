@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using MudBlazor.Services;
 using OzyParkAdmin.Components;
 using OzyParkAdmin.Components.Account;
+using OzyParkAdmin.Infrastructure.Layout;
+using OzyParkAdmin.Shared;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,8 @@ builder.Services.AddAuthentication(options =>
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
     .AddIdentityCookies();
+
+builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 
 builder.AddOzyParkAdmin();
 

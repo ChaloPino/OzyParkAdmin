@@ -1,12 +1,14 @@
-﻿@inherits LayoutComponentBase
+﻿@using OzyParkAdmin.Infrastructure.Layout
+@inherits LayoutComponentBase
 @layout MainLayout
-
+@inject LayoutService LayoutService
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
         <MudText Typo="Typo.h5" Class="ml-3">OzyPark Admin</MudText>
         <MudSpacer />
         <UserView />
+        <MudIconButton Icon="@DarkLightModeButtonIcon" Title="@DarkLightModeButtonText" Color="Color.Inherit" Edge="Edge.End" OnClick="LayoutService.CycleDarkLightModeAsync" />
     </MudAppBar>
     <MudDrawer @bind-Open="drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
@@ -20,6 +22,20 @@
 
 @code {
     private bool drawerOpen = true;
+
+    private string DarkLightModeButtonIcon => LayoutService.CurrentDarkLigntMode switch
+    {
+        DarkLightMode.Dark => Icons.Material.Rounded.AutoMode,
+        DarkLightMode.Light => Icons.Material.Outlined.DarkMode,
+        _ => Icons.Material.Filled.LightMode,
+    };
+
+    private string DarkLightModeButtonText => LayoutService.CurrentDarkLigntMode switch
+    {
+        DarkLightMode.Dark => "System mode",
+        DarkLightMode.Light => "Dark mode",
+        _ => "Ligth mode",
+    };
 
     private void DrawerToggle()
     {

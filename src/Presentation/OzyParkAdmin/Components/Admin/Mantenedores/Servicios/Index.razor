@@ -24,14 +24,13 @@
 @using OzyParkAdmin.Domain.Zonas
 @inject IMediator Mediator
 @inject ISnackbar Snackbar
+@inject ServicioViewModelValidator Validator
 <PageTitle>Servicios</PageTitle>
 <MudText Typo="Typo.h4">Servicios</MudText>
 
-<MudDataGrid @ref="dataGrid" T="ServicioViewModel" ReadOnly="false" Striped="true" Hover="true" ShowMenuIcon="true"
+<MudDataGrid @ref="dataGrid" T="ServicioViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
              ServerData="LoadServiciosAsync" SortMode="SortMode.Multiple"
-             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterRow"
-             EditMode="DataGridEditMode.Form" EditTrigger="DataGridEditTrigger.Manual" EditDialogOptions="dialogOptions"
-             StartedEditingItem="StartEditing" CanceledEditingItem="CancelEditing" CommittedItemChanges="SaveServicioAsync">
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterRow">
     <ToolBarContent>
         <MudSpacer />
         <SearchControl @bind-SearchText="searchText" />
@@ -39,185 +38,19 @@
     </ToolBarContent>
     <Columns>
         <HierarchyColumn T="ServicioViewModel" />
-        <PropertyColumn Property="x => x.CentroCosto.Nombre" Title="Centro de costo">
-            <EditTemplate>
-                <MudSelect @bind-Value="context.Item.CentroCosto" Variant="Variant.Outlined" Margin="Margin.Dense"
-                           Label="Centro de costo" Required="true" ToStringFunc="(x) => x?.Nombre" Class="mt-4"
-                           Disabled="!context.Item.IsNew">
-                    <ForIn Items="centrosCosto" Context="centroCosto">
-                        <MudSelectItem T="CentroCostoModel" Value="centroCosto"></MudSelectItem>
-                    </ForIn>
-                </MudSelect>
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.FranquiciaId" Hidden="true" Title="Franquicia" Filterable="false" Sortable="false">
-            <EditTemplate>
-                <MudSelect T="int" Value="context.Item.FranquiciaId" ValueChanged="async (franquiciaId) => await FranquiciaChanged(context, franquiciaId)" Variant="Variant.Outlined" Margin="Margin.Dense"
-                           Label="Franquicia" Required="true" Class="mt-4"
-                           Disabled="!context.Item.IsNew">
-                    <ForIn Items="franquicias" Context="franquicia">
-                        <MudSelectItem T="int" Value="franquicia.Id">@franquicia.Nombre</MudSelectItem>
-                    </ForIn>
-                </MudSelect>
-            </EditTemplate>
-        </PropertyColumn>
+        <PropertyColumn Property="x => x.CentroCosto.Nombre" Title="Centro de costo" />
         <PropertyColumn Property="x => x.Aka" Title="Aka" />
         <PropertyColumn Property="x => x.Nombre" Title="Nombre" />
         <PropertyColumn Property="x => x.TipoServicio" Title="Tipo servicio">
             <FilterTemplate>
                 <TipoServicioFilter FilterContext="context" />
             </FilterTemplate>
-            <EditTemplate>
-                <MudSelect @bind-Value="context.Item.TipoServicio" Variant="Variant.Outlined" Margin="Margin.Dense"
-                           Label="Tipo servicio" Required="true" Class="mt-4">
-                    <MudSelectItem T="TipoServicio" Value="TipoServicio.SoloIda">Solo ida</MudSelectItem>
-                    <MudSelectItem T="TipoServicio" Value="TipoServicio.IdaVuelta">Ida y vuelta</MudSelectItem>
-                    <MudSelectItem T="TipoServicio" Value="TipoServicio.Ilimitado">Ilimitado</MudSelectItem>
-                </MudSelect>
-            </EditTemplate>
             <CellTemplate>
                 <TipoServicioDisplay TipoServicio="context.Item.TipoServicio" />
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.TipoDistribucion.Nombre" Title="Tipo distribución">
-            <EditTemplate>
-                <MudSelect @bind-Value="context.Item.TipoDistribucion" Variant="Variant.Outlined" Margin="Margin.Dense"
-                           Label="Tipo distribución" Required="true" ToStringFunc="(x) => x?.Nombre" Class="mt-4">
-                    <ForIn Items="tiposDistribucion" Context="tipoDitribucion">
-                        <MudSelectItem T="TipoDistribucionModel" Value="tipoDitribucion"></MudSelectItem>
-                    </ForIn>
-                </MudSelect>
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.TipoVigencia" Hidden="true" Title="Vigencia">
-            <EditTemplate>
-                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
-                    <MudSelect @bind-Value="context.Item.TipoVigencia" Variant="Variant.Outlined" Margin="Margin.Dense"
-                               Label="Vigencia" Required="true" ToStringFunc="(x) => x?.Nombre">
-                        <ForIn Items="tiposVigencia" Context="tipoVigencia">
-                            <MudSelectItem T="TipoVigenciaModel" Value="tipoVigencia"></MudSelectItem>
-                        </ForIn>
-                    </MudSelect>
-
-                    <MudNumericField @bind-Value="context.Item.NumeroVigencia" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                     Label="@context.Item.TipoVigencia.ToLabel()" Required="true" />
-                </MudStack>
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.NumeroValidez" Hidden="true" Title="Validez">
-            <EditTemplate>
-                <MudNumericField @bind-Value="context.Item.NumeroValidez" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                 Label="Validez" Required="true" Adornment="Adornment.End" AdornmentText="días" Class="mt-4" />
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.NumeroPaxMinimo" Hidden="true">
-            <EditTemplate>
-                <MudNumericField @bind-Value="context.Item.NumeroPaxMinimo" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                 Label="Mín. pasajeros" Required="true" Class="mt-4" />
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.NumeroPaxMaximo" Hidden="true">
-            <EditTemplate>
-                <MudNumericField @bind-Value="context.Item.NumeroPaxMaximo" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                 Label="Max. pasajeros" Required="true" Class="mt-4" />
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.TipoControl" Hidden="true">
-            <EditTemplate>
-                <MudSelect @bind-Value="context.Item.TipoControl" Variant="Variant.Outlined" Margin="Margin.Dense"
-                            Label="Tipo control" Required="true" ToStringFunc="(x) => x?.Nombre" Class="mt-4">
-                    <ForIn Items="tiposControl" Context="tipoControl">
-                        <MudSelectItem T="TipoControlModel" Value="tipoControl"></MudSelectItem>
-                    </ForIn>
-                </MudSelect>
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.EsConHora" Hidden="true" Title="Con hora">
-            <EditTemplate>
-                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
-                    <MudSwitch @bind-Value="context.Item.EsConHora" Label="Con hora" Color="Color.Primary" />
-                    <MudSwitch @bind-Value="context.Item.EsPorTramos" Label="Pro tramos" Color="Color.Primary" />
-                    <MudSwitch @bind-Value="context.Item.EsParaVenta" Label="Para venta" Color="Color.Primary" />
-                </MudStack>
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.HolguraInicio" Hidden="true">
-            <EditTemplate>
-                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
-                    <MudTimePicker @bind-Time="context.Item.HolguraInicio" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                    Label="Holgura inicio" Required="false" />
-                    <MudTimePicker @bind-Time="context.Item.HolguraFin" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                   Label="Holgura fin" Required="false" />
-                </MudStack>
-            </EditTemplate>
-        </PropertyColumn>
+        <PropertyColumn Property="x => x.TipoDistribucion.Nombre" Title="Tipo distribución" />
         <PropertyColumn Property="x => x.Orden" Title="Orden" />
-        <PropertyColumn Property="x => x.EsParaMovil" Hidden="true">
-            <EditTemplate>
-                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
-                    <MudSwitch @bind-Value="context.Item.EsParaMovil" Label="Es para móviles" Color="Color.Primary" />
-                    <MudSwitch @bind-Value="context.Item.MostrarTramos" Label="Mostrar tramos" Color="Color.Primary" Disabled="!context.Item.EsParaMovil" />
-                </MudStack>
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.EsParaBuses" Hidden="true">
-            <EditTemplate>
-                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
-                    <MudSwitch @bind-Value="context.Item.EsParaBuses" Label="Es para móviles" Color="Color.Primary" />
-                    <MudSelect @bind-Value="context.Item.IdaVuelta" Variant="Variant.Outlined" Margin="Margin.Dense"
-                               Label="Tipo bus" Disabled="!context.Item.EsParaBuses">
-                        <MudSelectItem T="TipoServicio?"></MudSelectItem>
-                        <MudSelectItem T="TipoServicio?" Value="TipoServicio.SoloIda">Solo ida</MudSelectItem>
-                        <MudSelectItem T="TipoServicio?" Value="TipoServicio.IdaVuelta">Ida y vuelta</MudSelectItem>
-                        <MudSelectItem T="TipoServicio?" Value="TipoServicio.Ilimitado">Ilimitado</MudSelectItem>
-                    </MudSelect>
-                </MudStack>
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.HolguraEntrada" Hidden="true">
-            <EditTemplate>
-                <MudNumericField @bind-Value="context.Item.HolguraEntrada" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                 Label="Holgura de entrada (mins.)" Required="true" Class="mt-4" />
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.Politicas" Hidden="true">
-            <EditTemplate>
-                <MudTextField @bind-Value="context.Item.Politicas" Variant="Variant.Outlined" Margin="Margin.Dense" Lines="4"
-                                 Label="Políticas" Required="false" Class="mt-4" />
-            </EditTemplate>
-        </PropertyColumn>
-        <PropertyColumn Property="x => x.ControlParental" Hidden="true">
-            <EditTemplate>
-                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
-                    <MudSwitch @bind-Value="context.Item.ControlParental" Label="Control parental" Color="Color.Primary" />
-                    <MudSelect @bind-Value="context.Item.ServicioResponsableId" Variant="Variant.Outlined" Margin="Margin.Dense"
-                               Label="Servicio responsable" Disabled="!context.Item.ControlParental">
-                        <MudSelectItem T="int?" Value="(int?)null"></MudSelectItem>
-                        <ForIn Items="servicios" Context="servicio">
-                            <MudSelectItem T="int?" Value="servicio.Id">@servicio.Nombre</MudSelectItem>
-                        </ForIn>
-                    </MudSelect>
-                </MudStack>
-            </EditTemplate>
-        </PropertyColumn>
-         <PropertyColumn Property="x => x.PlantillaId" Hidden="true">
-            <EditTemplate>
-                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
-                    <MudSelect @bind-Value="context.Item.PlantillaId" Variant="Variant.Outlined" Margin="Margin.Dense"
-                               Label="Plantilla">
-                        <ForIn Items="plantillas" Context="plantilla">
-                            <MudSelectItem T="int" Value="plantilla.Id">@plantilla.Descripcion</MudSelectItem>
-                        </ForIn>
-                    </MudSelect>
-                    <MudSelect @bind-Value="context.Item.PlantillaDigitalId" Variant="Variant.Outlined" Margin="Margin.Dense"
-                               Label="Plantilla Digital">
-                        <ForIn Items="plantillas" Context="plantilla">
-                            <MudSelectItem T="int" Value="plantilla.Id">@plantilla.Descripcion</MudSelectItem>
-                        </ForIn>
-                    </MudSelect>
-                </MudStack>
-            </EditTemplate>
-        </PropertyColumn>
         <PropertyColumn Property="x => x.EsActivo" Editable="false" Title="Estado">
             <FilterTemplate>
                 <IsActiveFilter FilterContext="context" />
@@ -231,7 +64,7 @@
             <CellTemplate>
                 <div class="d-flex justify-end">
                     <MudTooltip Text="Editar">
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="context.Actions.StartEditingItemAsync" />
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEditingAsync(context)" />
                     </MudTooltip>
                     <MudTooltip Text="Asignar centros de costo">
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Apartment" OnClick="async () => await ShowCentrosCostoAsync(context)" />
@@ -241,9 +74,6 @@
                     </MudTooltip>
                     <MudTooltip Text="Asignar permisos">
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DoorFront" OnClick="async () => await ShowPermisosAsync(context)" />
-                    </MudTooltip>
-                    <MudTooltip Text="Asignar zonas">
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.FmdGood" OnClick="async () => await ShowZonasAsync(context)" />
                     </MudTooltip>
                     <MudTooltip Text="Asignar grupos etarios">
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.FamilyRestroom" OnClick="async () => await ShowGruposEtariosAsync(context)" />
@@ -298,14 +128,17 @@
         <MudDataGridPager T="ServicioViewModel" />
     </PagerContent>
 </MudDataGrid>
-
-<CentrosCostoDialog @bind-IsOpen="openCentrosCosto" CentrosCosto="centrosCosto" Servicio="currentServicio" CommitChanges="SaveCentrosCostoAsync" DialogOptions="dialogOptions" />
-<TramosDialog @bind-IsOpen="openTramos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SaveTramosAsync" DialogOptions="dialogOptions" />
-<PermisosDialog @bind-IsOpen="openPermisos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SavePermisosAsync" DialogOptions="dialogOptions" />
-<ZonasDialog @bind-IsOpen="openZonas" Tramos="tramos" Zonas="zonas" Servicio="currentServicio" CommitChanges="SaveZonasAsync" DialogOptions="dialogOptions" />
-<GruposEtariosDialog @bind-IsOpen="openGruposEtarios" GruposEtarios="gruposEtarios" Servicio="currentServicio" CommitChanges="SaveGruposEtariosAsync" DialogOptions="dialogOptions" />
-<CajasDialog @bind-IsOpen="openCajas" Cajas="cajas" Servicio="currentServicio" CommitChanges="SaveCajasAsync" DialogOptions="dialogOptions" />
-
+<CascadingValue Value="true" Name="IsNested">
+    <ServicioEditDialog @bind-IsOpen="openEditing" Servicio="currentServicio" CentrosCosto="centrosCosto" Franquicias="franquicias" TiposDistribucion="tiposDistribucion"
+        TiposVigencia="tiposVigencia" TiposControl="tiposControl" Servicios="servicios" Plantillas="plantillas" LoadServicios="LoadServiciosAsync"
+        CommitChanges="SaveServicioAsync" DialogOptions="dialogOptions" />
+    <CentrosCostoDialog @bind-IsOpen="openCentrosCosto" CentrosCosto="centrosCosto" Servicio="currentServicio" CommitChanges="SaveCentrosCostoAsync" DialogOptions="dialogOptions" />
+    <TramosDialog @bind-IsOpen="openTramos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SaveTramosAsync" DialogOptions="dialogOptions" />
+    <PermisosDialog @bind-IsOpen="openPermisos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SavePermisosAsync" DialogOptions="dialogOptions" />
+    <ZonasDialog @bind-IsOpen="openZonas" Tramos="tramos" Zonas="zonas" Servicio="currentServicio" CommitChanges="SaveZonasAsync" DialogOptions="dialogOptions" />
+    <GruposEtariosDialog @bind-IsOpen="openGruposEtarios" GruposEtarios="gruposEtarios" Servicio="currentServicio" CommitChanges="SaveGruposEtariosAsync" DialogOptions="dialogOptions" />
+    <CajasDialog @bind-IsOpen="openCajas" Cajas="cajas" Servicio="currentServicio" CommitChanges="SaveCajasAsync" DialogOptions="dialogOptions" />
+</CascadingValue>
 @code {
     private static readonly DialogOptions dialogOptions = new()
         {
@@ -313,6 +146,15 @@
             FullWidth = true,
             BackdropClick = false,
         };
+
+
+    private const short ZeroShort = 0;
+    private const short OneShort = 1;
+    private const short MaxShort = short.MaxValue;
+    private const int OneInt = 1;
+    private const int MaxInt = int.MaxValue;
+    private const byte ZeroByte = 0;
+    private const byte MaxByte = byte.MaxValue;
 
     private ClaimsPrincipal? user;
     private MudDataGrid<ServicioViewModel> dataGrid = default!;
@@ -330,6 +172,7 @@
     private List<ServicioModel> servicios = [];
     private List<Plantilla> plantillas = [];
 
+    private bool openEditing;
     private bool openCentrosCosto;
     private bool openTramos;
     private bool openPermisos;
@@ -337,7 +180,6 @@
     private bool openGruposEtarios;
     private bool openCajas;
     private ServicioViewModel? currentServicio;
-
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -442,32 +284,28 @@
 
     private async Task AddServicioAsync()
     {
-        ServicioViewModel newServicio = new() 
+        currentServicio = new() 
         { 
             IsNew = true,
             FranquiciaId = franquicias.First().Id,
             CentroCosto = centrosCosto.First(),
             TipoDistribucion = tiposDistribucion.First(),
             TipoVigencia = tiposVigencia.First(),
+            TipoControl = tiposControl.First(),
             PlantillaId = plantillas.First().Id,
             PlantillaDigitalId = plantillas.First().Id,
         };
-        currentServicios?.Add(newServicio);
-        await new CellContext<ServicioViewModel>(dataGrid, newServicio).Actions.StartEditingItemAsync();
+
+        CellContext<ServicioViewModel> context = new CellContext<ServicioViewModel>(dataGrid, currentServicio);
+        await ShowEditingAsync(context);
     }
 
-    private async Task StartEditing(ServicioViewModel servicio)
+    private async Task ShowEditingAsync(CellContext<ServicioViewModel> context)
     {
-        await LoadServiciosAsync(servicio.FranquiciaId);
-    }
-
-    private void CancelEditing(ServicioViewModel servicio)
-    {
-        if (servicio.IsNew)
-        {
-            currentServicios?.Remove(servicio);
-        }
-    }
+        await LoadServiciosAsync(context.Item.FranquiciaId);
+        currentServicio = context.Item.Copy();
+        openEditing = true;
+    } 
 
     private async Task ShowCentrosCostoAsync(CellContext<ServicioViewModel> context)
     {
@@ -555,17 +393,14 @@
         return true;
     }
 
-    private async Task SaveServicioAsync(ServicioViewModel servicio)
+    private async Task<bool> SaveServicioAsync(ServicioViewModel servicio)
     {
         IServicioStateChangeable changeStatus = servicio.IsNew
             ? servicio.ToCreate()
             : servicio.ToUpdate();
 
         var result = await Mediator.SendRequest(changeStatus);
-        if (!UpdateServicio(servicio, result, servicio.IsNew ? "crear servicio" : "modificar servicio"));
-        {
-            await new CellContext<ServicioViewModel>(dataGrid, servicio).Actions.StartEditingItemAsync();
-        }
+        return UpdateServicio(servicio, result, servicio.IsNew ? "crear servicio" : "modificar servicio");
     }
 
     private async Task SaveEsActivoAsync(ServicioViewModel servicio, bool esActivo)
@@ -630,8 +465,24 @@
 
     private bool UpdateServicio(ServicioViewModel servicio, ServicioFullInfo info)
     {
+        bool isNew = servicio.IsNew;
         servicio.Update(info);
-        return true;
+
+        if (isNew)
+        {
+            currentServicios?.Add(servicio);
+            return true;
+        }
+
+        ServicioViewModel? persistent = currentServicios?.Find(servicio);
+
+        if (persistent is not null)
+        {
+            persistent.Update(servicio);
+            return true;
+        }
+
+        return false;
     }
 
     private bool AddFailure(Failure failure, string action)

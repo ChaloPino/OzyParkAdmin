@@ -1,0 +1,246 @@
+﻿@using OzyParkAdmin.Components.Admin.Shared
+@using OzyParkAdmin.Domain.Plantillas
+@using OzyParkAdmin.Domain.Servicios
+@inject ServicioViewModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <MudForm Model="Servicio" @ref="form" Validation="Validator.ValidateValue" ValidationDelay="0">
+            <MudSelect @bind-Value="Servicio.CentroCosto" Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Label="Centro de costo" ToStringFunc="(x) => x?.Nombre" Class="mt-4"
+                       Disabled="!Servicio.IsNew" For="() => Servicio.CentroCosto" Immediate="true">
+                <ForIn Items="CentrosCosto" Context="centroCosto">
+                    <MudSelectItem T="CentroCostoModel" Value="centroCosto"></MudSelectItem>
+                </ForIn>
+            </MudSelect>
+
+            <MudSelect T="int" Value="Servicio.FranquiciaId" ValueChanged="async (franquiciaId) => await FranquiciaChanged(franquiciaId)" Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Label="Franquicia" Required="true" Class="mt-4"
+                       Disabled="!Servicio.IsNew" For="() => Servicio.FranquiciaId" Immediate="true">
+                <ForIn Items="Franquicias" Context="franquicia">
+                    <MudSelectItem T="int" Value="franquicia.Id">@franquicia.Nombre</MudSelectItem>
+                </ForIn>
+            </MudSelect>
+
+            <MudTextField @bind-Value="Servicio.Aka" Variant="Variant.Outlined" Margin="Margin.Dense"
+                          Label="Aka" Class="mt-4" For="() => Servicio.Aka" Immediate="true" />
+
+            <MudTextField @bind-Value="Servicio.Nombre" Variant="Variant.Outlined" Margin="Margin.Dense"
+                          Label="Nombre" Class="mt-4" For="() => Servicio.Nombre" Immediate="true" />
+
+            <MudSelect @bind-Value="Servicio.TipoServicio" Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Label="Tipo servicio" Class="mt-4" For="() => Servicio.TipoServicio" Immediate="true">
+                <MudSelectItem T="TipoServicio" Value="TipoServicio.SoloIda">Solo ida</MudSelectItem>
+                <MudSelectItem T="TipoServicio" Value="TipoServicio.IdaVuelta">Ida y vuelta</MudSelectItem>
+                <MudSelectItem T="TipoServicio" Value="TipoServicio.Ilimitado">Ilimitado</MudSelectItem>
+            </MudSelect>
+
+            <MudSelect @bind-Value="Servicio.TipoDistribucion" Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Label="Tipo distribución" ToStringFunc="(x) => x?.Nombre" Class="mt-4"
+                       For="() => Servicio.TipoDistribucion" Immediate="true">
+                <ForIn Items="TiposDistribucion" Context="tipoDitribucion">
+                    <MudSelectItem T="TipoDistribucionModel" Value="tipoDitribucion"></MudSelectItem>
+                </ForIn>
+            </MudSelect>
+
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
+                <MudSelect @bind-Value="Servicio.TipoVigencia" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Vigencia" ToStringFunc="(x) => x?.Nombre"
+                           For="() => Servicio.TipoVigencia" Immediate="true">
+                    <ForIn Items="TiposVigencia" Context="tipoVigencia">
+                        <MudSelectItem T="TipoVigenciaModel" Value="tipoVigencia"></MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+
+                <MudNumericField @bind-Value="Servicio.NumeroVigencia" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                 Min="ZeroShort" Max="MaxShort" Label="@Servicio.TipoVigencia.ToLabel()"
+                                 For="() => Servicio.NumeroVigencia" Immediate="true" />
+            </MudStack>
+
+            <MudNumericField @bind-Value="Servicio.NumeroValidez" Variant="Variant.Outlined" Margin="Margin.Dense"
+                             Min="ZeroShort" Max="MaxShort" Label="Validez" Adornment="Adornment.End"
+                             AdornmentText="días" Class="mt-4"
+                             For="() => Servicio.NumeroValidez" Immediate="true" />
+
+            <MudStack Row="true" Class="mt-4">
+                <MudNumericField @bind-Value="Servicio.NumeroPaxMinimo" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                 Min="OneShort" Max="MaxShort" Label="Mín. pasajeros"
+                                 For="() => Servicio.NumeroPaxMinimo" Immediate="true" />
+                <MudNumericField @bind-Value="Servicio.NumeroPaxMaximo" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                 Min="OneShort" Max="MaxShort" Label="Máx. pasajeros"
+                                 For="() => Servicio.NumeroPaxMaximo" Immediate="true" />
+            </MudStack>
+
+            <MudSelect @bind-Value="Servicio.TipoControl" Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Label="Tipo control" ToStringFunc="(x) => x?.Nombre" Class="mt-4"
+                       For="() => Servicio.TipoControl" Immediate="true">
+                <ForIn Items="TiposControl" Context="tipoControl">
+                    <MudSelectItem T="TipoControlModel" Value="tipoControl"></MudSelectItem>
+                </ForIn>
+            </MudSelect>
+
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
+                <MudSwitch @bind-Value="Servicio.EsConHora" Label="Con hora" Color="Color.Primary" />
+                <MudSwitch @bind-Value="Servicio.EsPorTramos" Label="Por tramos" Color="Color.Primary" />
+                <MudSwitch @bind-Value="Servicio.EsParaVenta" Label="Para venta" Color="Color.Primary" />
+            </MudStack>
+
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
+                <MudTimePicker @bind-Time="Servicio.HolguraInicio" Variant="Variant.Outlined" Margin="Margin.Dense"
+                               Label="Holgura inicio" For="() => Servicio.HolguraInicio" />
+                <MudTimePicker @bind-Time="Servicio.HolguraFin" Variant="Variant.Outlined" Margin="Margin.Dense"
+                               Label="Holgura fin" For="() => Servicio.HolguraFin" />
+            </MudStack>
+
+            <MudNumericField @bind-Value="Servicio.Orden" Variant="Variant.Outlined" Margin="Margin.Dense"
+                             Min="OneInt" Max="MaxInt" Label="Orden" Class="mt-4"
+                             For="() => Servicio.Orden" Immediate="true" />
+
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
+                <MudSwitch @bind-Value="Servicio.EsParaMovil" Label="Es para móviles" Color="Color.Primary" />
+                <MudSwitch @bind-Value="Servicio.MostrarTramos" Label="Mostrar tramos" Color="Color.Primary" Disabled="!Servicio.EsParaMovil" />
+            </MudStack>
+
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
+                <MudSwitch @bind-Value="Servicio.EsParaBuses" Label="Es para buses" Color="Color.Primary" />
+                <MudSelect @bind-Value="Servicio.IdaVuelta" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Tipo bus" Disabled="!Servicio.EsParaBuses"
+                           For="() => Servicio.IdaVuelta" Immediate="true">
+                    <MudSelectItem T="TipoServicio?"></MudSelectItem>
+                    <MudSelectItem T="TipoServicio?" Value="TipoServicio.SoloIda">Solo ida</MudSelectItem>
+                    <MudSelectItem T="TipoServicio?" Value="TipoServicio.IdaVuelta">Ida y vuelta</MudSelectItem>
+                    <MudSelectItem T="TipoServicio?" Value="TipoServicio.Ilimitado">Ilimitado</MudSelectItem>
+                </MudSelect>
+            </MudStack>
+
+            <MudNumericField @bind-Value="Servicio.HolguraEntrada" Variant="Variant.Outlined" Margin="Margin.Dense"
+                             Min="ZeroByte" Max="MaxByte" Label="Holgura de entrada (mins.)" Class="mt-4"
+                             For="() => Servicio.HolguraEntrada" Immediate="true" />
+
+            <MudTextField @bind-Value="Servicio.Politicas" Variant="Variant.Outlined" Margin="Margin.Dense" Lines="4"
+                          Label="Políticas" Class="mt-4"
+                          For="() => Servicio.Politicas" Immediate="true" />
+
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
+                <MudSwitch @bind-Value="Servicio.ControlParental" Label="Control parental" Color="Color.Primary" />
+                <MudSelect @bind-Value="Servicio.ServicioResponsableId" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Servicio responsable" Disabled="!Servicio.ControlParental"
+                           For="() => Servicio.ServicioResponsableId" Immediate="true">
+                    <MudSelectItem T="int?" Value="(int?)null"></MudSelectItem>
+                    <ForIn Items="Servicios" Context="servicio">
+                        <MudSelectItem T="int?" Value="servicio.Id">@servicio.Nombre</MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+            </MudStack>
+
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
+                <MudSelect @bind-Value="Servicio.PlantillaId" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Plantilla" For="() => Servicio.PlantillaId" Immediate="true">
+                    <ForIn Items="Plantillas" Context="plantilla">
+                        <MudSelectItem T="int" Value="plantilla.Id">@plantilla.Descripcion</MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+                <MudSelect @bind-Value="Servicio.PlantillaDigitalId" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Plantilla Digital" For="() => Servicio.PlantillaDigitalId" Immediate="true">
+                    <ForIn Items="Plantillas" Context="plantilla">
+                        <MudSelectItem T="int" Value="plantilla.Id">@plantilla.Descripcion</MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    private const short ZeroShort = 0;
+    private const short OneShort = 1;
+    private const short MaxShort = short.MaxValue;
+    private const int OneInt = 1;
+    private const int MaxInt = int.MaxValue;
+    private const byte ZeroByte = 0;
+    private const byte MaxByte = byte.MaxValue;
+
+    private MudForm form = default!;
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public ServicioViewModel Servicio { get; set; } = default!;
+
+    [Parameter]
+    public List<CentroCostoModel> CentrosCosto { get; set; } = [];
+
+    [Parameter]
+    public List<FranquiciaModel> Franquicias { get; set; } = [];
+
+    [Parameter]
+    public List<TipoControlModel> TiposControl { get; set; } = [];
+
+    [Parameter]
+    public List<TipoDistribucionModel> TiposDistribucion { get; set; } = [];
+
+    [Parameter]
+    public List<TipoVigenciaModel> TiposVigencia { get; set; } = [];
+
+    [Parameter]
+    public List<ServicioModel> Servicios { get; set; } = [];
+
+    [Parameter]
+    public List<Plantilla> Plantillas { get; set; } = [];
+
+    [Parameter]
+    public Func<int, Task>? LoadServicios { get; set; }
+
+    [Parameter]
+    public Func<ServicioViewModel, Task<bool>>? CommitChanges { get; set; }
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    private async Task FranquiciaChanged(int franquiciaId)
+    {
+        Servicio.FranquiciaId = franquiciaId;
+
+        if (LoadServicios is not null)
+        {
+            await LoadServicios(franquiciaId);
+        }
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        await ChangeIsOpen(false);
+    }
+
+    private async Task CommitItemChangesAsync()
+    {
+        await form.Validate();
+
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        if (Servicio is not null && CommitChanges is not null)
+        {
+            bool result = await CommitChanges(Servicio);
+
+            if (result)
+            {
+                await ChangeIsOpen(false);
+            }
+        }
+    }
+}

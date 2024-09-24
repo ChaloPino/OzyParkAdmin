@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using FluentValidation;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using MudBlazor.Services;
@@ -22,6 +23,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 builder.Services.AddMudServices();
 builder.Services.AddBlazoredLocalStorage();

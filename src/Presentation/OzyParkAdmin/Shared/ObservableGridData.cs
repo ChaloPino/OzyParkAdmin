@@ -25,6 +25,11 @@ internal class ObservableGridData<T> : GridData<T>
     {
         return _items.Remove(item);
     }
+
+    public T? Find(T item)
+    {
+        return _items.FirstOrDefault(x => EqualityComparer<T>.Default.Equals(x, item));
+    }
 }
 
 internal sealed class ObservableGridData<T, TKey> : ObservableGridData<T>

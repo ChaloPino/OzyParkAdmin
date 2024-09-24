@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
+﻿using MassTransit.Internals;
+using OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
 using OzyParkAdmin.Components.Admin.Shared;
 using OzyParkAdmin.Domain.Servicios;
 
@@ -37,22 +38,22 @@ public sealed record ServicioViewModel
     /// <summary>
     /// El número de vigencia del servicio.
     /// </summary>
-    public short NumeroVigencia { get; set; }
+    public short NumeroVigencia { get; set; } = 0;
 
     /// <summary>
     /// El número de validez del servicio.
     /// </summary>
-    public short NumeroValidez { get; set; }
+    public short NumeroValidez { get; set; } = 0;
 
     /// <summary>
     /// Número mínimo de pasajeros.
     /// </summary>
-    public short NumeroPaxMinimo { get; set; }
+    public short NumeroPaxMinimo { get; set; } = 1;
 
     /// <summary>
     /// Número máximo de pasajeros.
     /// </summary>
-    public short NumeroPaxMaximo { get; set; }
+    public short NumeroPaxMaximo { get; set; } = 1;
 
     /// <summary>
     /// El tipo de control del servicio.
@@ -87,7 +88,7 @@ public sealed record ServicioViewModel
     /// <summary>
     /// El orden en que se presenta el servicio.
     /// </summary>
-    public int Orden { get; set; }
+    public int Orden { get; set; } = 1;
 
     /// <summary>
     /// La holgura de inicio.
@@ -122,7 +123,7 @@ public sealed record ServicioViewModel
     /// <summary>
     /// La holgura de entrada en minutos.
     /// </summary>
-    public byte HolguraEntrada { get; set; }
+    public byte HolguraEntrada { get; set; } = 0;
 
     /// <summary>
     /// Las políticas de uso del servicio.
@@ -147,7 +148,7 @@ public sealed record ServicioViewModel
     /// <summary>
     /// El tipo del servicio.
     /// </summary>
-    public TipoServicio TipoServicio { get; set; }
+    public TipoServicio TipoServicio { get; set; } = TipoServicio.SoloIda;
 
     /// <summary>
     /// La plantilla asociada al servicio.
@@ -247,4 +248,87 @@ public sealed record ServicioViewModel
         PlantillaDigitalId = servicio.PlantillaDigitalId;
         EsActivo = servicio.EsActivo;
     }
+
+    internal void Update(ServicioViewModel servicio)
+    {
+        Id = servicio.Id;
+        FranquiciaId = servicio.FranquiciaId;
+        CentroCosto = servicio.CentroCosto;
+        IsNew = servicio.IsNew;
+        Aka = servicio.Aka;
+        Nombre = servicio.Nombre;
+        TipoControl = servicio.TipoControl;
+        TipoDistribucion = servicio.TipoDistribucion;
+        TipoServicio = servicio.TipoServicio;
+        TipoVigencia = servicio.TipoVigencia;
+        NumeroVigencia = servicio.NumeroVigencia;
+        NumeroValidez = servicio.NumeroValidez;
+        NumeroPaxMinimo = servicio.NumeroPaxMinimo;
+        NumeroPaxMaximo = servicio.NumeroPaxMaximo;
+        EsConHora = servicio.EsConHora;
+        EsPorTramos = servicio.EsPorTramos;
+        EsParaVenta = servicio.EsParaVenta;
+        Orden = servicio.Orden;
+        HolguraInicio = servicio.HolguraInicio;
+        HolguraFin = servicio.HolguraFin;
+        EsParaMovil = servicio.EsParaMovil;
+        MostrarTramos = servicio.MostrarTramos;
+        EsParaBuses = servicio.EsParaBuses;
+        IdaVuelta = servicio.IdaVuelta;
+        HolguraEntrada = servicio.HolguraEntrada;
+        Politicas = servicio.Politicas;
+        ControlParental = servicio.ControlParental;
+        ServicioResponsableId = servicio.ServicioResponsableId;
+        Tramos = servicio.Tramos;
+        CentrosCosto = servicio.CentrosCosto;
+        GruposEtarios = servicio.GruposEtarios;
+        Cajas = servicio.Cajas;
+        Zonas = servicio.Zonas;
+        Permisos = servicio.Permisos;
+        PlantillaId = servicio.PlantillaId;
+        PlantillaDigitalId = servicio.PlantillaDigitalId;
+        EsActivo = servicio.EsActivo;
+    }
+
+    internal ServicioViewModel Copy() =>
+        new()
+        {
+            Id = Id,
+            FranquiciaId = FranquiciaId,
+            CentroCosto = CentroCosto,
+            IsNew = IsNew,
+            Aka = Aka,
+            Nombre = Nombre,
+            TipoControl = TipoControl,
+            TipoDistribucion = TipoDistribucion,
+            TipoServicio = TipoServicio,
+            TipoVigencia = TipoVigencia,
+            NumeroVigencia = NumeroVigencia,
+            NumeroValidez = NumeroValidez,
+            NumeroPaxMinimo = NumeroPaxMinimo,
+            NumeroPaxMaximo = NumeroPaxMaximo,
+            EsConHora = EsConHora,
+            EsPorTramos = EsPorTramos,
+            EsParaVenta = EsParaVenta,
+            Orden = Orden,
+            HolguraInicio = HolguraInicio,
+            HolguraFin = HolguraFin,
+            EsParaMovil = EsParaMovil,
+            MostrarTramos = MostrarTramos,
+            EsParaBuses = EsParaBuses,
+            IdaVuelta = IdaVuelta,
+            HolguraEntrada = HolguraEntrada,
+            Politicas = Politicas,
+            ControlParental = ControlParental,
+            ServicioResponsableId = ServicioResponsableId,
+            Tramos = Tramos,
+            CentrosCosto = CentrosCosto,
+            GruposEtarios = GruposEtarios,
+            Cajas = Cajas,
+            Zonas = Zonas,
+            Permisos = Permisos,
+            PlantillaId = PlantillaId,
+            PlantillaDigitalId = PlantillaDigitalId,
+            EsActivo = EsActivo,
+        };
 }

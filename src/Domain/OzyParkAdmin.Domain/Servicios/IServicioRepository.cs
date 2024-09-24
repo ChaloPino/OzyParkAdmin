@@ -8,6 +8,15 @@ namespace OzyParkAdmin.Domain.Servicios;
 public interface IServicioRepository
 {
     /// <summary>
+    /// Busca un servicio que coincida con la <paramref name="franquiciaId"/> y el <paramref name="aka"/>.
+    /// </summary>
+    /// <param name="franquiciaId">El id de franquicia.</param>
+    /// <param name="aka">El aka del servicio.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El servicio si existe.</returns>
+    Task<Servicio?> FindByAkaAsync(int franquiciaId, string? aka, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Busca un servicio dado el <paramref name="servicioId"/>.
     /// </summary>
     /// <param name="servicioId">El id del servicio a buscar.</param>

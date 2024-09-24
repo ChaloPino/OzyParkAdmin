@@ -24,7 +24,7 @@ public readonly record struct Forbid(string? ErrorMessage = null);
 /// Representa un error de unauthorized.
 /// </summary>
 /// <param name="ErrorMessage">El mensaje de error.</param>
-public readonly record struct Unauthorized(string ErrorMessage = null);
+public readonly record struct Unauthorized(string? ErrorMessage = null);
 
 /// <summary>
 /// Representa un error de validación.

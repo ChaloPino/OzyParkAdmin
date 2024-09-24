@@ -64,6 +64,7 @@ public static class OzyParkAdminHostApplicationExtensions
     {
         services.AddScoped<UsuarioService>();
         services.AddScoped<ServicioManager>();
+        services.AddScoped<ServicioValidator>();
         return services;
     }
 }

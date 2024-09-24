@@ -13,6 +13,7 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageVersion Include="Extensions.MudBlazor.StaticInput" Version="2.1.2" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.10.0" />
     <PackageVersion Include="MassTransit" Version="8.2.5" />
     <PackageVersion Include="MassTransit.Abstractions" Version="8.2.5" />
     <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="8.2.5" />

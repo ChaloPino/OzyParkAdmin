@@ -13,6 +13,12 @@ namespace OzyParkAdmin.Infrastructure.Servicios;
 public sealed class ServicioRepository(OzyParkAdminContext context) : Repository<Servicio>(context), IServicioRepository
 {
     /// <inheritdoc/>
+    public async Task<Servicio?> FindByAkaAsync(int franquiciaId, string? aka, CancellationToken cancellationToken)
+    {
+        return await EntitySet.AsSplitQuery().FirstOrDefaultAsync(x => x.FranquiciaId == franquiciaId && x.Aka == aka, cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task<Servicio?> FindByIdAsync(int servicioId, CancellationToken cancellationToken)
     {
         return await EntitySet.AsSplitQuery().FirstOrDefaultAsync(x => x.Id == servicioId, cancellationToken);

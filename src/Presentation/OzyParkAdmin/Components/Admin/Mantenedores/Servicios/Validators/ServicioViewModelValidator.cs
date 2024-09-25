@@ -83,7 +83,7 @@ public class ServicioViewModelValidator : BaseValidator<ServicioViewModel>
 
     private async Task ValidateAkaAsync(string aka, ValidationContext<ServicioViewModel> context, CancellationToken cancellationToken)
     {
-        var validateAka = new ValidateAka(context.InstanceToValidate.Id, context.InstanceToValidate.FranquiciaId, aka);
+        var validateAka = new ValidateServicioAka(context.InstanceToValidate.Id, context.InstanceToValidate.FranquiciaId, aka);
 
         SuccessOrFailure result = await _mediator.SendRequest(validateAka, cancellationToken);
 

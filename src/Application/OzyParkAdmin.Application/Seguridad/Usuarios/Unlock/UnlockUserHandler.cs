@@ -35,6 +35,6 @@ public sealed class UnlockUserHandler : MediatorRequestHandler<UnlockUser, Resul
         }
 
         var result = await _userManager.SetLockoutEndDateAsync(usuario, null);
-        return result.Succeeded ? usuario.ToInfo() : result.ToFailure();
+        return result.Succeeded ? usuario.ToFullInfo() : result.ToFailure();
     }
 }

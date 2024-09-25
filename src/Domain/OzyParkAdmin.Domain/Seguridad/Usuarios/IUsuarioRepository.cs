@@ -21,4 +21,12 @@ public interface IUsuarioRepository
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>El listado de usuarios paginado que coinciden con el criterio de búsqueda.</returns>
     Task<PagedList<UsuarioFullInfo>> BuscarUsuariosAsync(string? searchText, int[]? centrosCosto, string[]? roles, FilterExpressionCollection<Usuario> filterExpressions, SortExpressionCollection<Usuario> sortExpressions, int page, int pageSize, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Busca un usuario dado su id.
+    /// </summary>
+    /// <param name="id">El id de usuario a buscar.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El usuario si es que se encuentra.</returns>
+    Task<Usuario?> FindByIdAsync(Guid id, CancellationToken cancellationToken);
 }

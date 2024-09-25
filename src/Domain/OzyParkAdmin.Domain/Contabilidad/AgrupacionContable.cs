@@ -1,4 +1,4 @@
-﻿namespace OzyParkAdmin.Domain.Productos;
+﻿namespace OzyParkAdmin.Domain.Contabilidad;
 
 /// <summary>
 /// La agrupación contable.

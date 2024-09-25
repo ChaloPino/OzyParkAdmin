@@ -5,24 +5,24 @@ using OzyParkAdmin.Domain.Shared;
 namespace OzyParkAdmin.Application.Servicios.Validate;
 
 /// <summary>
-/// El manejador de <see cref="ValidateAka"/>.
+/// El manejador de <see cref="ValidateServicioAka"/>.
 /// </summary>
-public sealed class ValidateAkaHandler : MediatorRequestHandler<ValidateAka, SuccessOrFailure>
+public sealed class ValidateServicioAkaHandler : MediatorRequestHandler<ValidateServicioAka, SuccessOrFailure>
 {
     private readonly ServicioValidator _servicioValidator;
 
     /// <summary>
-    /// Crea una nueva instancia de <see cref="ValidateAkaHandler"/>.
+    /// Crea una nueva instancia de <see cref="ValidateServicioAkaHandler"/>.
     /// </summary>
     /// <param name="servicioValidator"></param>
-    public ValidateAkaHandler(ServicioValidator servicioValidator)
+    public ValidateServicioAkaHandler(ServicioValidator servicioValidator)
     {
         ArgumentNullException.ThrowIfNull(servicioValidator);
         _servicioValidator = servicioValidator;
     }
 
     /// <inheritdoc/>
-    protected override async Task<SuccessOrFailure> Handle(ValidateAka request, CancellationToken cancellationToken)
+    protected override async Task<SuccessOrFailure> Handle(ValidateServicioAka request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         return await _servicioValidator.ValidateAkaAsync(request.ServicioId, request.FranquiciaId, request.Aka, cancellationToken);

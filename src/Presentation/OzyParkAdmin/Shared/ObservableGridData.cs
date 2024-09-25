@@ -30,6 +30,11 @@ internal class ObservableGridData<T> : GridData<T>
     {
         return _items.FirstOrDefault(x => EqualityComparer<T>.Default.Equals(x, item));
     }
+
+    public T? Find(Func<T, bool> predicate)
+    {
+        return _items.FirstOrDefault(predicate);
+    }
 }
 
 internal sealed class ObservableGridData<T, TKey> : ObservableGridData<T>

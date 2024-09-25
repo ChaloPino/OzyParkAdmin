@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Validators;
+namespace OzyParkAdmin.Shared;
 
 /// <summary>
 /// Validador base.

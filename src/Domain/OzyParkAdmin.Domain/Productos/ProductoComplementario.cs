@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Domain.Productos;
+﻿
+
+namespace OzyParkAdmin.Domain.Productos;
 
 /// <summary>
 /// Define un producto complementario.
@@ -14,4 +16,10 @@ public sealed class ProductoComplementario
     /// El orden de despliegue del complemento.
     /// </summary>
     public int Orden { get; private set; }
+
+    internal static ProductoComplementario Create(Producto producto, int orden) =>
+        new() { Complemento = producto, Orden = orden };
+
+    internal void Update(int orden) =>
+        Orden = orden;
 }

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using System.Linq.Expressions;
 
-namespace OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Validators;
+namespace OzyParkAdmin.Shared;
 
 internal static class ValidatorExtensions
 {

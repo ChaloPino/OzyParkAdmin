@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Domain.Productos;
+﻿using OzyParkAdmin.Domain.Contabilidad;
+
+namespace OzyParkAdmin.Domain.Productos;
 
 /// <summary>
 /// Define la agrupación contable asociada a un producto.
@@ -9,4 +11,10 @@ public sealed class ProductoAgrupacion
     /// La agrupación contable asociada al producto.
     /// </summary>
     public AgrupacionContable AgrupacionContable { get; private set; } = default!;
+
+    internal static ProductoAgrupacion Create(AgrupacionContable agrupacionContable) =>
+        new() {  AgrupacionContable = agrupacionContable };
+
+    internal void Update(AgrupacionContable familia) =>
+        AgrupacionContable = familia;
 }

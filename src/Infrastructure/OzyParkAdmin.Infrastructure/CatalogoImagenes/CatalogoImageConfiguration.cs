@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OzyParkAdmin.Domain.Productos;
+using OzyParkAdmin.Domain.CatalogoImagenes;
 
-namespace OzyParkAdmin.Infrastructure.Productos;
+namespace OzyParkAdmin.Infrastructure.CatalogoImagenes;
 internal sealed class CatalogoImageConfiguration : IEntityTypeConfiguration<CatalogoImagen>
 {
     public void Configure(EntityTypeBuilder<CatalogoImagen> builder)

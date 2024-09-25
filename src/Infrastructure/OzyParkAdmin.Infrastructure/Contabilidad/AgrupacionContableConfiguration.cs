@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OzyParkAdmin.Domain.Productos;
+using OzyParkAdmin.Domain.Contabilidad;
 
-namespace OzyParkAdmin.Infrastructure.Productos;
+namespace OzyParkAdmin.Infrastructure.Contabilidad;
 internal sealed class AgrupacionContableConfiguration : IEntityTypeConfiguration<AgrupacionContable>
 {
     public void Configure(EntityTypeBuilder<AgrupacionContable> builder)

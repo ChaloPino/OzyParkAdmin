@@ -13,6 +13,19 @@ using OzyParkAdmin.Infrastructure.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Infrastructure.Layout;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Bmp;
+using SixLabors.ImageSharp.Formats.Qoi;
+using SixLabors.ImageSharp.Formats.Tga;
+using SixLabors.ImageSharp.Formats.Gif;
+using SixLabors.ImageSharp.Formats.Pbm;
+using SixLabors.ImageSharp.Formats.Tiff;
+using SixLabors.ImageSharp.Formats.Webp;
+using OzyParkAdmin.Infrastructure.CatalogoImagenes;
+using OzyParkAdmin.Domain.Productos;
+using OzyParkAdmin.Domain.CatalogoImagenes;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -67,6 +80,26 @@ public static class OzyParkAdminHostApplicationExtensions
         services.AddScoped<UsuarioService>();
         services.AddScoped<ServicioManager>();
         services.AddScoped<ServicioValidator>();
+        services.AddScoped<ProductoManager>();
+        services.AddScoped<ProductoValidator>();
+        services.AddScoped<CatalogoImagenService>();
+        services.AddSingleton(_ => CreateImageFormatManager());
+        services.AddScoped<ImagenService>();
         return services;
+    }
+
+    private static ImageFormatManager CreateImageFormatManager()
+    {
+        ImageFormatManager manager = new();
+        manager.AddImageFormat(PngFormat.Instance);
+        manager.AddImageFormat(JpegFormat.Instance);
+        manager.AddImageFormat(BmpFormat.Instance);
+        manager.AddImageFormat(QoiFormat.Instance);
+        manager.AddImageFormat(TgaFormat.Instance);
+        manager.AddImageFormat(GifFormat.Instance);
+        manager.AddImageFormat(PbmFormat.Instance);
+        manager.AddImageFormat(TiffFormat.Instance);
+        manager.AddImageFormat(WebpFormat.Instance);
+        return manager;
     }
 }

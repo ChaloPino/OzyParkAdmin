@@ -75,7 +75,7 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
     }
 
     private static UsuarioFullInfo ToUsuarioInfo(Usuario usuario, List<Rol> roles, List<CentroCosto> centrosCosto, List<Franquicia> franquicias) =>
-        usuario.ToInfo(
+        usuario.ToFullInfo(
             roles.Where(x => ContieneRol(usuario, x)).ToList(),
             centrosCosto.Where(x => ContieneCentroCosto(usuario, x)).ToList(),
             franquicias.Where(x => ContieneFranquicia(usuario, x)).ToList());
@@ -88,4 +88,8 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
 
     private static bool ContieneFranquicia(Usuario usuario, Franquicia franquicia) =>
         usuario.Franquicias.Any(x => x.FranquiciaId == franquicia.Id);
+
+    /// <inheritdoc/>
+    public async Task<Usuario?> FindByIdAsync(Guid id, CancellationToken cancellationToken) =>
+        await EntitySet.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 }

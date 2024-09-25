@@ -37,7 +37,7 @@ public sealed class ServicioRepository(OzyParkAdminContext context) : Repository
     public async Task<int> MaxIdAsync(CancellationToken cancellationToken)
     {
         int? id = await EntitySet.MaxAsync(x => (int?)x.Id, cancellationToken);
-        return id is null ? 1 : id.Value + 1;
+        return id is null ? 0 : id.Value;
     }
 
     /// <inheritdoc/>

@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Validators;
 
-namespace OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Validators;
+namespace OzyParkAdmin.Shared;
 
 /// <summary>
 /// Validador de <see cref="NotNullValidator{T, TProperty}"/> con una condición para saber si se evalúa o no.

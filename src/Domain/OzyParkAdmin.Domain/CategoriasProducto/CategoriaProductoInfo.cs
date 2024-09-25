@@ -1,4 +1,4 @@
-﻿namespace OzyParkAdmin.Domain.Productos;
+﻿namespace OzyParkAdmin.Domain.CategoriasProducto;
 
 /// <summary>
 /// Contiene la información de una categoria de producto.

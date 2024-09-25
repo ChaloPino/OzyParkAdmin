@@ -2,12 +2,18 @@
 @using System.Security.Claims
 @using OzyParkAdmin.Application
 @using OzyParkAdmin.Application.Cajas.List
+@using OzyParkAdmin.Application.CategoriasProducto.List
 @using OzyParkAdmin.Application.CentrosCosto.List
+@using OzyParkAdmin.Application.Contabilidad.List
 @using OzyParkAdmin.Application.Franquicias.List
+@using OzyParkAdmin.Application.Productos
+@using OzyParkAdmin.Application.Productos.List
 @using OzyParkAdmin.Application.Productos.Search
 @using OzyParkAdmin.Components.Admin.Shared
 @using OzyParkAdmin.Domain.Cajas
+@using OzyParkAdmin.Domain.CategoriasProducto
 @using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Contabilidad
 @using OzyParkAdmin.Domain.Franquicias
 @using OzyParkAdmin.Domain.Productos
 @using OzyParkAdmin.Domain.Shared
@@ -27,13 +33,28 @@
     </ToolBarContent>
     <Columns>
         <HierarchyColumn T="ProductoViewModel" Hideable="false" />
-        <PropertyColumn Property="x => x.Sku" Title="Sku" Groupable="false" />
-        <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false" />
-        <PropertyColumn Property="x => x.Nombre" Title="Nombre" Groupable="false" />
+        <PropertyColumn Property="x => x.Sku" Title="Sku" Groupable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Sku" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Aka" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Nombre" Title="Nombre" Groupable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
         <PropertyColumn Property="x => x.TipoProducto.Nombre" Title="Tipo producto">
             <GroupTemplate>
                 <StringGrouping Title="Tipo producto" GroupDefinition="context" />
             </GroupTemplate>
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.TipoProducto.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.TipoProducto.EsParaVenta" Editable="false" Title="Es para venta" Hidden="true">
             <FilterTemplate>
@@ -72,11 +93,17 @@
             <GroupTemplate>
                 <StringGrouping Title="Categoría" GroupDefinition="context" />
             </GroupTemplate>
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Categoria.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Familia.Aka" Title="Familia contable">
             <GroupTemplate>
                 <StringGrouping Title="Familia contable" GroupDefinition="context" />
             </GroupTemplate>
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Familia.Aka" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.FechaAlta" Title="Fecha de alta">
             <FilterTemplate>
@@ -123,6 +150,9 @@
             <GroupTemplate>
                 <StringGrouping GroupDefinition="context" Title="Usuario creación" />
             </GroupTemplate>
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.UsuarioCreacion.FriendlyName" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.UltimaModificacion" Title="Ultima modificación" Hidden="true">
             <GroupTemplate>
@@ -133,6 +163,9 @@
             <GroupTemplate>
                 <StringGrouping GroupDefinition="context" Title="Usuario modificación" />
             </GroupTemplate>
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.UsuarioCreacion.FriendlyName" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
         </PropertyColumn>
         <TemplateColumn Groupable="false">
             <CellTemplate>
@@ -224,8 +257,10 @@
 </MudDataGrid>
 
 <CascadingValue Value="true" Name="IsNested">
-    <ProductoEditDialog @bind-IsOpen="openEditing" Producto="currentProducto" CentrosCosto="centrosCosto" Franquicias="franquicias" TiposProducto="tiposProducto"
-        Familias="familias" CommitChanges="SaveProductoAsync" DialogOptions="dialogOptions" />
+    <ProductoEditDialog @bind-IsOpen="openEditing" Producto="currentProducto" CentrosCosto="centrosCosto" Franquicias="franquicias"
+        TiposProducto="tiposProducto" Categorias="categorias" CategoriasDespliegue="categoriasDespliegue" Complementos="complementos"
+        Familias="familias" LoadCategorias="OnLoadCategoriasAsync" LoadComplementos="LoadComplementosAsync"
+        CommitChanges="SaveProductoAsync" DialogOptions="dialogOptions" />
 </CascadingValue>
 
 @code {
@@ -244,8 +279,11 @@
     private List<CentroCostoInfo> centrosCosto = [];
     private List<FranquiciaModel> franquicias = [];
     private List<CajaInfo> cajas = [];
+    private List<CategoriaProductoInfo> categorias = [];
+    private List<CategoriaProductoInfo> categoriasDespliegue = [];
     private List<TipoProducto> tiposProducto = [];
     private List<AgrupacionContable> familias = [];
+    private List<ProductoInfo> complementos = [];
 
     private bool openEditing;
     private ProductoViewModel? currentProducto;
@@ -269,6 +307,7 @@
         Task[] loadingTasks =
         [
             LoadCentrosCostoAsync(), LoadFranquiciasAsync(), LoadCajasAsync(),
+    LoadAgrupacionesContablesAsync(), LoadTiposProductoAsync(),
     ];
 
         await Task.WhenAll(loadingTasks);
@@ -292,6 +331,48 @@
         cajas = result.Items.ToList();
     }
 
+    private async Task LoadAgrupacionesContablesAsync()
+    {
+        ResultListOf<AgrupacionContable> result = await Mediator.SendRequest(new ListAgrupacionesContables());
+        familias = result.Items.ToList();
+    }
+
+    private async Task LoadTiposProductoAsync()
+    {
+        ResultListOf<TipoProducto> result = await Mediator.SendRequest(new ListTiposProducto());
+        tiposProducto = result.Items.ToList();
+    }
+
+    private async Task OnLoadCategoriasAsync(int franquiciaId)
+    {
+        Task[] loadingTasks =
+        [
+            LoadCategoriasAsync(franquiciaId), LoadCategoriasDespliegueAsync(franquiciaId),
+    ];
+
+        await Task.WhenAll(loadingTasks);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadCategoriasAsync(int franquiciaId)
+    {
+        ResultListOf<CategoriaProductoInfo> result = await Mediator.SendRequest(new ListCategoriasProductoFinales(franquiciaId));
+        categorias = result.Items.ToList();
+    }
+
+    private async Task LoadCategoriasDespliegueAsync(int franquiciaId)
+    {
+        ResultListOf<CategoriaProductoInfo> result = await Mediator.SendRequest(new ListCategoriasProducto(franquiciaId));
+        categoriasDespliegue = result.Items.ToList();
+    }
+
+    private async Task LoadComplementosAsync(int categoriaId)
+    {
+        ResultListOf<ProductoInfo> result = await Mediator.SendRequest(new ListComplementos(categoriaId));
+        complementos = result.Items.ToList();
+    }
+
     public async Task<GridData<ProductoViewModel>> LoadProductosAsync(GridState<ProductoViewModel> state)
     {
         SearchProductos searchProductos = state.ToSearch(user!, searchText);
@@ -300,16 +381,23 @@
         return currentProductos;
     }
 
-    private Task AddProductoAsync()
+    private async Task AddProductoAsync()
     {
-        return Task.CompletedTask;
+        currentProducto = new() { IsNew = true, };
+
+        CellContext<ProductoViewModel> context = new CellContext<ProductoViewModel>(dataGrid, currentProducto);
+        await ShowEditingAsync(context);
     }
 
-    private Task ShowEditingAsync(CellContext<ProductoViewModel> context)
+    private async Task ShowEditingAsync(CellContext<ProductoViewModel> context)
     {
-        currentProducto = context.Item;
-        openEditing = true;
-        return Task.CompletedTask;
+        currentProducto = dataGrid.CloneStrategy.CloneObject(context.Item);
+
+        if (currentProducto is not null)
+        {
+            await LoadCategoriasAsync(currentProducto.FranquiciaId);
+            openEditing = true;
+        }
     }
 
     private Task SaveEsActivoAsync(ProductoViewModel producto, bool esActivo)
@@ -317,8 +405,48 @@
         return Task.CompletedTask;
     }
 
-    private Task<bool> SaveProductoAsync(ProductoViewModel producto)
+    private async Task<bool> SaveProductoAsync(ProductoViewModel producto)
     {
-        return Task.FromResult(true);
+        IProductoStateChangeable changeStatus = producto.IsNew
+            ? producto.ToCreate(user!)
+            : producto.ToUpdate(user!);
+
+        var result = await Mediator.SendRequest(changeStatus);
+        return UpdateProducto(producto, result, producto.IsNew ? "crear producto" : "modificar producto");
+    }
+
+    private bool UpdateProducto(ProductoViewModel producto, ResultOf<ProductoFullInfo> result, string action)
+    {
+        return result.Match(
+            onSuccess: info => UpdateProducto(producto, info),
+            onFailure: failure => AddFailure(failure, action));
+    }
+
+    private bool UpdateProducto(ProductoViewModel producto, ProductoFullInfo info)
+    {
+        bool isNew = producto.IsNew;
+        producto.Save(info);
+
+        if (isNew)
+        {
+            currentProductos?.Add(producto);
+            return true;
+        }
+
+        ProductoViewModel? persistent = currentProductos?.Find(x => x.Id == producto.Id);
+
+        if (persistent is not null)
+        {
+            persistent.Update(producto);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool AddFailure(Failure failure, string action)
+    {
+        Snackbar.AddFailure(failure, action);
+        return false;
     }
 }

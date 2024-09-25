@@ -1,9 +1,13 @@
 ﻿using MudBlazor;
 using MudBlazor.Interfaces;
+using OzyParkAdmin.Application.Productos.Create;
 using OzyParkAdmin.Application.Productos.Search;
+using OzyParkAdmin.Application.Productos.Update;
+using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Shared;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Security.Claims;
 
@@ -120,24 +124,70 @@ internal static class ProductoMapper
             Partes = producto.Partes.ToModel(),
         };
 
-    private static CatalogoImagenModel ToModel(this CatalogoImagenInfo imagen) =>
+    public static CatalogoImagenModel ToModel(this CatalogoImagenInfo imagen) =>
         new() { Aka = imagen.Aka, Base64 = imagen.Base64, MimeType = imagen.MimeType, Tipo = imagen.Tipo };
 
-    private static List<ProductoComplementarioModel> ToModel(this IEnumerable<ProductoComplementarioInfo> source) =>
+    public static List<ProductoComplementarioModel> ToModel(this IEnumerable<ProductoComplementarioInfo> source) =>
         [.. source.Select(ToModel)];
 
     private static ProductoComplementarioModel ToModel(ProductoComplementarioInfo complementario) =>
         new() { Complemento = complementario.Complemento, Orden = complementario.Orden };
 
-    private static List<ProductoRelacionadoModel> ToModel(this IEnumerable<ProductoRelacionadoInfo> source) =>
+    public static List<ProductoRelacionadoModel> ToModel(this IEnumerable<ProductoRelacionadoInfo> source) =>
         [.. source.Select(ToModel)];
 
     private static ProductoRelacionadoModel ToModel(ProductoRelacionadoInfo relacionado) =>
         new() { Relacionado = relacionado.Relacionado, Orden = relacionado.Orden };
 
-    private static List<ProductoParteModel> ToModel(this IEnumerable<ProductoParteInfo> source) =>
+    public static List<ProductoParteModel> ToModel(this IEnumerable<ProductoParteInfo> source) =>
         [.. source.Select(ToModel)];
 
     private static ProductoParteModel ToModel(ProductoParteInfo parte) =>
         new() { Parte = parte.Parte, Cantidad = parte.Cantidad, EsOpcional = parte.EsOpcional };
+
+    public static CreateProducto ToCreate(this ProductoViewModel producto, ClaimsPrincipal user) =>
+        new(
+            producto.Aka,
+            producto.Sku,
+            producto.Nombre,
+            producto.FranquiciaId,
+            producto.CentroCosto,
+            producto.Categoria,
+            producto.CategoriaDespliegue,
+            producto.Imagen.ToInfo(),
+            producto.TipoProducto,
+            producto.Orden,
+            producto.Familia,
+            producto.EsComplemento,
+            producto.FechaAlta,
+            user,
+            producto.Complementos.ToInfo());
+
+    public static UpdateProducto ToUpdate(this ProductoViewModel producto, ClaimsPrincipal user) =>
+        new(
+            producto.Id,
+            producto.Aka,
+            producto.Sku,
+            producto.Nombre,
+            producto.FranquiciaId,
+            producto.CentroCosto,
+            producto.Categoria,
+            producto.CategoriaDespliegue,
+            producto.Imagen.ToInfo(),
+            producto.TipoProducto,
+            producto.Orden,
+            producto.Familia,
+            producto.EsComplemento,
+            producto.FechaAlta,
+            user,
+            producto.Complementos.ToInfo());
+
+    private static CatalogoImagenInfo ToInfo(this CatalogoImagenModel imagen) =>
+        new() {  Aka = imagen.Aka, Base64 = imagen.Base64, MimeType = imagen.MimeType, Tipo = imagen.Tipo };
+
+    private static ImmutableArray<ProductoComplementarioInfo> ToInfo(this IEnumerable<ProductoComplementarioModel> source) =>
+        [.. source.Select(ToInfo)];
+
+    private static ProductoComplementarioInfo ToInfo(ProductoComplementarioModel complementario) =>
+        new() { Complemento = complementario.Complemento, Orden = complementario.Orden };
 }

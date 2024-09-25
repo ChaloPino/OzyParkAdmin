@@ -16,21 +16,40 @@ public sealed class GenericRepository<TEntity>(OzyParkAdminContext context) : Re
     where TEntity : class
 {
     /// <inheritdoc/>
-    public async Task<List<TEntity>> ListAsync(Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    public async Task<List<TEntity>> ListAsync(
+        Expression<Func<TEntity, bool>>? predicate = null,
+        SortExpressionCollection<TEntity>? sortExpressions = null,
+        CancellationToken cancellationToken = default)
     {
-        return predicate is null
-            ? await EntitySet.ToListAsync(cancellationToken).ConfigureAwait(false)
-            : await EntitySet.Where(predicate).ToListAsync(cancellationToken).ConfigureAwait(false);
+        IQueryable<TEntity> query = predicate is null
+            ? EntitySet
+            : EntitySet.Where(predicate);
+
+        if (sortExpressions is not null)
+        {
+            query = sortExpressions.Sort(query);
+        }
+
+        return await query.ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
-    public async Task<List<TResult>> ListAsync<TResult>(Expression<Func<TEntity, TResult>> selector, Expression<Func<TEntity, bool>>? predicate = null, CancellationToken cancellationToken = default)
+    public async Task<List<TResult>> ListAsync<TResult>(
+        Expression<Func<TEntity, TResult>> selector,
+        Expression<Func<TEntity, bool>>? predicate = null,
+        SortExpressionCollection<TEntity>? sortExpressions = null,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(selector);
 
         IQueryable<TEntity> query = predicate is null
             ? EntitySet
             : EntitySet.Where(predicate);
+
+        if (sortExpressions is not null)
+        {
+            query = sortExpressions.Sort(query);
+        }
 
         return await query.Select(selector).ToListAsync(cancellationToken).ConfigureAwait(false);
     }

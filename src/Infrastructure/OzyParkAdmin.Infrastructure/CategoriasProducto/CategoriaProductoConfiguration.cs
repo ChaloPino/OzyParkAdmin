@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OzyParkAdmin.Domain.CanalesVenta;
-using OzyParkAdmin.Domain.Productos;
+using OzyParkAdmin.Domain.CategoriasProducto;
 
-namespace OzyParkAdmin.Infrastructure.Productos;
+namespace OzyParkAdmin.Infrastructure.CategoriasProducto;
 internal sealed class CategoriaProductoConfiguration : IEntityTypeConfiguration<CategoriaProducto>
 {
     public void Configure(EntityTypeBuilder<CategoriaProducto> builder)

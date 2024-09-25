@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
-using OzyParkAdmin.Domain.Cajas;
+﻿using OzyParkAdmin.Domain.Cajas;
+using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.Contabilidad;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 
@@ -14,42 +15,42 @@ public sealed record ProductoViewModel
     /// <summary>
     /// El id del producto.
     /// </summary>
-    public required int Id { get; set; }
+    public int Id { get; set; }
 
     /// <summary>
     /// El aka del producto.
     /// </summary>
-    public required string Aka { get; set; } = string.Empty;
+    public string Aka { get; set; } = string.Empty;
 
     /// <summary>
     /// El sku del producto.
     /// </summary>
-    public required string Sku { get; set; } = string.Empty;
+    public string Sku { get; set; } = string.Empty;
 
     /// <summary>
     /// El nombre del producto.
     /// </summary>
-    public required string Nombre { get; set; } = string.Empty;
+    public string Nombre { get; set; } = string.Empty;
 
     /// <summary>
     /// El id de la franquicia.
     /// </summary>
-    public required int FranquiciaId { get; set; }
+    public int FranquiciaId { get; set; }
 
     /// <summary>
     /// El centro de costo asociado al producto.
     /// </summary>
-    public required CentroCostoInfo CentroCosto { get; set; }
+    public CentroCostoInfo CentroCosto { get; set; } = default!;
 
     /// <summary>
     /// La categoría asociada al producto.
     /// </summary>
-    public required CategoriaProductoInfo Categoria { get; set; }
+    public CategoriaProductoInfo Categoria { get; set; } = default!;
 
     /// <summary>
     /// La categoría de despliegue asociada al producto.
     /// </summary>
-    public required CategoriaProductoInfo CategoriaDespliegue { get; set; }
+    public CategoriaProductoInfo CategoriaDespliegue { get; set; } = default!;
 
     /// <summary>
     /// El catálogo de imagen asociado al producto.
@@ -59,57 +60,57 @@ public sealed record ProductoViewModel
     /// <summary>
     /// El tipo del producto.
     /// </summary>
-    public required TipoProducto TipoProducto { get; set; }
+    public TipoProducto TipoProducto { get; set; } = default!;
 
     /// <summary>
     /// El orden de despliegue del producto.
     /// </summary>
-    public required int Orden { get; set; }
+    public int Orden { get; set; } = 1;
 
     /// <summary>
     /// La agrupación contable de la familia.
     /// </summary>
-    public AgrupacionContable? Familia { get; set; }
+    public AgrupacionContable Familia { get; set; } = default!;
 
     /// <summary>
     /// Si el producto es complemento.
     /// </summary>
-    public required bool EsComplemento { get; set; }
+    public bool EsComplemento { get; set; }
 
     /// <summary>
     /// Si el producto está en inventario.
     /// </summary>
-    public required bool EnInventario { get; set; }
+    public bool EnInventario { get; set; }
 
     /// <summary>
     /// La fecha de alta del producto.
     /// </summary>
-    public required DateOnly FechaAlta { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public DateOnly FechaAlta { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
     /// <summary>
     /// El usuario que creó el producto.
     /// </summary>
-    public required UsuarioInfo UsuarioCreacion { get; set; }
+    public UsuarioInfo UsuarioCreacion { get; set; } = default!;
 
     /// <summary>
     /// La fecha en que se creó el producto.
     /// </summary>
-    public required DateTime FechaSistema { get; set; } = DateTime.Now;
+    public DateTime FechaSistema { get; set; } = DateTime.Now;
 
     /// <summary>
     /// El usuario que realizó la última modificación del producto.
     /// </summary>
-    public required UsuarioInfo UsuarioModificacion { get; set; }
+    public UsuarioInfo UsuarioModificacion { get; set; } = default!;
 
     /// <summary>
     /// La fecha en que se realizó la última modificación del producto.
     /// </summary>
-    public required DateTime UltimaModificacion { get; set; } = DateTime.Now;
+    public DateTime UltimaModificacion { get; set; } = DateTime.Now;
 
     /// <summary>
     /// Si el producto está activo.
     /// </summary>
-    public required bool EsActivo { get; set; } = true;
+    public bool EsActivo { get; set; } = true;
 
     /// <summary>
     /// Las cajas asignadas al producto.
@@ -137,6 +138,11 @@ public sealed record ProductoViewModel
     public bool IsNew { get; set; }
 
     /// <summary>
+    /// Si el detalle del producto fue cargado.
+    /// </summary>
+    public bool DetailLoaded { get; set; }
+
+    /// <summary>
     /// La fecha de alta como <see cref="DateTime"/>.
     /// </summary>
     public DateTime? FechaAltaDate
@@ -145,5 +151,69 @@ public sealed record ProductoViewModel
         set => FechaAlta = value is null
                 ? DateOnly.MinValue
                 : DateOnly.FromDateTime(value.Value);
+    }
+
+    internal void Save(ProductoFullInfo producto)
+    {
+        if (IsNew)
+        {
+            Id = producto.Id;
+            FranquiciaId = producto.FranquiciaId;
+            CentroCosto = producto.CentroCosto;
+            IsNew = false;
+        }
+
+        Aka = producto.Aka;
+        Sku = producto.Sku;
+        Nombre = producto.Nombre;
+        FranquiciaId = producto.FranquiciaId;
+        Categoria = producto.Categoria;
+        CategoriaDespliegue = producto.CategoriaDespliegue;
+        Imagen = producto.Imagen.ToModel();
+        TipoProducto = producto.TipoProducto;
+        Orden = producto.Orden;
+        Familia = producto.Familia;
+        EsComplemento = producto.EsComplemento;
+        EnInventario = producto.EnInventario;
+        FechaAlta = producto.FechaAlta;
+        UsuarioCreacion = producto.UsuarioCreacion;
+        FechaSistema = producto.FechaSistema;
+        UsuarioModificacion = producto.UsuarioModificacion;
+        UltimaModificacion = producto.UltimaModificacion;
+        EsActivo = producto.EsActivo;
+        Cajas = [.. producto.Cajas];
+        Complementos = producto.Complementos.ToModel();
+        Relacionados = producto.Relacionados.ToModel();
+        Partes = producto.Partes.ToModel();
+    }
+
+    internal void Update(ProductoViewModel producto)
+    {
+        Id = producto.Id;
+        FranquiciaId = producto.FranquiciaId;
+        CentroCosto = producto.CentroCosto;
+        IsNew = false;
+        Aka = producto.Aka;
+        Sku = producto.Sku;
+        Nombre = producto.Nombre;
+        FranquiciaId = producto.FranquiciaId;
+        Categoria = producto.Categoria;
+        CategoriaDespliegue = producto.CategoriaDespliegue;
+        Imagen = producto.Imagen;
+        TipoProducto = producto.TipoProducto;
+        Orden = producto.Orden;
+        Familia = producto.Familia;
+        EsComplemento = producto.EsComplemento;
+        EnInventario = producto.EnInventario;
+        FechaAlta = producto.FechaAlta;
+        UsuarioCreacion = producto.UsuarioCreacion;
+        FechaSistema = producto.FechaSistema;
+        UsuarioModificacion = producto.UsuarioModificacion;
+        UltimaModificacion = producto.UltimaModificacion;
+        EsActivo = producto.EsActivo;
+        Cajas = [.. producto.Cajas];
+        Complementos = producto.Complementos;
+        Relacionados = producto.Relacionados;
+        Partes = producto.Partes;
     }
 }

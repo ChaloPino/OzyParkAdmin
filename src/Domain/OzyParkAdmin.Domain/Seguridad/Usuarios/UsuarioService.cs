@@ -85,7 +85,7 @@ public class UsuarioService
         IEnumerable<CentroCostoInfo> centrosCostoPersisted = await _centroCostoRepository.ListCentrosCostoAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
         IEnumerable<Franquicia> franquiciasPersisted = await _faranquiciaRepository.ListFranquiciasAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
 
-        return usuario.ToInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToList());
+        return usuario.ToFullInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToList());
     }
 
     /// <summary>
@@ -200,7 +200,7 @@ public class UsuarioService
         IEnumerable<CentroCostoInfo> centrosCostoPersisted = await _centroCostoRepository.ListCentrosCostoAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
         IEnumerable<Franquicia> franquiciasPersisted = await _faranquiciaRepository.ListFranquiciasAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
 
-        return usuario.ToInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToList());
+        return usuario.ToFullInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToList());
     }
 
     private async Task<IdentityResult> AddToCentrosCostoAsync(Usuario user,  IEnumerable<int> centrosCosto)

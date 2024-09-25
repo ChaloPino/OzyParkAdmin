@@ -1,4 +1,4 @@
-﻿namespace OzyParkAdmin.Domain.Productos;
+﻿namespace OzyParkAdmin.Domain.CatalogoImagenes;
 
 /// <summary>
 /// La información del catálogo de imagen.

@@ -1,6 +1,6 @@
 ﻿using OzyParkAdmin.Domain.Cajas;
 
-namespace OzyParkAdmin.Domain.Productos;
+namespace OzyParkAdmin.Domain.CategoriasProducto;
 
 /// <summary>
 /// La caja asignada a una categoría de producto.

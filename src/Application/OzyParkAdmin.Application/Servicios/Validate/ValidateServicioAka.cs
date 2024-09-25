@@ -9,4 +9,4 @@ namespace OzyParkAdmin.Application.Servicios.Validate;
 /// <param name="ServicioId">El id del servicio a validar.</param>
 /// <param name="FranquiciaId">El id de franquicia.</param>
 /// <param name="Aka">El aka del servicio.</param>
-public sealed record ValidateAka(int ServicioId, int FranquiciaId, string? Aka) : Request<SuccessOrFailure>;
+public sealed record ValidateServicioAka(int ServicioId, int FranquiciaId, string? Aka) : Request<SuccessOrFailure>;

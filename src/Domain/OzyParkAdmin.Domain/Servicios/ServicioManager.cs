@@ -200,7 +200,7 @@ public sealed class ServicioManager
 
         int[] grupoEtarioIds = gruposEtariosAssign.Select(x => x.Id).ToArray();
 
-        IEnumerable<GrupoEtario> gruposEtarios = await _grupoEtarioRepository.ListAsync(x => grupoEtarioIds.Contains(x.Id), cancellationToken);
+        IEnumerable<GrupoEtario> gruposEtarios = await _grupoEtarioRepository.ListAsync(predicate: x => grupoEtarioIds.Contains(x.Id), cancellationToken: cancellationToken);
 
         return servicio.AssignGruposEtarios(gruposEtarios);
     }

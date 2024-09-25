@@ -35,8 +35,8 @@ public interface IServicioRepository
     /// <summary>
     /// Devuelve el id máximo.
     /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El id máximo.</returns>
     Task<int> MaxIdAsync(CancellationToken cancellationToken);
 
     /// <summary>

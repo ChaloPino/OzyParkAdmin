@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using OzyParkAdmin.Domain.Seguridad.Usuarios;
+using System.Security.Claims;
 
 namespace OzyParkAdmin.Application.Identity;
 
@@ -76,5 +77,31 @@ public static class ClaimsPrincipalExtensions
                 yield return result;
             }
         }
+    }
+
+    /// <summary>
+    /// Convierte el <paramref name="user"/> en <see cref="UsuarioInfo"/>.
+    /// </summary>
+    /// <param name="user">El <see cref="ClaimsPrincipal"/> a convertir.</param>
+    /// <returns>El <see cref="UsuarioInfo"/> convertido desde <paramref name="user"/>.</returns>
+    public static UsuarioInfo ToInfo(this ClaimsPrincipal user)
+    {
+        return new UsuarioInfo
+        {
+            Id = user.GetUserId(),
+            UserName = user.GetUserName(),
+            FriendlyName = user.GetFriendlyName() ?? string.Empty,
+        };
+    }
+
+    private static Guid GetUserId(this ClaimsPrincipal user) 
+    {
+        string? userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        return userId is not null ? Guid.Parse(userId) : Guid.Empty;
+    }
+
+    private static string GetUserName(this ClaimsPrincipal user)
+    {
+        return user.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
     }
 }

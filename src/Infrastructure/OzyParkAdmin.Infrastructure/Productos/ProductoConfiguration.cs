@@ -61,7 +61,6 @@ internal sealed class ProductoConfiguration : IEntityTypeConfiguration<Producto>
             navBuilder.HasKey("ProductoId", "ComplementoId");
             navBuilder.WithOwner().HasForeignKey("ProductoId");
             navBuilder.HasOne(x => x.Complemento).WithMany().HasForeignKey("ComplementoId");
-            navBuilder.Navigation(x => x.Complemento).AutoInclude();
         });
 
         builder.OwnsMany(x => x.Relacionados, navBuilder =>
@@ -72,7 +71,6 @@ internal sealed class ProductoConfiguration : IEntityTypeConfiguration<Producto>
             navBuilder.HasKey("ProductoId", "RelacionadoId");
             navBuilder.WithOwner().HasForeignKey("ProductoId");
             navBuilder.HasOne(x => x.Relacionado).WithMany().HasForeignKey("RelacionadoId");
-            navBuilder.Navigation(x => x.Relacionado).AutoInclude();
         });
 
         builder.OwnsMany(x => x.Partes, navBuilder =>
@@ -83,7 +81,6 @@ internal sealed class ProductoConfiguration : IEntityTypeConfiguration<Producto>
             navBuilder.HasKey("ProductoId", "ParteProductoId");
             navBuilder.WithOwner().HasForeignKey("ProductoId");
             navBuilder.HasOne(x => x.Parte).WithMany().HasForeignKey("ParteProductoId");
-            navBuilder.Navigation(x => x.Parte).AutoInclude();
             navBuilder.Property(x => x.Cantidad).HasPrecision(18, 2);
         });
     }

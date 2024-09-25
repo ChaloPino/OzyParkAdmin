@@ -1,7 +1,8 @@
 ﻿using OzyParkAdmin.Domain.CanalesVenta;
+using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 
-namespace OzyParkAdmin.Domain.Productos;
+namespace OzyParkAdmin.Domain.CategoriasProducto;
 
 /// <summary>
 /// Define la categoría del producto.
@@ -106,4 +107,7 @@ public sealed class CategoriaProducto
     /// Las subcategorias de la categoría de producto.
     /// </summary>
     public IEnumerable<CategoriaProducto> Hijos => _hijos;
+
+    internal string ToNombreCompleto() =>
+        Padre is not null ? $"{Padre.ToNombreCompleto()} > {Nombre}" : Nombre;
 }

@@ -1,5 +1,8 @@
 ﻿using OzyParkAdmin.Domain.Cajas;
+using OzyParkAdmin.Domain.CatalogoImagenes;
+using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.Contabilidad;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using System.Collections.Immutable;
 
@@ -68,7 +71,7 @@ public sealed record ProductoFullInfo
     /// <summary>
     /// La agrupación contable del producto.
     /// </summary>
-    public AgrupacionContable? Familia { get; init; }
+    public AgrupacionContable Familia { get; init; } = default!;
 
     /// <summary>
     /// Si el producto es un complemento.

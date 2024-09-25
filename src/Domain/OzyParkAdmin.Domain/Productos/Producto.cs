@@ -1,6 +1,11 @@
 ﻿using OzyParkAdmin.Domain.Cajas;
+using OzyParkAdmin.Domain.CatalogoImagenes;
+using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.Contabilidad;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
+using OzyParkAdmin.Domain.Shared;
+using System.Collections.Immutable;
 
 namespace OzyParkAdmin.Domain.Productos;
 
@@ -9,7 +14,7 @@ namespace OzyParkAdmin.Domain.Productos;
 /// </summary>
 public sealed class Producto
 {
-    private ProductoAgrupacion? _productoAgrupacion;
+    private ProductoAgrupacion _productoAgrupacion = default!;
     private readonly List<Caja> _cajas = [];
     private readonly List<ProductoComplementario> _complementos = [];
     private readonly List<ProductoRelacionado> _relacionados = [];
@@ -73,7 +78,7 @@ public sealed class Producto
     /// <summary>
     /// La familia de agrupación contable del producto.
     /// </summary>
-    public AgrupacionContable? Familia => _productoAgrupacion?.AgrupacionContable;
+    public AgrupacionContable Familia => _productoAgrupacion.AgrupacionContable;
 
     /// <summary>
     /// Si el producto es complemento de otro producto.
@@ -134,4 +139,122 @@ public sealed class Producto
     /// Las partes del producto.
     /// </summary>
     public IEnumerable<ProductoParte> Partes => _partes;
+
+    internal static ResultOf<Producto> Create(
+        int id,
+        string aka,
+        string sku,
+        string nombre,
+        int franquiciaId,
+        CentroCosto centroCosto,
+        CategoriaProducto categoria,
+        CategoriaProducto categoriaDespliegue,
+        CatalogoImagen imagen,
+        TipoProducto tipoProducto,
+        AgrupacionContable familia,
+        int orden,
+        bool esComplemento,
+        DateOnly fechaAlta,
+        Usuario usuarioCreacion,
+        IEnumerable<(ProductoComplementarioInfo Info, Producto Producto)> complementos)
+    {
+        Producto producto = new()
+        {
+            Id = id,
+            Aka = aka,
+            Sku = sku,
+            Nombre = nombre,
+            FranquiciaId = franquiciaId,
+            CentroCosto = centroCosto,
+            Categoria = categoria,
+            CategoriaDespliegue = categoriaDespliegue,
+            TipoProducto = tipoProducto,
+            Orden = orden,
+            EsComplemento = esComplemento,
+            FechaAlta = fechaAlta,
+            UsuarioCreacion = usuarioCreacion,
+            UsuarioModificacion = usuarioCreacion,
+            Imagen = imagen,
+        };
+
+        producto.AssignFamilia(familia);
+        producto.AssignComplementos(complementos);
+        return producto;
+    }
+
+    internal ResultOf<Producto> Update(
+        string aka,
+        string sku,
+        string nombre,
+        CategoriaProducto categoria,
+        CategoriaProducto categoriaDespliegue,
+        CatalogoImagen imagen,
+        TipoProducto tipoProducto,
+        AgrupacionContable familia,
+        int orden,
+        bool esComplemento,
+        DateOnly fechaAlta,
+        Usuario usuarioCreacion,
+        IEnumerable<(ProductoComplementarioInfo Info, Producto Producto)> complementos)
+    {
+        Aka = aka;
+        Sku = sku;
+        Nombre = nombre;
+        Categoria = categoria;
+        CategoriaDespliegue = categoriaDespliegue;
+        TipoProducto = tipoProducto;
+        Orden = orden;
+        EsComplemento = esComplemento;
+        FechaAlta = fechaAlta;
+        UltimaModificacion = DateTime.Now;
+        UsuarioModificacion = usuarioCreacion;
+        Imagen = imagen;
+
+        AssignFamilia(familia);
+        AssignComplementos(complementos);
+        return this;
+    }
+
+    private void AssignFamilia(AgrupacionContable familia)
+    {
+        if (_productoAgrupacion is not null && _productoAgrupacion.AgrupacionContable != familia)
+        {
+            _productoAgrupacion.Update(familia);
+            return;
+        }
+
+        _productoAgrupacion = ProductoAgrupacion.Create(familia);
+    }
+
+    private void AssignComplementos(IEnumerable<(ProductoComplementarioInfo Info, Producto Producto)> complementos)
+    {
+        var toAdd = (from complemento in complementos
+                     join persisted in _complementos on complemento.Producto.Id equals persisted.Complemento.Id into productoComplementos
+                     from productoComplemento in productoComplementos.DefaultIfEmpty()
+                     where productoComplemento is null
+                     select (complemento.Producto, complemento.Info.Orden)).ToList();
+
+        var toRemove = (from persisted in _complementos
+                        join complemento in complementos on persisted.Complemento.Id equals complemento.Producto.Id into productoComplementos
+                        from productoComplemento in productoComplementos.DefaultIfEmpty()
+                        where productoComplemento.Producto is null
+                        select persisted).ToList();
+
+        var toUpdate = (from persisted in _complementos
+                        join complemento in complementos on persisted.Complemento.Id equals complemento.Producto.Id
+                        select (persisted, complemento.Info.Orden)).ToList();
+
+        toAdd.ForEach(AddComplemento);
+        toRemove.ForEach(RemoveComplemento);
+        toUpdate.ForEach(UpdateComplemento);
+    }
+
+    private void AddComplemento((Producto Producto, int Orden) complemento) =>
+        _complementos.Add(ProductoComplementario.Create(complemento.Producto, complemento.Orden));
+
+    private void RemoveComplemento(ProductoComplementario complementario) =>
+        _complementos.Remove(complementario);
+
+    private static void UpdateComplemento((ProductoComplementario Complementario, int Orden) info) =>
+        info.Complementario.Update(info.Orden);
 }

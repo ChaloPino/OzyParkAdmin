@@ -8,7 +8,7 @@ namespace OzyParkAdmin.Application.Seguridad.Usuarios.Unlock;
 /// <summary>
 /// El manejador de <see cref="UnlockUser"/>.
 /// </summary>
-public sealed class UnlockUserHandler : MediatorRequestHandler<UnlockUser, ResultOf<UsuarioInfo>>
+public sealed class UnlockUserHandler : MediatorRequestHandler<UnlockUser, ResultOf<UsuarioFullInfo>>
 {
     private readonly UserManager<Usuario> _userManager;
 
@@ -23,7 +23,7 @@ public sealed class UnlockUserHandler : MediatorRequestHandler<UnlockUser, Resul
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<UsuarioInfo>> Handle(UnlockUser request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<UsuarioFullInfo>> Handle(UnlockUser request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 

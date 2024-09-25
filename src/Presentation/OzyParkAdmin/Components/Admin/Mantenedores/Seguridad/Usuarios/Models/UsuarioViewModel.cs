@@ -1,6 +1,6 @@
 ﻿using OzyParkAdmin.Components.Admin.Shared;
 
-namespace OzyParkAdmin.Components.Admin.Mantenedores.Seguridad.Usuarios;
+namespace OzyParkAdmin.Components.Admin.Mantenedores.Seguridad.Usuarios.Models;
 
 /// <summary>
 /// Representa el view-model para el usuario.

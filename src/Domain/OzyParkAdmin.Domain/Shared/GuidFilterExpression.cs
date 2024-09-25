@@ -18,7 +18,7 @@ public class GuidFilterExpression<T> : FilterExpression<T>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
     public GuidFilterExpression(Expression<Func<T, Guid>> member, string @operator, Guid value) 
-        : base(CreatePredicate(member, @operator, value).Reduce())
+        : base(CreatePredicate(member, @operator, value))
     {
     }
 
@@ -28,12 +28,12 @@ public class GuidFilterExpression<T> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
-    public GuidFilterExpression(Expression<Func<T, Guid?>> member, string @operator, Guid value)
-        : base(CreatePredicate(member, @operator, value).Reduce())
+    public GuidFilterExpression(Expression<Func<T, Guid?>> member, string @operator, Guid? value)
+        : base(CreatePredicate(member, @operator, value))
     {
     }
 
-    private static FilterOperationExpression<T> CreatePredicate(Expression<Func<T, Guid?>> member, string @operator, Guid value)
+    private static FilterOperationExpression<T> CreatePredicate(Expression<Func<T, Guid?>> member, string @operator, Guid? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(@operator);
         return @operator.ToLowerInvariant() switch

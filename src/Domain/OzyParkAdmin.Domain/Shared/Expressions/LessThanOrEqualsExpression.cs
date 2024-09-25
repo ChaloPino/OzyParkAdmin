@@ -12,7 +12,7 @@ internal sealed class LessThanOrEqualsExpression<T, TProperty> : FilterOperation
         _value = Expression.Constant(value, typeof(TProperty));
     }
 
-    public LessThanOrEqualsExpression(Expression<Func<T, TProperty?>> memberExpression, TProperty value)
+    public LessThanOrEqualsExpression(Expression<Func<T, TProperty?>> memberExpression, TProperty? value)
         : base(memberExpression)
     {
         _value = Expression.Constant(value, typeof(TProperty));

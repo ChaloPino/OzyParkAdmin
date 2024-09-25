@@ -1,0 +1,11 @@
+﻿@typeparam T
+
+<BooleanGrouping Title="@Title" GroupDefinition="GroupDefinition" TrueLabel="Habilitado" FalseLabel="Deshabilitado" />
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Estado";
+
+    [Parameter]
+    public GroupDefinition<T>? GroupDefinition { get; set; }
+}

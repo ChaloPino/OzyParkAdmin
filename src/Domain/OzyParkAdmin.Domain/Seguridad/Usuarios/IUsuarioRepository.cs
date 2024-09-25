@@ -20,5 +20,5 @@ public interface IUsuarioRepository
     /// <param name="pageSize">El tamaño de la página.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>El listado de usuarios paginado que coinciden con el criterio de búsqueda.</returns>
-    Task<PagedList<UsuarioInfo>> BuscarUsuariosAsync(string? searchText, int[]? centrosCosto, string[]? roles, FilterExpressionCollection<Usuario> filterExpressions, SortExpressionCollection<Usuario> sortExpressions, int page, int pageSize, CancellationToken cancellationToken);
+    Task<PagedList<UsuarioFullInfo>> BuscarUsuariosAsync(string? searchText, int[]? centrosCosto, string[]? roles, FilterExpressionCollection<Usuario> filterExpressions, SortExpressionCollection<Usuario> sortExpressions, int page, int pageSize, CancellationToken cancellationToken);
 }

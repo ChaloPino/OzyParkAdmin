@@ -1,0 +1,187 @@
+﻿@typeparam T
+@using MudBlazor.Interfaces
+
+<IfThen Condition="dataGrid is not null">
+    <Then>
+        <SwitchCase Value="dataGrid!.FilterMode">
+            <CaseWhen T="DataGridFilterMode" Condition="(mode) => mode == DataGridFilterMode.ColumnFilterRow">
+                <MudStack Row="true">
+                    <MudSelect T="bool?" Value="indicator" ValueChanged="IndicatorFilterChangedAsync" FullWidth="true" Dense="true" Margin="Margin.Dense">
+                        <MudSelectItem T="bool?" Value="@(null)">@AllLabel</MudSelectItem>
+                        <MudSelectItem T="bool?" Value="@(true)">@TrueLabel</MudSelectItem>
+                        <MudSelectItem T="bool?" Value="@(false)">@FalseLabel</MudSelectItem>
+                    </MudSelect>
+
+                    <MudMenu Icon="@Icons.Material.Filled.FilterAlt" Size="Size.Small" Dense="true">
+                        <ForIn Items="Operators" Context="o">
+                            <IfThen Condition="!string.IsNullOrWhiteSpace(o)">
+                                <Then>
+                                    <MudMenuItem Style="@ChosenOperatorStyle(o)" OnClick="async () => await ChangeOperatorAsync(o)">@o</MudMenuItem>
+                                </Then>
+                            </IfThen>
+                        </ForIn>
+                    </MudMenu>
+                    <MudIconButton Class="align-self-center" Icon="@Icons.Material.Filled.FilterAltOff" Size="Size.Small" OnClick="ClearFilterAsync" />
+                </MudStack>
+            </CaseWhen>
+
+            <CaseWhen T="DataGridFilterMode" Condition="(mode) => mode == DataGridFilterMode.ColumnFilterMenu">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudGrid Spacing="0">
+                            <MudItem xs="12">
+                                <MudSelect @bind-Value="FilterContext!.FilterDefinition!.Operator" FullWidth="true" Label="Operador" Dense="true" Margin="Margin.Dense"
+                                           Class="filter-operator">
+                                    <ForIn Items="Operators" Context="fieldOperator">
+                                        <MudSelectItem Value="@fieldOperator">@fieldOperator</MudSelectItem>
+                                    </ForIn>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSelect T="bool?" Value="indicator" ValueChanged="IndicatorFilterChanged" FullWidth="true" Dense="true" Margin="Margin.Dense">
+                                    <MudSelectItem T="bool?" Value="@(null)">@AllLabel</MudSelectItem>
+                                    <MudSelectItem T="bool?" Value="@(true)">@TrueLabel</MudSelectItem>
+                                    <MudSelectItem T="bool?" Value="@(false)">@FalseLabel</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                    <MudItem xs="12" Class="d-flex justify-end">
+                        <MudButton Class="clear-filter-button" OnClick="ClearFilterAsync">Limpiar</MudButton>
+                        <MudButton Class="apply-filter-button" Color="Color.Primary" OnClick="ApplyFilterAsync">Filtrar</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </CaseWhen>
+        </SwitchCase>
+    </Then>
+</IfThen>
+
+
+@code {
+    private bool? indicator;
+
+    [CascadingParameter]
+    private MudDataGrid<T>? DataGrid { get; set; }
+
+    private MudDataGrid<T>? dataGrid => DataGrid ?? FilterContext?.FilterDefinition?.Column?.DataGrid;
+
+    [Parameter]
+    public FilterContext<T>? FilterContext { get; set; }
+
+    [Parameter]
+    public string AllLabel { get; set; } = "Todos";
+
+    [Parameter]
+    public string TrueLabel { get; set; } = "Sí";
+
+    [Parameter]
+    public string FalseLabel { get; set; } = "No";
+
+    [Parameter]
+    public bool UseNullAsFilter { get; set; }
+
+    private string[] Operators => [FilterOperator.Boolean.Is];
+
+    private string? Operator => FilterContext?.FilterDefinition?.Operator ?? Operators.FirstOrDefault();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            indicator = (bool?)FilterContext.FilterDefinition.Value;
+        }
+    }
+
+    private string ChosenOperatorStyle(string o)
+    {
+        return o == Operator ? "color:var(--mud-palette-primary-text);background-color:var(--mud-palette-primary)" : "";
+    }
+
+    private async Task ChangeOperatorAsync(string o)
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            FilterContext.FilterDefinition.Operator = o;
+            await ApplyFilterAsync(FilterContext.FilterDefinition);
+        }
+    }
+
+    private async Task IndicatorFilterChangedAsync(bool? value)
+    {
+        indicator = value;
+
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            if (indicator is not null)
+            {
+                FilterContext.FilterDefinition.Value = indicator;
+                await ApplyFilterAsync(FilterContext.FilterDefinition);
+            }
+            else
+            {
+                await ClearFilterAsync();
+            }
+        }
+    }
+
+    private void IndicatorFilterChanged(bool? value)
+    {
+        indicator = value;
+
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            if (indicator is not null)
+            {
+                FilterContext.FilterDefinition.Value = indicator;
+                dataGrid?.GroupItems();
+            }
+            else
+            {
+                FilterContext.FilterDefinition.Value = null;
+            }
+        }
+    }
+
+    private async Task ApplyFilterAsync()
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            if (FilterContext.FilterDefinition.Value is not null || UseNullAsFilter)
+            {
+                await FilterContext.Actions.ApplyFilterAsync(FilterContext.FilterDefinition);
+                ((IMudStateHasChanged)dataGrid!).StateHasChanged();
+            }
+            else
+            {
+                await ClearFilterAsync();
+            }
+        }
+    }
+
+    private async Task ApplyFilterAsync(IFilterDefinition<T> filterDefinition)
+    {
+        if (FilterContext is not null)
+        {
+            if (filterDefinition.Value is not null || UseNullAsFilter)
+            {
+                await FilterContext.Actions.ApplyFilterAsync(filterDefinition);
+                ((IMudStateHasChanged)dataGrid!).StateHasChanged();
+            }
+            else
+            {
+                await ClearFilterAsync();
+            }
+        }
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            FilterContext.FilterDefinition.Value = null;
+            await FilterContext.Actions.ClearFilterAsync(FilterContext.FilterDefinition);
+            ((IMudStateHasChanged)dataGrid!).StateHasChanged();
+        }
+    }
+}

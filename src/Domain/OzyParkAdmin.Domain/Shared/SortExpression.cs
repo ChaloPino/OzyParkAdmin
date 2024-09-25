@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using OzyParkAdmin.Domain.Shared.Utils;
+using System.Linq.Expressions;
 
 namespace OzyParkAdmin.Domain.Shared;
 
@@ -7,11 +8,35 @@ namespace OzyParkAdmin.Domain.Shared;
 /// </summary>
 /// <typeparam name="T">El tipo del elemento a ordenar.</typeparam>
 /// <typeparam name="TProperty">El tipo de la propiedad con la que se ordenará.</typeparam>
-/// <param name="KeySelector">Una expressión para conseguir la propiedad que se usará para ordenar.</param>
-/// <param name="Descending">Un flag que indica si se ordenará de forma descendente o ascendente.</param>
-public sealed record SortExpression<T, TProperty>(Expression<Func<T, TProperty?>> KeySelector, bool Descending) : ISortExpression<T>
+public sealed class SortExpression<T, TProperty> : ISortExpression<T>
     where T : class
 {
+    /// <summary>
+    /// Crea una nueva instancia de <see cref="SortExpression{T, TProperty}"/>.
+    /// </summary>
+    /// <param name="keySelector">Una expressión para conseguir la propiedad que se usará para ordenar.</param>
+    /// <param name="descending">Un flag que indica si se ordenará de forma descendente o ascendente.</param>
+    public SortExpression(Expression<Func<T, TProperty?>> keySelector, bool descending)
+    {
+        ArgumentNullException.ThrowIfNull(keySelector);
+        KeySelector = keySelector;
+        Descending = descending;
+
+        MemberName = PropertyPath.Visit(KeySelector).GetPath();
+    }
+
+    /// <inheritdoc/>
+    public Expression<Func<T, TProperty?>> KeySelector { get; private set; }
+
+    /// <inheritdoc/>
+    public bool Descending { get; }
+
+    /// <inheritdoc/>
+    public string MemberName { get; }
+
+    void ISortExpression<T>.Replace(LambdaExpression replacement) =>
+        KeySelector = (Expression<Func<T, TProperty?>>)replacement;
+
     /// <inheritdoc/>
     public IOrderedQueryable<T> Sort(IQueryable<T> query) =>
         !Descending

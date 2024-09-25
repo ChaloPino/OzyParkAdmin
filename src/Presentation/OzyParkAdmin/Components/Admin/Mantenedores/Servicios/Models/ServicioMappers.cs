@@ -27,44 +27,56 @@ internal static class ServicioMappers
 
     private static FilterExpressionCollection<Servicio> ToFilterExpressions(this GridState<ServicioViewModel> state)
     {
-        IEnumerable<IFilterExpression<Servicio>> filterExpressions = state.FilterDefinitions.Select(ToFilterExpression);
-        return new(filterExpressions);
+        FilterExpressionCollection<Servicio> filterExpressions = new();
+
+        foreach (var filterDefinition in state.FilterDefinitions)
+        {
+            filterDefinition.ToFilterExpression(filterExpressions);
+        }
+
+        return filterExpressions;
     }
 
-    private static IFilterExpression<Servicio> ToFilterExpression(IFilterDefinition<ServicioViewModel> filterDefinition)
+    private static void ToFilterExpression(this IFilterDefinition<ServicioViewModel> filterDefinition, FilterExpressionCollection<Servicio> filterExpressions)
     {
-        return filterDefinition.Column!.PropertyName switch
+        _ = filterDefinition.Column!.PropertyName switch
         {
-            "CentroCosto.Nombre" => new StringFilterExpression<Servicio>(x => x.CentroCosto.Descripcion, filterDefinition.Operator!, (string?)filterDefinition.Value),
-            nameof(ServicioViewModel.Aka) => new StringFilterExpression<Servicio>(x => x.Aka, filterDefinition.Operator!, (string?)filterDefinition.Value),
-            nameof(ServicioViewModel.Nombre) => new StringFilterExpression<Servicio>(x => x.Nombre, filterDefinition.Operator!, (string?)filterDefinition.Value),
-            nameof(ServicioViewModel.TipoServicio) => new EnumFilterExpression<Servicio, TipoServicio>(x => x.TipoServicio, filterDefinition.Operator!, (TipoServicio?)filterDefinition.Value ?? default),
-            "TipoDistribucion.Nombre" => new StringFilterExpression<Servicio>(x => x.TipoDistribucion.Descripcion, filterDefinition.Operator!, (string?)filterDefinition.Value),
-            "TipoVigencia.Nombre" => new StringFilterExpression<Servicio>(x => x.TipoVigencia.Descripcion, filterDefinition.Operator!, (string?)filterDefinition.Value),
-            nameof(ServicioViewModel.Orden) => new NumberFilterExpression<Servicio, int>(x => x.Orden, filterDefinition.Operator!, (double?)filterDefinition.Value ?? default),
-            nameof(ServicioViewModel.EsActivo) => new BooleanFilterExpression<Servicio>(x => x.EsActivo, filterDefinition.Operator!, (bool?)filterDefinition.Value ?? default),
+            "CentroCosto.Nombre" => filterExpressions.Add(x => x.CentroCosto.Descripcion, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(ServicioViewModel.Aka) => filterExpressions.Add(x => x.Aka, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(ServicioViewModel.Nombre) => filterExpressions.Add(x => x.Nombre, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(ServicioViewModel.TipoServicio) => filterExpressions.Add(x => x.TipoServicio, filterDefinition.Operator!, filterDefinition.Value),
+            "TipoDistribucion.Nombre" => filterExpressions.Add(x => x.TipoDistribucion.Descripcion, filterDefinition.Operator!, filterDefinition.Value),
+            "TipoVigencia.Nombre" => filterExpressions.Add(x => x.TipoVigencia.Descripcion, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(ServicioViewModel.Orden) => filterExpressions.Add(x => x.Orden, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(ServicioViewModel.EsActivo) => filterExpressions.Add(x => x.EsActivo, filterDefinition.Operator!, filterDefinition.Value),
             _ => throw new UnreachableException(),
         };
     }
 
     private static SortExpressionCollection<Servicio> ToSortExpressions(this GridState<ServicioViewModel> state)
     {
-        IEnumerable<ISortExpression<Servicio>> sortExpressions = state.SortDefinitions.Select(ToSortExpression);
-        return new(sortExpressions);
+        SortExpressionCollection<Servicio> sortExpressions = new();
+
+        foreach (var sortDefinition in state.SortDefinitions)
+        {
+            sortDefinition.ToSortExpression(sortExpressions);
+        }
+
+        return sortExpressions;
     }
 
-    private static ISortExpression<Servicio> ToSortExpression(SortDefinition<ServicioViewModel> sortDefinition)
+    private static void ToSortExpression(this SortDefinition<ServicioViewModel> sortDefinition, SortExpressionCollection<Servicio> sortExpressions)
     {
-        return sortDefinition.SortBy switch
+        _ = sortDefinition.SortBy switch
         {
-            "CentroCosto.Nombre" => new SortExpression<Servicio, string>(x => x.CentroCosto.Descripcion, sortDefinition.Descending),
-            nameof(ServicioViewModel.Aka) => new SortExpression<Servicio, string>(x => x.Aka, sortDefinition.Descending),
-            nameof(ServicioViewModel.Nombre) => new SortExpression<Servicio, string>(x => x.Nombre, sortDefinition.Descending),
-            nameof(ServicioViewModel.TipoServicio) => new SortExpression<Servicio, TipoServicio>(x => x.TipoServicio, sortDefinition.Descending),
-            "TipoDistribucion.Nombre" => new SortExpression<Servicio, string>(x => x.TipoDistribucion.Descripcion, sortDefinition.Descending),
-            "TipoVigencia.Nombre" => new SortExpression<Servicio, string>(x => x.TipoVigencia.Descripcion, sortDefinition.Descending),
-            nameof(ServicioViewModel.Orden) => new SortExpression<Servicio, int>(x => x.Orden, sortDefinition.Descending),
-            nameof(ServicioViewModel.EsActivo) => new SortExpression<Servicio, bool>(x => x.EsActivo, sortDefinition.Descending),
+            "CentroCosto.Nombre" => sortExpressions.Add(x => x.CentroCosto.Descripcion, sortDefinition.Descending),
+            nameof(ServicioViewModel.Aka) => sortExpressions.Add(x => x.Aka, sortDefinition.Descending),
+            nameof(ServicioViewModel.Nombre) => sortExpressions.Add(x => x.Nombre, sortDefinition.Descending),
+            nameof(ServicioViewModel.TipoServicio) => sortExpressions.Add(x => x.TipoServicio, sortDefinition.Descending),
+            "TipoDistribucion.Nombre" => sortExpressions.Add(x => x.TipoDistribucion.Descripcion, sortDefinition.Descending),
+            "TipoVigencia.Nombre" => sortExpressions.Add(x => x.TipoVigencia.Descripcion, sortDefinition.Descending),
+            nameof(ServicioViewModel.Orden) => sortExpressions.Add(x => x.Orden, sortDefinition.Descending),
+            nameof(ServicioViewModel.EsActivo) => sortExpressions.Add(x => x.EsActivo, sortDefinition.Descending),
             _ => throw new UnreachableException(),
         };
     }

@@ -10,11 +10,11 @@ namespace OzyParkAdmin.Domain.Seguridad.Usuarios;
 public static class UsuarioExtensions
 {
     /// <summary>
-    /// Convierte un <paramref name="usuario"/> a <see cref="UsuarioInfo"/>.
+    /// Convierte un <paramref name="usuario"/> a <see cref="UsuarioFullInfo"/>.
     /// </summary>
     /// <param name="usuario">El usuario a convertir.</param>
-    /// <returns>Una nueva instancia de <see cref="UsuarioInfo"/> con los datos del <paramref name="usuario"/>.</returns>
-    public static UsuarioInfo ToInfo(this Usuario usuario) =>
+    /// <returns>Una nueva instancia de <see cref="UsuarioFullInfo"/> con los datos del <paramref name="usuario"/>.</returns>
+    public static UsuarioFullInfo ToInfo(this Usuario usuario) =>
         new()
         {
             Id = usuario.Id,
@@ -26,16 +26,16 @@ public static class UsuarioExtensions
         };
 
     /// <summary>
-    /// Convierte un <paramref name="usuario"/> a <see cref="UsuarioInfo"/>.
+    /// Convierte un <paramref name="usuario"/> a <see cref="UsuarioFullInfo"/>.
     /// </summary>
     /// <param name="usuario">El usuario a convertir.</param>
     /// <param name="roles">Roles asociados al usuario.</param>
     /// <param name="centrosCosto">Centros de costo asociados al usuario.</param>
     /// <param name="franquicia">Franquicias asociafos al usuario.</param>
-    /// <returns>Una nueva instancia de <see cref="UsuarioInfo"/> con los datos del <paramref name="usuario"/>.</returns>
-    public static UsuarioInfo ToInfo(this Usuario usuario, List<Rol> roles, List<CentroCosto> centrosCosto, List<Franquicia> franquicia)
+    /// <returns>Una nueva instancia de <see cref="UsuarioFullInfo"/> con los datos del <paramref name="usuario"/>.</returns>
+    public static UsuarioFullInfo ToInfo(this Usuario usuario, List<Rol> roles, List<CentroCosto> centrosCosto, List<Franquicia> franquicia)
     {
-        UsuarioInfo usuarioInfo = usuario.ToInfo();
+        UsuarioFullInfo usuarioInfo = usuario.ToInfo();
         usuarioInfo.Roles = roles;
         usuarioInfo.CentrosCosto = centrosCosto.ToInfo();
         usuarioInfo.Franquicias = franquicia;
@@ -43,16 +43,16 @@ public static class UsuarioExtensions
     }
 
     /// <summary>
-    /// Convierte un <paramref name="usuario"/> a <see cref="UsuarioInfo"/>.
+    /// Convierte un <paramref name="usuario"/> a <see cref="UsuarioFullInfo"/>.
     /// </summary>
     /// <param name="usuario">El usuario a convertir.</param>
     /// <param name="roles">Roles asociados al usuario.</param>
     /// <param name="centrosCosto">Centros de costo asociados al usuario.</param>
     /// <param name="franquicia">Franquicias asociafos al usuario.</param>
-    /// <returns>Una nueva instancia de <see cref="UsuarioInfo"/> con los datos del <paramref name="usuario"/>.</returns>
-    public static UsuarioInfo ToInfo(this Usuario usuario, List<Rol> roles, List<CentroCostoInfo> centrosCosto, List<Franquicia> franquicia)
+    /// <returns>Una nueva instancia de <see cref="UsuarioFullInfo"/> con los datos del <paramref name="usuario"/>.</returns>
+    public static UsuarioFullInfo ToInfo(this Usuario usuario, List<Rol> roles, List<CentroCostoInfo> centrosCosto, List<Franquicia> franquicia)
     {
-        UsuarioInfo usuarioInfo = usuario.ToInfo();
+        UsuarioFullInfo usuarioInfo = usuario.ToInfo();
         usuarioInfo.Roles = roles;
         usuarioInfo.CentrosCosto = centrosCosto;
         usuarioInfo.Franquicias = franquicia;

@@ -1,0 +1,23 @@
+﻿@typeparam T
+
+<IfThenElse Condition="string.IsNullOrEmpty(Title)">
+    <Then>
+        <span style="font-weight:bold">@Key <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small">total @Total</MudChip></span>
+    </Then>
+    <Else>
+        <span style="font-weight:bold">@Title: @Key <MudChip T="string" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small">total @Total</MudChip></span>
+    </Else>
+</IfThenElse>
+
+
+@code {
+    [Parameter]
+    public GroupDefinition<T>? GroupDefinition { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    private int Total => GroupDefinition?.Grouping.Count() ?? 0;
+
+    private string Key => (string?)GroupDefinition?.Grouping.Key ?? string.Empty;
+}

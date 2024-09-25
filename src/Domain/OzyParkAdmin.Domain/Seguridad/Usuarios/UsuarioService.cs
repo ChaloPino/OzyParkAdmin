@@ -49,7 +49,7 @@ public class UsuarioService
     /// <param name="franquicias">Franquicias asociados al usuario.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>Resultado de la creación de un usuario.</returns>
-    public async Task<ResultOf<UsuarioInfo>> CreateUserAsync(string  username, string friendlyName, string? rut, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
+    public async Task<ResultOf<UsuarioFullInfo>> CreateUserAsync(string  username, string friendlyName, string? rut, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
     {
         Usuario usuario = Usuario.Create(username, friendlyName, rut, email);
 
@@ -101,7 +101,7 @@ public class UsuarioService
     /// <param name="franquicias">Franquicias asociados al usuario.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>Resultado de la creación de un usuario.</returns>
-    public async Task<ResultOf<UsuarioInfo>> UpdateUserAsync(Guid userId, string username, string friendlyName, string? rut, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
+    public async Task<ResultOf<UsuarioFullInfo>> UpdateUserAsync(Guid userId, string username, string friendlyName, string? rut, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
     {
         Usuario? usuario = await _userManager.FindByIdAsync(userId.ToString());
 

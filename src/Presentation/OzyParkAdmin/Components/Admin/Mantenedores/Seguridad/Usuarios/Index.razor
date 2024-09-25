@@ -25,7 +25,7 @@
 
 <MudDataGrid @ref="dataGrid" T="UsuarioViewModel" ReadOnly="false" Striped="true" Hover="true"
              ServerData="LoadUsuariosAsync" SortMode="SortMode.Multiple" 
-             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterRow"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu"
              EditMode="DataGridEditMode.Form" EditTrigger="DataGridEditTrigger.Manual" EditDialogOptions="dialogOptions"
              CanceledEditingItem="CancelEditing" CommittedItemChanges="SaveUsuarioAsync">
     <ToolBarContent>
@@ -87,7 +87,7 @@
                               CanChangeStatus="true"/>
             </CellTemplate>
             <FilterTemplate>
-                <LockoutoutFilter FilterContext="context" />
+                <StateFilter FilterContext="context" TrueLabel="Bloqueado" FalseLabel="Desbloqueado" />
             </FilterTemplate>
         </PropertyColumn>
         <TemplateColumn>
@@ -153,7 +153,7 @@
     private async Task<GridData<UsuarioViewModel>> LoadUsuariosAsync(GridState<UsuarioViewModel> state)
     {
         SearchUsers searchUsers = state.ToSearchUsers(user!, searchText);
-        PagedList<UsuarioInfo> usuarios = await Mediator.SendRequest(searchUsers);
+        PagedList<UsuarioFullInfo> usuarios = await Mediator.SendRequest(searchUsers);
         currentUsers = usuarios.ToGridData(dataGrid);
         return currentUsers;
     }
@@ -195,7 +195,7 @@
     }
 
 
-    private void UpdateUsuario(UsuarioViewModel currentUser, ResultOf<UsuarioInfo> result, string action)
+    private void UpdateUsuario(UsuarioViewModel currentUser, ResultOf<UsuarioFullInfo> result, string action)
     {
         result.Switch(
             onSuccess: (usuario) => UpdateUsuario(currentUser, usuario),
@@ -203,7 +203,7 @@
         );
     }
 
-    private void UpdateUsuario(UsuarioViewModel currentUser, UsuarioInfo usuario)
+    private void UpdateUsuario(UsuarioViewModel currentUser, UsuarioFullInfo usuario)
     {
         if (currentUser.IsNew)
         {

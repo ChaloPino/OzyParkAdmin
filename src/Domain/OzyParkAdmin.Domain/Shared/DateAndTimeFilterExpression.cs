@@ -19,8 +19,8 @@ public class DateAndTimeFilterExpression<T, TDateAndTime> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
-    public DateAndTimeFilterExpression(Expression<Func<T, TDateAndTime?>> member, string @operator, TDateAndTime value)
-        : base(CreatePredicate(member, @operator, value).Reduce())
+    public DateAndTimeFilterExpression(Expression<Func<T, TDateAndTime?>> member, string @operator, TDateAndTime? value)
+        : base(CreatePredicate(member, @operator, value))
     {
     }
 
@@ -31,7 +31,7 @@ public class DateAndTimeFilterExpression<T, TDateAndTime> : FilterExpression<T>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
     public DateAndTimeFilterExpression(Expression<Func<T, TDateAndTime>> member, string @operator, TDateAndTime value)
-        : base(CreatePredicate(member, @operator, value).Reduce())
+        : base(CreatePredicate(member, @operator, value))
     {
     }
 
@@ -41,7 +41,7 @@ public class DateAndTimeFilterExpression<T, TDateAndTime> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     public DateAndTimeFilterExpression(Expression<Func<T, TDateAndTime?>> member, string @operator)
-        : base(CreatePredicate(member, @operator, default).Reduce())
+        : base(CreatePredicate(member, @operator, default))
     {
     }
 
@@ -51,11 +51,11 @@ public class DateAndTimeFilterExpression<T, TDateAndTime> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     public DateAndTimeFilterExpression(Expression<Func<T, TDateAndTime>> member, string @operator)
-        : base(CreatePredicate(member, @operator, default).Reduce())
+        : base(CreatePredicate(member, @operator, default))
     {
     }
 
-    private static FilterOperationExpression<T> CreatePredicate(Expression<Func<T, TDateAndTime?>> member, string @operator, TDateAndTime value)
+    private static FilterOperationExpression<T> CreatePredicate(Expression<Func<T, TDateAndTime?>> member, string @operator, TDateAndTime? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(@operator);
         return @operator.ToLowerInvariant() switch

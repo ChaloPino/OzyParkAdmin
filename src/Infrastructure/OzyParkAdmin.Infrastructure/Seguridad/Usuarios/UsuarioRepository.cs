@@ -15,7 +15,7 @@ namespace OzyParkAdmin.Infrastructure.Seguridad.Usuarios;
 public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<Usuario>(context), IUsuarioRepository
 {
     /// <inheritdoc/>
-    public async Task<PagedList<UsuarioInfo>> BuscarUsuariosAsync(string? searchText, int[]? centrosCosto, string[]? roles, FilterExpressionCollection<Usuario> filterExpressions, SortExpressionCollection<Usuario> sortExpressions, int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<PagedList<UsuarioFullInfo>> BuscarUsuariosAsync(string? searchText, int[]? centrosCosto, string[]? roles, FilterExpressionCollection<Usuario> filterExpressions, SortExpressionCollection<Usuario> sortExpressions, int page, int pageSize, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(filterExpressions);
@@ -50,9 +50,9 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
 
         IEnumerable<Usuario> lista = await sortExpressions.Sort(query).Skip(page *  pageSize).Take(pageSize).ToListAsync(cancellationToken).ConfigureAwait(false);
 
-        IEnumerable<UsuarioInfo> usuarios = await LoadUsuariosAsync(lista, cancellationToken);
+        IEnumerable<UsuarioFullInfo> usuarios = await LoadUsuariosAsync(lista, cancellationToken);
 
-        return new PagedList<UsuarioInfo>
+        return new PagedList<UsuarioFullInfo>
         {
             CurrentPage = page,
             PageSize = pageSize,
@@ -61,7 +61,7 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
         };
     }
 
-    private async Task<IEnumerable<UsuarioInfo>> LoadUsuariosAsync(IEnumerable<Usuario> usuarios, CancellationToken cancellationToken)
+    private async Task<IEnumerable<UsuarioFullInfo>> LoadUsuariosAsync(IEnumerable<Usuario> usuarios, CancellationToken cancellationToken)
     {
         Guid[] rolesId = usuarios.SelectMany(x => x.Roles.Select(x => x.RoleId)).ToArray();
         int[] centrosCostoId = usuarios.SelectMany(x => x.CentrosCosto.Select(x => x.CentroCostoId)).ToArray();
@@ -74,7 +74,7 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
         return usuarios.Select(x => ToUsuarioInfo(x, roles, centrosCosto, franquicias));
     }
 
-    private static UsuarioInfo ToUsuarioInfo(Usuario usuario, List<Rol> roles, List<CentroCosto> centrosCosto, List<Franquicia> franquicias) =>
+    private static UsuarioFullInfo ToUsuarioInfo(Usuario usuario, List<Rol> roles, List<CentroCosto> centrosCosto, List<Franquicia> franquicias) =>
         usuario.ToInfo(
             roles.Where(x => ContieneRol(usuario, x)).ToList(),
             centrosCosto.Where(x => ContieneCentroCosto(usuario, x)).ToList(),

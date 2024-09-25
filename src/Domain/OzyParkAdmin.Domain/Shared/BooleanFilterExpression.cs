@@ -18,7 +18,7 @@ public class BooleanFilterExpression<T> : FilterExpression<T>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
     public BooleanFilterExpression(Expression<Func<T, bool>> member, string @operator, bool value)
-        : base(CreatePredicate(member, @operator, value).Reduce())
+        : base(CreatePredicate(member, @operator, value))
     {
     }
 
@@ -29,7 +29,7 @@ public class BooleanFilterExpression<T> : FilterExpression<T>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
     public BooleanFilterExpression(Expression<Func<T, bool?>> member, string @operator, bool? value)
-        : base(CreatePredicate(member, @operator, value).Reduce())
+        : base(CreatePredicate(member, @operator, value))
     {
     }
 

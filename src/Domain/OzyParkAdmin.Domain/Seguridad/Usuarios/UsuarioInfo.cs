@@ -1,56 +1,22 @@
-﻿using OzyParkAdmin.Domain.CentrosCosto;
-using OzyParkAdmin.Domain.Franquicias;
-using OzyParkAdmin.Domain.Seguridad.Roles;
-
-namespace OzyParkAdmin.Domain.Seguridad.Usuarios;
+﻿namespace OzyParkAdmin.Domain.Seguridad.Usuarios;
 
 /// <summary>
-/// Información del usuario.
+/// Contiene la información del usuario.
 /// </summary>
 public sealed record UsuarioInfo
 {
     /// <summary>
-    /// Id del usuario.
+    /// El Id del usuario.
     /// </summary>
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
     /// <summary>
-    /// Nombre del usuario.
+    /// El nombre del usuario.
     /// </summary>
-    public required string UserName { get; set; }
+    public string UserName { get; init; } = string.Empty;
 
     /// <summary>
-    /// Nombre completo del usuario.
+    /// El nombre completo del usuario.
     /// </summary>
-    public required string FriendlyName { get; set; }
-
-    /// <summary>
-    /// Dirección de correo electrónico del usuario.
-    /// </summary>
-    public string? Email { get; set; }
-
-    /// <summary>
-    /// El rut del usuario.
-    /// </summary>
-    public string? Rut { get; set; }
-
-    /// <summary>
-    /// Si el usuario está bloqueado.
-    /// </summary>
-    public bool IsLockedout { get; set; }
-
-    /// <summary>
-    /// Roles asociados al usuario.
-    /// </summary>
-    public List<Rol> Roles { get; set; } = [];
-
-    /// <summary>
-    /// Franquicias asociadas al usuario.
-    /// </summary>
-    public List<Franquicia> Franquicias { get; set; } = [];
-
-    /// <summary>
-    /// Centros de costo asociados al usuario.
-    /// </summary>
-    public List<CentroCostoInfo> CentrosCosto { get; set; } = [];
+    public string FriendlyName { get; init; } = string.Empty;
 }

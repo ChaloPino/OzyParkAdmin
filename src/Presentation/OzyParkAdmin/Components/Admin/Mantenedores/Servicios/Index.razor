@@ -24,13 +24,13 @@
 @using OzyParkAdmin.Domain.Zonas
 @inject IMediator Mediator
 @inject ISnackbar Snackbar
-@inject ServicioViewModelValidator Validator
+
 <PageTitle>Servicios</PageTitle>
 <MudText Typo="Typo.h4">Servicios</MudText>
 
 <MudDataGrid @ref="dataGrid" T="ServicioViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
              ServerData="LoadServiciosAsync" SortMode="SortMode.Multiple"
-             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterRow">
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
         <MudSpacer />
         <SearchControl @bind-SearchText="searchText" />
@@ -146,15 +146,6 @@
             FullWidth = true,
             BackdropClick = false,
         };
-
-
-    private const short ZeroShort = 0;
-    private const short OneShort = 1;
-    private const short MaxShort = short.MaxValue;
-    private const int OneInt = 1;
-    private const int MaxInt = int.MaxValue;
-    private const byte ZeroByte = 0;
-    private const byte MaxByte = byte.MaxValue;
 
     private ClaimsPrincipal? user;
     private MudDataGrid<ServicioViewModel> dataGrid = default!;

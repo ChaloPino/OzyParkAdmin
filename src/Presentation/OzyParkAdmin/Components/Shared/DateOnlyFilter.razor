@@ -1,0 +1,180 @@
+﻿@using MudBlazor.Interfaces
+@using OzyParkAdmin.Domain.Servicios;
+@typeparam T
+
+<IfThen Condition="_dataGrid is not null">
+    <Then>
+        <SwitchCase Value="_dataGrid!.FilterMode">
+            <CaseWhen T="DataGridFilterMode" Condition="(mode) => mode == DataGridFilterMode.ColumnFilterRow">
+                <MudStack Row="true">
+                    <MudDatePicker Date="dateOnly" DateChanged="DateOnlyFilterChangedAsync" Margin="Margin.Dense" Class="filter-input-date" Placeholder="Valor de filtro" />
+                    <MudMenu Icon="@Icons.Material.Filled.FilterAlt" Size="Size.Small" Dense="true">
+                        <ForIn Items="Operators" Context="o">
+                            <IfThen Condition="!string.IsNullOrWhiteSpace(o)">
+                                <Then>
+                                    <MudMenuItem Style="@ChosenOperatorStyle(o)" OnClick="async () => await ChangeOperatorAsync(o)">@o</MudMenuItem>
+                                </Then>
+                            </IfThen>
+                        </ForIn>
+                    </MudMenu>
+                    <MudIconButton Class="align-self-center" Icon="@Icons.Material.Filled.FilterAltOff" Size="Size.Small" OnClick="ClearFilterAsync" />
+                </MudStack>
+            </CaseWhen>
+            <CaseWhen T="DataGridFilterMode" Condition="(mode) => mode == DataGridFilterMode.ColumnFilterMenu">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudGrid Spacing="0">
+                            <MudItem xs="12">
+                                <MudSelect @bind-Value="FilterContext!.FilterDefinition!.Operator" FullWidth="true" Label="Operador" Dense="true" Margin="Margin.Dense"
+                                           Class="filter-operator">
+                                    <ForIn Items="Operators" Context="fieldOperator">
+                                        <MudSelectItem Value="@fieldOperator">@fieldOperator</MudSelectItem>
+                                    </ForIn>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <IfThen Condition="OperatorNotEndsWithEmtpy">
+                                    <Then>
+                                        <MudDatePicker Date="dateOnly" DateChanged="DateOnlyFilterChanged" Margin="Margin.Dense" Class="filter-input-date" Placeholder="Valor de filtro" />
+                                    </Then>
+                                </IfThen>      
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                    <MudItem xs="12" Class="d-flex justify-end">
+                        <MudButton Class="clear-filter-button" OnClick="ClearFilterAsync">Limpiar</MudButton>
+                        <MudButton Class="apply-filter-button" Color="Color.Primary" OnClick="ApplyFilterAsync">Filtrar</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </CaseWhen>
+        </SwitchCase>
+    </Then>
+</IfThen>
+
+@code {
+    private DateTime? dateOnly;
+
+    [CascadingParameter]
+    private MudDataGrid<T>? DataGrid { get; set; }
+
+    [Parameter]
+    public FilterContext<T>? FilterContext { get; set; }
+
+    private MudDataGrid<T>? _dataGrid => DataGrid ?? FilterContext?.FilterDefinition?.Column?.DataGrid;
+
+    private string[] Operators => 
+    [
+        FilterOperator.DateTime.Is,
+        FilterOperator.DateTime.IsNot,
+        FilterOperator.DateTime.After,
+        FilterOperator.DateTime.OnOrAfter,
+        FilterOperator.DateTime.Before,
+        FilterOperator.DateTime.OnOrBefore,
+        FilterOperator.DateTime.Empty,
+        FilterOperator.DateTime.NotEmpty,
+    ];
+
+    private string Operator => FilterContext?.FilterDefinition?.Operator ?? Operators.FirstOrDefault() ?? string.Empty;
+
+    private bool OperatorNotEndsWithEmtpy => !Operator.EndsWith("empty");
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            var date = (DateOnly?)FilterContext.FilterDefinition.Value;
+            dateOnly = date is not null ? date.Value.ToDateTime(TimeOnly.MinValue) : null;
+        }
+    }
+
+    private string ChosenOperatorStyle(string o)
+    {
+        return o == Operator ? "color:var(--mud-palette-primary-text);background-color:var(--mud-palette-primary)" : "";
+    }
+
+    private async Task ChangeOperatorAsync(string o)
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            FilterContext.FilterDefinition.Operator = o;
+            await ApplyFilterAsync(FilterContext.FilterDefinition);
+        }
+    }
+
+    private async Task DateOnlyFilterChangedAsync(DateTime? value)
+    {
+        dateOnly = value;
+
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            if (dateOnly is not null)
+            {
+                FilterContext.FilterDefinition.Value = DateOnly.FromDateTime(dateOnly.Value);
+                await ApplyFilterAsync(FilterContext.FilterDefinition);
+            }
+            else
+            {
+                await ClearFilterAsync();
+            }
+        }
+    }
+
+    private void DateOnlyFilterChanged(DateTime? value)
+    {
+        dateOnly = value;
+
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            if (dateOnly is not null)
+            {
+                FilterContext.FilterDefinition.Value = DateOnly.FromDateTime(dateOnly.Value);
+                _dataGrid?.GroupItems();
+            }
+            else
+            {
+                FilterContext.FilterDefinition.Value = null;
+            }
+        }
+    }
+
+    private async Task ApplyFilterAsync()
+    {
+        if (_dataGrid is not null)
+        {
+            if (_dataGrid.FilterDefinitions.All(x => x.Id != FilterContext!.FilterDefinition!.Id))
+            {
+                _dataGrid.FilterDefinitions.Add(FilterContext!.FilterDefinition);
+            }
+
+            await _dataGrid.ReloadServerData();
+
+            _dataGrid.GroupItems();
+            ((IMudStateHasChanged)_dataGrid).StateHasChanged();
+        }
+    }
+
+    private async Task ApplyFilterAsync(IFilterDefinition<T> filterDefinition)
+    {
+        if (_dataGrid is not null)
+        {
+            if (_dataGrid.FilterDefinitions.All(x => x.Id != filterDefinition.Id))
+            {
+                _dataGrid.FilterDefinitions.Add(filterDefinition);
+            }
+
+            await _dataGrid.ReloadServerData();
+
+            _dataGrid.GroupItems();
+            ((IMudStateHasChanged)_dataGrid).StateHasChanged();
+        }
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            await FilterContext.Actions.ClearFilterAsync(FilterContext.FilterDefinition);
+        }
+    }
+}

@@ -12,7 +12,7 @@ internal sealed class LessThanExpression<T, TProperty> : FilterOperationExpressi
         _value = Expression.Constant(value, typeof(TProperty));
     }
 
-    public LessThanExpression(Expression<Func<T, TProperty?>> memberExpression, TProperty value)
+    public LessThanExpression(Expression<Func<T, TProperty?>> memberExpression, TProperty? value)
         : base(memberExpression)
     {
         _value = Expression.Constant(value, typeof(TProperty));

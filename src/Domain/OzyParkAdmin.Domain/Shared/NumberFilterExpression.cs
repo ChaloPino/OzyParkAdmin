@@ -21,8 +21,8 @@ public class NumberFilterExpression<T, TNumber> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
-    public NumberFilterExpression(Expression<Func<T, TNumber?>> member, string @operator, IConvertible value)
-        : base(CreatePredicate(member, @operator, Convert(value)).Reduce())
+    public NumberFilterExpression(Expression<Func<T, TNumber?>> member, string @operator, double? value)
+        : base(CreatePredicate(member, @operator, ConvertNull(value)))
     {
     }
 
@@ -32,8 +32,8 @@ public class NumberFilterExpression<T, TNumber> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
-    public NumberFilterExpression(Expression<Func<T, TNumber>> member, string @operator, IConvertible value)
-        : base(CreatePredicate(member, @operator, Convert(value)).Reduce())
+    public NumberFilterExpression(Expression<Func<T, TNumber>> member, string @operator, double value)
+        : base(CreatePredicate(member, @operator, Convert(value)))
     {
     }
 
@@ -43,7 +43,7 @@ public class NumberFilterExpression<T, TNumber> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     public NumberFilterExpression(Expression<Func<T, TNumber?>> member, string @operator)
-        : base(CreatePredicate(member, @operator, default).Reduce())
+        : base(CreatePredicate(member, @operator, default))
     {
     }
 
@@ -53,14 +53,17 @@ public class NumberFilterExpression<T, TNumber> : FilterExpression<T>
     /// <param name="member">Una expresión que representa el miembro del elemento.</param>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     public NumberFilterExpression(Expression<Func<T, TNumber>> member, string @operator)
-        : base(CreatePredicate(member, @operator, default).Reduce())
+        : base(CreatePredicate(member, @operator, default))
     {
     }
 
     private static TNumber Convert(IConvertible value) =>
         (TNumber)value.ToType(typeof(TNumber), CultureInfo.InvariantCulture);
 
-    private static FilterOperationExpression<T> CreatePredicate(Expression<Func<T, TNumber?>> member, string @operator, TNumber value)
+    private static TNumber? ConvertNull(IConvertible? value) =>
+        value is null ? default : Convert(value);
+
+    private static FilterOperationExpression<T> CreatePredicate(Expression<Func<T, TNumber?>> member, string @operator, TNumber? value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(@operator);
         return @operator.ToLowerInvariant() switch

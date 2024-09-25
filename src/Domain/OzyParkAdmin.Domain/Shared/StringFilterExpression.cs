@@ -18,7 +18,7 @@ public class StringFilterExpression<T> : FilterExpression<T>
     /// <param name="operator">El operador que se usará para el filtrado.</param>
     /// <param name="value">El valor que se usará para filtrar el elemento.</param>
     public StringFilterExpression(Expression<Func<T, string?>> member, string @operator, string? value = null)
-        : base(CreatePredicate(member, @operator, value).Reduce())
+        : base(CreatePredicate(member, @operator, value))
     {
     }
 

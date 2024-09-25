@@ -12,7 +12,7 @@ internal sealed class GreaterThanOrEqualsExpression<T, TProperty> : FilterOperat
         _value = Expression.Constant(value, typeof(TProperty));
     }
 
-    public GreaterThanOrEqualsExpression(Expression<Func<T, TProperty?>> memberExpression, TProperty value)
+    public GreaterThanOrEqualsExpression(Expression<Func<T, TProperty?>> memberExpression, TProperty? value)
         : base(memberExpression)
     {
         _value = Expression.Constant(value, typeof(TProperty));

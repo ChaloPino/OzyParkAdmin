@@ -8,7 +8,7 @@ namespace OzyParkAdmin.Application.Seguridad.Usuarios.Search;
 /// <summary>
 /// El manejador de <see cref="SearchUsers"/>.
 /// </summary>
-public sealed class SearchUserHandler : MediatorRequestHandler<SearchUsers, PagedList<UsuarioInfo>>
+public sealed class SearchUserHandler : MediatorRequestHandler<SearchUsers, PagedList<UsuarioFullInfo>>
 {
     private readonly IUsuarioRepository _repository;
 
@@ -23,7 +23,7 @@ public sealed class SearchUserHandler : MediatorRequestHandler<SearchUsers, Page
     }
 
     /// <inheritdoc/>
-    protected override async Task<PagedList<UsuarioInfo>> Handle(SearchUsers request, CancellationToken cancellationToken)
+    protected override async Task<PagedList<UsuarioFullInfo>> Handle(SearchUsers request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 

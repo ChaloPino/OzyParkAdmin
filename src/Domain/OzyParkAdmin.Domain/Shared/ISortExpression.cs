@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Domain.Shared;
+﻿using System.Linq.Expressions;
+
+namespace OzyParkAdmin.Domain.Shared;
 
 /// <summary>
 /// Representa una expressión de ordenamiento para el <typeparamref name="T"/>.
@@ -7,6 +9,17 @@
 public interface ISortExpression<T>
     where T : class
 {
+    /// <summary>
+    /// El nombre del miembro que realizará el ordenamiento.
+    /// </summary>
+    string MemberName { get; }
+
+    /// <summary>
+    /// Reemplaza el miembro de ordenamiento.
+    /// </summary>
+    /// <param name="replacement">La expresión lambda que reemplazará el actual.</param>
+    void Replace(LambdaExpression replacement);
+
     /// <summary>
     /// Ejecuta el ordenamiento definido.
     /// </summary>

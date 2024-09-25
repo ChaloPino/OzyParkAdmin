@@ -1,4 +1,4 @@
-﻿namespace OzyParkAdmin.Components.Admin.Mantenedores.Seguridad.Usuarios;
+﻿namespace OzyParkAdmin.Components.Admin.Mantenedores.Seguridad.Usuarios.Models;
 
 /// <summary>
 /// Representa un rol asociado al usuario.

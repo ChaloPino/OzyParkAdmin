@@ -7,7 +7,7 @@ namespace OzyParkAdmin.Application.Seguridad.Usuarios.Update;
 /// <summary>
 /// Manejador de <see cref="UpdateUser"/>,
 /// </summary>
-public sealed class UpdateUserHandler : MediatorRequestHandler<UpdateUser, ResultOf<UsuarioInfo>>
+public sealed class UpdateUserHandler : MediatorRequestHandler<UpdateUser, ResultOf<UsuarioFullInfo>>
 {
     private readonly UsuarioService _usuarioService;
 
@@ -22,7 +22,7 @@ public sealed class UpdateUserHandler : MediatorRequestHandler<UpdateUser, Resul
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<UsuarioInfo>> Handle(UpdateUser request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<UsuarioFullInfo>> Handle(UpdateUser request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         return await _usuarioService.UpdateUserAsync(

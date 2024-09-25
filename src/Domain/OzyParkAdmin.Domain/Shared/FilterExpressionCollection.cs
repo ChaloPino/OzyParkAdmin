@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Domain.Shared;
+﻿using System.Linq.Expressions;
+
+namespace OzyParkAdmin.Domain.Shared;
 
 /// <summary>
 /// Representa una lista de <see cref="IFilterExpression{T}"/>.
@@ -7,7 +9,7 @@
 public class FilterExpressionCollection<T>
     where T : class
 {
-    private readonly List<IFilterExpression<T>> _expressions = [];
+    private readonly Dictionary<string, IFilterExpression<T>> _expressions = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Crea una nueva instancia de <see cref="FilterExpressionCollection{T}"/>.
@@ -20,12 +22,43 @@ public class FilterExpressionCollection<T>
     /// <summary>
     /// Crea una nueva instancia de <see cref="FilterExpressionCollection{T}"/> con una lista de <see cref="IFilterExpression{T}"/> para inicializar.
     /// </summary>
-    /// <param name="expression">La lista de <see cref="IFilterExpression{T}"/> para inicializar la nueva instancia.</param>
-    public FilterExpressionCollection(IEnumerable<IFilterExpression<T>> expression)
+    /// <param name="expressions">La lista de <see cref="IFilterExpression{T}"/> para inicializar la nueva instancia.</param>
+    public FilterExpressionCollection(IEnumerable<IFilterExpression<T>> expressions)
     {
-        ArgumentNullException.ThrowIfNull(expression);
-        _expressions.AddRange(expression);
+        ArgumentNullException.ThrowIfNull(expressions);
+
+        foreach (IFilterExpression<T> expression in expressions)
+        {
+            _expressions[expression.MemberName] = expression;
+        }
     }
+
+    /// <summary>
+    /// Agrega una expresión de filtrado.
+    /// </summary>
+    /// <param name="filterExpression">La expresión de filtrado.</param>
+    public void Add(IFilterExpression<T> filterExpression)
+    {
+        _expressions[filterExpression.MemberName] = filterExpression;
+    }
+
+    /// <summary>
+    /// Reemplaza uno de las expresiones de filtro.
+    /// </summary>
+    /// <typeparam name="TProperty">El tipo de la propiedad.</typeparam>
+    /// <param name="memberName">El nombre del filtro que se va a reemplazar.</param>
+    /// <param name="replacement">La expresión lambda con que se reemplazará.</param>
+    /// <returns>El mismo <see cref="FilterExpressionCollection{T}"/> de tal forma que se pueda concatenar otras llamadas.</returns>
+    public FilterExpressionCollection<T> Replace<TProperty>(string memberName, Expression<Func<T, TProperty>> replacement)
+    {
+        if (_expressions.TryGetValue(memberName, out var filterExpression))
+        {
+            filterExpression.Replace(replacement);
+        }
+
+        return this;
+    }
+
 
     /// <summary>
     /// Aplica el filtrado a la consulta.
@@ -34,11 +67,12 @@ public class FilterExpressionCollection<T>
     /// <returns>La consulta filtrada.</returns>
     public IQueryable<T> Where(IQueryable<T> query)
     {
-        foreach (var expression in _expressions)
+        foreach (var expression in _expressions.Values)
         {
             query = expression.Where(query);
         }
 
         return query;
     }
+
 }

@@ -1,0 +1,223 @@
+﻿@using OzyParkAdmin.Components.Admin.Shared
+@using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Productos
+@inject ProductoViewModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <MudForm Model="Producto" @ref="form" Validation="Validator.ValidateValue" ValidationDelay="0">
+            <MudSelect T="int" Value="Producto.FranquiciaId" ValueChanged="async (franquiciaId) => await FranquiciaChanged(franquiciaId)" Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Label="Franquicia" Required="true" Class="mt-4"
+                       Disabled="!Producto.IsNew" For="() => Producto.FranquiciaId" Immediate="true">
+                <ForIn Items="Franquicias" Context="franquicia">
+                    <MudSelectItem T="int" Value="franquicia.Id">@franquicia.Nombre</MudSelectItem>
+                </ForIn>
+            </MudSelect>
+
+            <MudSelect @bind-Value="Producto.CentroCosto" Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Label="Centro de costo" ToStringFunc="(x) => x?.Descripcion" Class="mt-4"
+                       Disabled="!Producto.IsNew" For="() => Producto.CentroCosto" Immediate="true">
+                <ForIn Items="CentrosCosto" Context="centroCosto">
+                    <MudSelectItem T="CentroCostoInfo" Value="centroCosto"></MudSelectItem>
+                </ForIn>
+            </MudSelect>
+
+            <MudStack Row="true" Class="mt-4">
+                <MudSelect @bind-Value="Producto.Categoria" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Categoria" ToStringFunc="(x) => x?.Nombre"
+                           For="() => Producto.Categoria" Immediate="true">
+                    <ForIn Items="Categorias" Context="categoria">
+                        <MudSelectItem T="CategoriaProductoInfo" Value="categoria"></MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+
+                <MudSelect @bind-Value="Producto.CategoriaDespliegue" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Categoria de despliegue" ToStringFunc="(x) => x?.Nombre"
+                           For="() => Producto.CategoriaDespliegue" Immediate="true">
+                    <ForIn Items="Categorias" Context="categoria">
+                        <MudSelectItem T="CategoriaProductoInfo" Value="categoria"></MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+
+                <MudSelect @bind-Value="Producto.Familia" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Familia" For="() => Producto.Familia" Immediate="true">
+                    <MudSelectItem T="AgrupacionContable" Value="(AgrupacionContable?)null">Sin familia</MudSelectItem>
+                    <ForIn Items="Familias" Context="familia">
+                        <MudSelectItem T="AgrupacionContable" Value="familia">@familia.Aka</MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+            </MudStack>
+
+            <MudStack Row="true" Class="mt-4">
+                <MudTextField @bind-Value="Producto.Sku" Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Label="Sku" For="() => Producto.Sku" Immediate="true" />
+                <MudTextField @bind-Value="Producto.Aka" Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Label="Aka" For="() => Producto.Aka" Immediate="true" />
+            </MudStack>
+
+            <MudTextField @bind-Value="Producto.Nombre" Variant="Variant.Outlined" Margin="Margin.Dense"
+                          Label="Nombre" Class="mt-4" For="() => Producto.Nombre" Immediate="true" />
+
+            <MudStack Row="true" Class="mt-4">
+                <MudSelect @bind-Value="Producto.TipoProducto" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Tipo producto" For="() => Producto.TipoProducto" Immediate="true"
+                           ToStringFunc="x => x?.Nombre">
+                    <ForIn Items="TiposProducto" Context="tipo">
+                        <MudSelectItem T="TipoProducto" Value="tipo"></MudSelectItem>
+                    </ForIn>
+                </MudSelect>
+
+                <MudDatePicker @bind-Date="Producto.FechaAltaDate" Variant="Variant.Outlined" Margin="Margin.Dense"
+                               Label="Fecha de alta" For="() => Producto.FechaAltaDate" ImmediateText="true" />
+
+                <MudNumericField @bind-Value="Producto.Orden" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                 Label="Orden" For="() => Producto.Orden" Immediate="true"
+                                 Min="OneInt" Max="MaxInt" />
+            </MudStack>
+
+            <MudStack Style="width:100%">
+                <MudFileUpload T="IBrowserFile" @ref="fileUpload"
+                               Files="Producto.Imagen.File" FilesChanged="async (file) => await Producto.Imagen.SetFile(file, TipoCatalogo)" 
+                               For="() => Producto.Imagen.File" SuppressOnChangeWhenInvalid="true"
+                               InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
+                               InputStyle="opacity:0"
+                               @ondrop="@ClearDragClass"
+                               @ondragenter="@SetDragClass"
+                               @ondragleave="@ClearDragClass"
+                               @ondragend="@ClearDragClass">
+                    <ActivatorContent>
+                        <MudPaper Outlined="true" Class="@_dragClass">
+                            <IfThenElse Condition="string.IsNullOrEmpty(Producto.Imagen.Aka)">
+                                <Then>
+                                    <MudText Typo="Typo.h6">
+                                        Arrastre el archivo aquí o haga clic
+                                    </MudText>
+                                </Then>
+                                <Else>
+                                    <MudText Typo="Typo.h6">
+                                        Arrastre el archivo aquí o haga clic para cambiar la imagen
+                                    </MudText>
+                                    <MudImage Src="@Producto.Imagen.Data" Elevation="2" Alt="@Producto.Imagen.Aka" />
+                                </Else>
+                            </IfThenElse>
+                        </MudPaper>
+                    </ActivatorContent>
+                </MudFileUpload>
+                <MudToolBar Gutters="false" Class="relative d-flex justify-space-between align-center gap-x-4">
+                    <MudTextField @bind-Value="Producto.Imagen.Aka" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                  Label="Nombre Imagen" For="() => Producto.Imagen.Aka" Immediate="true" />
+                    <MudButton Color="Color.Primary"
+                               OnClick="@OpenFilePickerAsync"
+                               StartIcon="@Icons.Material.Filled.CloudUpload"
+                               Variant="Variant.Filled">
+                        Abrir archivos
+                    </MudButton>
+                </MudToolBar>
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
+                <MudSwitch @bind-Value="Producto.EsComplemento" Label="Es complemento" Color="Color.Primary" />
+            </MudStack>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private const int OneInt = 1;
+    private const int MaxInt = int.MaxValue;
+    private const string TipoCatalogo = "Producto";
+    private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
+
+    private MudForm form = default!;
+    private MudFileUpload<IBrowserFile>? fileUpload;
+    private string _dragClass = DefaultDragClass;
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public ProductoViewModel Producto { get; set; } = default!;
+
+    [Parameter]
+    public List<CentroCostoInfo> CentrosCosto { get; set; } = [];
+
+    [Parameter]
+    public List<FranquiciaModel> Franquicias { get; set; } = [];
+
+    [Parameter]
+    public List<CategoriaProductoInfo> Categorias { get; set; } = [];
+
+    [Parameter]
+    public List<AgrupacionContable> Familias { get; set; } = [];
+
+    [Parameter]
+    public List<TipoProducto> TiposProducto { get; set; } = [];
+
+    [Parameter]
+    public Func<int, Task>? LoadCategorias { get; set; }
+
+    [Parameter]
+    public Func<ProductoViewModel, Task<bool>>? CommitChanges { get; set; }
+
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    private async Task FranquiciaChanged(int franquiciaId)
+    {
+        Producto.FranquiciaId = franquiciaId;
+
+        if (LoadCategorias is not null)
+        {
+            await LoadCategorias(franquiciaId);
+        }
+    }
+
+    private void SetDragClass()
+        => _dragClass = $"{DefaultDragClass} mud-border-primary";
+
+    private void ClearDragClass()
+        => _dragClass = DefaultDragClass;
+
+    private Task OpenFilePickerAsync()
+        => fileUpload?.OpenFilePickerAsync() ?? Task.CompletedTask;
+
+    private Task ClearAsync()
+        => fileUpload?.ClearAsync() ?? Task.CompletedTask;
+
+    private async Task CancelEditingItemAsync()
+    {
+        await ChangeIsOpen(false);
+    }
+
+    private async Task CommitItemChangesAsync()
+    {
+        await form.Validate();
+
+        if (!form.IsValid)
+        {
+            return;
+        }
+
+        if (Producto is not null && CommitChanges is not null)
+        {
+            bool result = await CommitChanges(Producto);
+
+            if (result)
+            {
+                await ChangeIsOpen(false);
+            }
+        }
+    }
+}

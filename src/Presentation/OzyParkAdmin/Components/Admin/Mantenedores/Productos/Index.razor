@@ -1,0 +1,324 @@
+﻿@page "/Mantenedores/Productos"
+@using System.Security.Claims
+@using OzyParkAdmin.Application
+@using OzyParkAdmin.Application.Cajas.List
+@using OzyParkAdmin.Application.CentrosCosto.List
+@using OzyParkAdmin.Application.Franquicias.List
+@using OzyParkAdmin.Application.Productos.Search
+@using OzyParkAdmin.Components.Admin.Shared
+@using OzyParkAdmin.Domain.Cajas
+@using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Franquicias
+@using OzyParkAdmin.Domain.Productos
+@using OzyParkAdmin.Domain.Shared
+@inject IMediator Mediator
+@inject ISnackbar Snackbar
+
+<PageTitle>Productos</PageTitle>
+<MudText Typo="Typo.h4">Productos</MudText>
+
+<MudDataGrid @ref="dataGrid" T="ProductoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
+             ServerData="LoadProductosAsync" SortMode="SortMode.Multiple" Groupable="true" Hideable="true" GroupExpanded="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+    <ToolBarContent>
+        <MudSpacer />
+        <SearchControl @bind-SearchText="searchText" />
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddProductoAsync">Nuevo producto</MudButton>
+    </ToolBarContent>
+    <Columns>
+        <HierarchyColumn T="ProductoViewModel" Hideable="false" />
+        <PropertyColumn Property="x => x.Sku" Title="Sku" Groupable="false" />
+        <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false" />
+        <PropertyColumn Property="x => x.Nombre" Title="Nombre" Groupable="false" />
+        <PropertyColumn Property="x => x.TipoProducto.Nombre" Title="Tipo producto">
+            <GroupTemplate>
+                <StringGrouping Title="Tipo producto" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.TipoProducto.EsParaVenta" Editable="false" Title="Es para venta" Hidden="true">
+            <FilterTemplate>
+                <StateFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <BooleanGrouping Title="Es para venta" GroupDefinition="context" />
+            </GroupTemplate>
+            <CellTemplate>
+                <StateControl State="@context.Item.TipoProducto.EsParaVenta" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.TipoProducto.ControlaStock" Editable="false" Title="Controla stock" Hidden="true">
+            <FilterTemplate>
+                <StateFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <BooleanGrouping Title="Controla stock" GroupDefinition="context" />
+            </GroupTemplate>
+            <CellTemplate>
+                <StateControl State="@context.Item.TipoProducto.ControlaStock" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.TipoProducto.ControlaInventario" Editable="false" Title="Controla inventario" Hidden="true">
+            <FilterTemplate>
+                <StateFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <BooleanGrouping Title="Controla inventario" GroupDefinition="context" />
+            </GroupTemplate>
+            <CellTemplate>
+                <StateControl State="@context.Item.TipoProducto.ControlaInventario" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Categoria.Nombre" Title="Categoria" Hidden="true" Grouping="true">
+            <GroupTemplate>
+                <StringGrouping Title="Categoría" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Familia.Aka" Title="Familia contable">
+            <GroupTemplate>
+                <StringGrouping Title="Familia contable" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.FechaAlta" Title="Fecha de alta">
+            <FilterTemplate>
+                <DateOnlyFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <Grouping Title="Fecha de alta" GroupDefinition="context" TValue="DateOnly" T="ProductoViewModel" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Orden" Editable="false" Title="Orden" Hidden="true">
+            <GroupTemplate>
+                <Grouping Title="Orden" GroupDefinition="context" T="ProductoViewModel" TValue="int" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.EsComplemento" Editable="false" Title="Es complemento" Hidden="true">
+            <FilterTemplate>
+                <StateFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <BooleanGrouping GroupDefinition="context" />
+            </GroupTemplate>
+            <CellTemplate>
+                <StateControl State="@context.Item.EsComplemento" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.EsActivo" Editable="false" Title="Estado">
+            <FilterTemplate>
+                <IsActiveFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <IsActiveGrouping GroupDefinition="context" />
+            </GroupTemplate>
+            <CellTemplate>
+                <StateControl State="@context.Item.EsActivo" CanChangeStatus="true" TrueLabel="Habilitado" FalseLabel="Deshabilitado"
+                              StateChanged="async (esActivo) => await SaveEsActivoAsync(context.Item, esActivo)" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.FechaSistema" Title="Fecha creación" Hidden="true">
+            <GroupTemplate>
+                <Grouping GroupDefinition="context" Title="Fecha creación" T="ProductoViewModel" TValue="DateTime" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.UsuarioCreacion.FriendlyName" Title="Usuario creación" Hidden="true">
+            <GroupTemplate>
+                <StringGrouping GroupDefinition="context" Title="Usuario creación" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.UltimaModificacion" Title="Ultima modificación" Hidden="true">
+            <GroupTemplate>
+                <Grouping GroupDefinition="context" Title="Fecha creación" T="ProductoViewModel" TValue="DateTime" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.UsuarioModificacion.FriendlyName" Title="Usuario modificación" Hidden="true">
+            <GroupTemplate>
+                <StringGrouping GroupDefinition="context" Title="Usuario modificación" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <TemplateColumn Groupable="false">
+            <CellTemplate>
+                <div class="d-flex justify-end">
+                    <MudTooltip Text="Editar">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEditingAsync(context)" />
+                    </MudTooltip>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <ChildRowContent>
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">@context.Item.Nombre</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <div class="mud-card-media">
+                <MudImage Src="@context.Item.Imagen.Data" Height="200" Width="200" Alt="@context.Item.Imagen.Aka" />
+            </div>
+            <MudCardContent>
+                <MudSimpleTable Style="max-width: 50%;">
+                    <tr>
+                        <th style="text-align: start;">Aka</th>
+                        <td>@context.Item.Aka</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Centro de costo</th>
+                        <td>@context.Item.CentroCosto.Descripcion</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Tipo producto</th>
+                        <td>@context.Item.TipoProducto.Nombre</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Es para venta</th>
+                        <td>
+                            <StateControl State="context.Item.TipoProducto.EsParaVenta" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Controla stock</th>
+                        <td>
+                            <StateControl State="context.Item.TipoProducto.ControlaStock" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Controla inventario</th>
+                        <td>
+                            <StateControl State="context.Item.TipoProducto.ControlaInventario" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Es complemento</th>
+                        <td>
+                            <StateControl State="context.Item.EsComplemento" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">En inventario</th>
+                        <td>
+                            <StateControl State="context.Item.EnInventario" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Usuario creación</th>
+                        <td>@context.Item.UsuarioCreacion.FriendlyName</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Fecha creación</th>
+                        <td>@context.Item.FechaSistema</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Usuario modificación</th>
+                        <td>@context.Item.UsuarioModificacion.FriendlyName</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Última modificación</th>
+                        <td>@context.Item.UltimaModificacion</td>
+                    </tr>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </ChildRowContent>
+    <PagerContent>
+        <MudDataGridPager T="ProductoViewModel" />
+    </PagerContent>
+</MudDataGrid>
+
+<CascadingValue Value="true" Name="IsNested">
+    <ProductoEditDialog @bind-IsOpen="openEditing" Producto="currentProducto" CentrosCosto="centrosCosto" Franquicias="franquicias" TiposProducto="tiposProducto"
+        Familias="familias" CommitChanges="SaveProductoAsync" DialogOptions="dialogOptions" />
+</CascadingValue>
+
+@code {
+    private static readonly DialogOptions dialogOptions = new()
+        {
+            Position = DialogPosition.Center,
+            FullWidth = true,
+            BackdropClick = false,
+        };
+
+    private ClaimsPrincipal? user;
+    private MudDataGrid<ProductoViewModel> dataGrid = default!;
+    private ObservableGridData<ProductoViewModel>? currentProductos;
+    private string? searchText;
+
+    private List<CentroCostoInfo> centrosCosto = [];
+    private List<FranquiciaModel> franquicias = [];
+    private List<CajaInfo> cajas = [];
+    private List<TipoProducto> tiposProducto = [];
+    private List<AgrupacionContable> familias = [];
+
+    private bool openEditing;
+    private ProductoViewModel? currentProducto;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    private Func<ProductoViewModel, object> GroupBy = x =>
+    {
+        return x.Categoria.Nombre;
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationState).User;
+        await LoadReferencesAsync();
+    }
+
+    private async Task LoadReferencesAsync()
+    {
+        Task[] loadingTasks =
+        [
+            LoadCentrosCostoAsync(), LoadFranquiciasAsync(), LoadCajasAsync(),
+    ];
+
+        await Task.WhenAll(loadingTasks);
+    }
+
+    private async Task LoadCentrosCostoAsync()
+    {
+        ResultListOf<CentroCostoInfo> result = await Mediator.SendRequest(new ListCentrosCosto(user!));
+        centrosCosto = result.Items.ToList();
+    }
+
+    private async Task LoadFranquiciasAsync()
+    {
+        ResultListOf<Franquicia> result = await Mediator.SendRequest(new ListFranquicias(user!));
+        franquicias = result.Items.ToModel();
+    }
+
+    private async Task LoadCajasAsync()
+    {
+        ResultListOf<CajaInfo> result = await Mediator.SendRequest(new ListCajas(user!));
+        cajas = result.Items.ToList();
+    }
+
+    public async Task<GridData<ProductoViewModel>> LoadProductosAsync(GridState<ProductoViewModel> state)
+    {
+        SearchProductos searchProductos = state.ToSearch(user!, searchText);
+        PagedList<ProductoFullInfo> productos = await Mediator.SendRequest(searchProductos);
+        currentProductos = productos.ToGridData(dataGrid);
+        return currentProductos;
+    }
+
+    private Task AddProductoAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    private Task ShowEditingAsync(CellContext<ProductoViewModel> context)
+    {
+        currentProducto = context.Item;
+        openEditing = true;
+        return Task.CompletedTask;
+    }
+
+    private Task SaveEsActivoAsync(ProductoViewModel producto, bool esActivo)
+    {
+        return Task.CompletedTask;
+    }
+
+    private Task<bool> SaveProductoAsync(ProductoViewModel producto)
+    {
+        return Task.FromResult(true);
+    }
+}

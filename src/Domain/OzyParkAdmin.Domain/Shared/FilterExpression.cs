@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using OzyParkAdmin.Domain.Shared.Expressions;
+using System.Linq.Expressions;
 
 namespace OzyParkAdmin.Domain.Shared;
 
@@ -9,16 +10,30 @@ namespace OzyParkAdmin.Domain.Shared;
 public abstract class FilterExpression<T> : IFilterExpression<T>
     where T : class
 {
-    private readonly Expression<Func<T, bool>> _predicate;
+    private readonly FilterOperationExpression<T> _operatorExpression;
+    private Expression<Func<T, bool>> _predicate;
 
     /// <summary>
     /// Crea una instancia de <see cref="FilterExpression{T}"/>.
     /// </summary>
-    /// <param name="predicate">Una expressión que define el predicado de filtrado.</param>
-    protected FilterExpression(Expression<Func<T, bool>> predicate)
+    /// <param name="operatorExpression">El <see cref="FilterOperationExpression{T}"/>.</param>
+    
+    protected FilterExpression(FilterOperationExpression<T> operatorExpression)
     {
-        ArgumentNullException.ThrowIfNull(predicate);
-        _predicate = predicate;
+        ArgumentNullException.ThrowIfNull(operatorExpression);
+        _operatorExpression = operatorExpression;
+        _predicate = operatorExpression.Reduce();
+        MemberName = operatorExpression.MemberName;
+    }
+
+    /// <inheritdoc/>
+    public string MemberName { get; }
+
+    /// <inheritdoc/>
+    public void Replace(LambdaExpression replacement)
+    {
+        _operatorExpression.Generate(replacement);
+        _predicate = _operatorExpression.Reduce();
     }
 
     /// <inheritdoc/>

@@ -30,7 +30,8 @@
 <MudText Typo="Typo.h4">Productos</MudText>
 
 <MudDataGrid @ref="dataGrid" T="ProductoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
-             ServerData="LoadProductosAsync" SortMode="SortMode.Multiple" Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             ServerData="LoadProductosAsync" SortMode="SortMode.Multiple" 
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
              Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
         <MudSpacer />
@@ -152,7 +153,7 @@
                 <StateFilter FilterContext="context" TrueLabel="Bloqueado" FalseLabel="Desbloqueado" />
             </FilterTemplate>
             <GroupTemplate>
-                <IsActiveGrouping GroupDefinition="context" />
+                <BooleanGrouping GroupDefinition="context" TrueLabel="Bloqueado" FalseLabel="Desbloqueado" />
             </GroupTemplate>
             <CellTemplate>
                 <StateControl State="@context.Item.EnInventario" CanChangeStatus="context.Item.TipoProducto.ControlaInventario"
@@ -187,7 +188,7 @@
                 <MudHighlighter Text="@context.Item.UsuarioCreacion.FriendlyName" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
         </PropertyColumn>
-        <TemplateColumn Groupable="false">
+        <TemplateColumn Hideable="false" Groupable="false" Filterable="false" Sortable="false">
             <CellTemplate>
                 <div class="d-flex justify-end">
                     <MudTooltip Text="Editar">

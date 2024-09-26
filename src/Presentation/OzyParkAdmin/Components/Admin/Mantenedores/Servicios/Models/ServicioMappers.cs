@@ -47,8 +47,11 @@ internal static class ServicioMappers
             nameof(ServicioViewModel.TipoServicio) => filterExpressions.Add(x => x.TipoServicio, filterDefinition.Operator!, filterDefinition.Value),
             "TipoDistribucion.Nombre" => filterExpressions.Add(x => x.TipoDistribucion.Descripcion, filterDefinition.Operator!, filterDefinition.Value),
             "TipoVigencia.Nombre" => filterExpressions.Add(x => x.TipoVigencia.Descripcion, filterDefinition.Operator!, filterDefinition.Value),
+            "TipoControl.Nombre" => filterExpressions.Add(x => x.TipoControl.Aka, filterDefinition.Operator!, filterDefinition.Value),
             nameof(ServicioViewModel.Orden) => filterExpressions.Add(x => x.Orden, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(ServicioViewModel.EsConHora) => filterExpressions.Add(x => x.EsConHora, filterDefinition.Operator!, filterDefinition.Value),
             nameof(ServicioViewModel.EsActivo) => filterExpressions.Add(x => x.EsActivo, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(ServicioViewModel.EsParaVenta) => filterExpressions.Add(x => x.EsParaVenta, filterDefinition.Operator!, filterDefinition.Value),
             _ => throw new UnreachableException(),
         };
     }
@@ -75,8 +78,11 @@ internal static class ServicioMappers
             nameof(ServicioViewModel.TipoServicio) => sortExpressions.Add(x => x.TipoServicio, sortDefinition.Descending),
             "TipoDistribucion.Nombre" => sortExpressions.Add(x => x.TipoDistribucion.Descripcion, sortDefinition.Descending),
             "TipoVigencia.Nombre" => sortExpressions.Add(x => x.TipoVigencia.Descripcion, sortDefinition.Descending),
+            "TipoControl.Nombre" => sortExpressions.Add(x => x.TipoControl.Aka, sortDefinition.Descending),
             nameof(ServicioViewModel.Orden) => sortExpressions.Add(x => x.Orden, sortDefinition.Descending),
+            nameof(ServicioViewModel.EsConHora) => sortExpressions.Add(x => x.EsConHora, sortDefinition.Descending),
             nameof(ServicioViewModel.EsActivo) => sortExpressions.Add(x => x.EsActivo, sortDefinition.Descending),
+            nameof(ServicioViewModel.EsParaVenta) => sortExpressions.Add(x => x.EsParaVenta, sortDefinition.Descending),
             _ => throw new UnreachableException(),
         };
     }

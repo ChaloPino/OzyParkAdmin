@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using MudBlazor.Services;
+using MudBlazor.Translations;
 using OzyParkAdmin.Components;
 using OzyParkAdmin.Components.Account;
 using OzyParkAdmin.Infrastructure.Layout;
@@ -28,6 +29,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuth
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 builder.Services.AddMudServices();
+builder.Services.AddMudTranslations();
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddAuthentication(options =>

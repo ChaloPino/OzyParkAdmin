@@ -30,6 +30,7 @@
 
 <MudDataGrid @ref="dataGrid" T="ServicioViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
              ServerData="LoadServiciosAsync" SortMode="SortMode.Multiple"
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
              Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
         <MudSpacer />
@@ -37,10 +38,25 @@
         <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddServicioAsync">Nuevo servicio</MudButton>
     </ToolBarContent>
     <Columns>
-        <HierarchyColumn T="ServicioViewModel" />
-        <PropertyColumn Property="x => x.CentroCosto.Nombre" Title="Centro de costo" />
-        <PropertyColumn Property="x => x.Aka" Title="Aka" />
-        <PropertyColumn Property="x => x.Nombre" Title="Nombre" />
+        <HierarchyColumn T="ServicioViewModel" Hideable="false" />
+        <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false" Hideable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Aka" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.CentroCosto.Nombre" Title="Centro de costo">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.CentroCosto.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Centro de costo" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Nombre" Groupable="false" Title="Nombre">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
         <PropertyColumn Property="x => x.TipoServicio" Title="Tipo servicio">
             <FilterTemplate>
                 <TipoServicioFilter FilterContext="context" />
@@ -48,9 +64,57 @@
             <CellTemplate>
                 <TipoServicioDisplay TipoServicio="context.Item.TipoServicio" />
             </CellTemplate>
+            <GroupTemplate>
+                <Grouping Title="Tipo servicio" GroupDefinition="context" T="ServicioViewModel" TValue="TipoServicio" />
+            </GroupTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.TipoDistribucion.Nombre" Title="Tipo distribución" />
-        <PropertyColumn Property="x => x.Orden" Title="Orden" />
+        <PropertyColumn Property="x => x.TipoDistribucion.Nombre" Title="Tipo distribución">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.TipoDistribucion.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Tipo distribución" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.TipoVigencia.Nombre" Title="Tipo vigencia" Hidden="true">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.TipoVigencia.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Tipo vigencia" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.TipoControl.Nombre" Title="Tipo control" Hidden="true">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.TipoControl.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Tipo control" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Orden" Title="Orden" Groupable="false" />
+        <PropertyColumn Property="x => x.EsConHora" Hidden="true" Title="Es con hora">
+            <FilterTemplate>
+                <StateFilter FilterContext="context" />
+            </FilterTemplate>
+            <CellTemplate>
+                <StateControl State="@context.Item.EsConHora" />
+            </CellTemplate>
+            <GroupTemplate>
+                <BooleanGrouping Title="Es con hora" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.EsParaVenta" Hidden="true" Title="Es para venta">
+            <FilterTemplate>
+                <StateFilter FilterContext="context" />
+            </FilterTemplate>
+            <CellTemplate>
+                <StateControl State="@context.Item.EsParaVenta" />
+            </CellTemplate>
+            <GroupTemplate>
+                <BooleanGrouping Title="Es para venta" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
         <PropertyColumn Property="x => x.EsActivo" Editable="false" Title="Estado">
             <FilterTemplate>
                 <IsActiveFilter FilterContext="context" />
@@ -59,8 +123,11 @@
                 <StateControl State="@context.Item.EsActivo" CanChangeStatus="true" TrueLabel="Habilitado" FalseLabel="Deshabilitado"
                               StateChanged="async (esActivo) => await SaveEsActivoAsync(context.Item, esActivo)"/>
             </CellTemplate>
+            <GroupTemplate>
+                <IsActiveGrouping GroupDefinition="context" />
+            </GroupTemplate>
         </PropertyColumn>
-        <TemplateColumn>
+        <TemplateColumn Hideable="false" Groupable="false" Filterable="false" Sortable="false">
             <CellTemplate>
                 <div class="d-flex justify-end">
                     <MudTooltip Text="Editar">

@@ -37,7 +37,7 @@ public sealed class ServicioRepository(OzyParkAdminContext context) : Repository
     public async Task<int> MaxIdAsync(CancellationToken cancellationToken)
     {
         int? id = await EntitySet.MaxAsync(x => (int?)x.Id, cancellationToken);
-        return id is null ? 0 : id.Value;
+        return id ?? 0;
     }
 
     /// <inheritdoc/>
@@ -60,7 +60,8 @@ public sealed class ServicioRepository(OzyParkAdminContext context) : Repository
                 x.Nombre.Contains(searchText) ||
                 x.CentroCosto.Descripcion.Contains(searchText) ||
                 x.TipoDistribucion.Descripcion.Contains(searchText) ||
-                x.TipoVigencia.Descripcion.Contains(searchText));
+                x.TipoVigencia.Descripcion.Contains(searchText) ||
+                x.TipoControl.Aka.Contains(searchText));
         }
 
         query = filterExpressions.Where(query);

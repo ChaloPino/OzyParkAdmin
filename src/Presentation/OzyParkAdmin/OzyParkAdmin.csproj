@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
     <PackageReference Include="MudBlazor" />
+    <PackageReference Include="MudBlazor.Translations" />
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Enrichers.Environment" />
     <PackageReference Include="Serilog.Enrichers.Thread" />
@@ -30,6 +31,17 @@
     <Folder Include="Components\Admin\CajaControl\CoordenadasEmergencia\" />
     <Folder Include="Components\Admin\Mantenedores\Cupos\" />
     <Folder Include="Components\Admin\Reportes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Update="Roslynator.Analyzers" Version="4.12.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Roslynator.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

@@ -79,6 +79,18 @@ public class ServicioViewModelValidator : BaseValidator<ServicioViewModel>
 
         RuleFor(x => x.HolguraEntrada)
             .InclusiveBetween((byte)0, byte.MaxValue, ComparableComparer<byte>.Instance);
+
+        RuleForEach(x => x.Cajas)
+            .SetValidator(new CajaServicioModelValidator());
+
+        RuleForEach(x => x.CentrosCosto)
+            .SetValidator(new CentroCostoServicioModelValidator());
+
+        RuleForEach(x => x.Permisos)
+            .SetValidator(new PermisoServicioModelValidator());
+
+        RuleForEach(x => x.Tramos)
+            .SetValidator(new TramoServicioModelValidator());
     }
 
     private async Task ValidateAkaAsync(string aka, ValidationContext<ServicioViewModel> context, CancellationToken cancellationToken)

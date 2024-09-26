@@ -1,37 +1,52 @@
 ﻿@using OzyParkAdmin.Components.Admin.Shared
 @using System.Collections.ObjectModel
+@inject ServicioViewModelValidator ServicioValidator
+@inject CentroCostoServicioModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
-        <MudDataGrid T="CentroCostoServicioModel" Items="centrosCostoPorServicio" EditMode="DataGridEditMode.Cell" ReadOnly="false">
-            <ToolBarContent>
-                <MudSpacer />
-                <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCentroCosto">Nuevo centro costo</MudButton>
-            </ToolBarContent>
-            <Columns>
-                <PropertyColumn Property="x => x.CentroCosto" Title="Centro de costo">
-                    <EditTemplate>
-                        <MudSelect @bind-Value="context.Item.CentroCosto" Margin="Margin.Dense"
-                                   Label="Centro de costo" Variant="Variant.Outlined" Required="true" Class="mt-4"
-                                   ToStringFunc="x => x?.Nombre">
-                            <ForIn Items="CentrosCosto" Context="centroCosto">
-                                <MudSelectItem T="CentroCostoModel" Value="centroCosto" />
-                            </ForIn>
-                        </MudSelect>
-                    </EditTemplate>
-                    <CellTemplate>
-                        @context.Item.CentroCosto?.Nombre
-                    </CellTemplate>
-                </PropertyColumn>
-                <PropertyColumn Property="x => x.Nombre" Title="Nombre del servicio" Required="false" />
-                <TemplateColumn>
-                    <CellTemplate>
-                        <MudTooltip Text="Eliminar">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="() => RemoveCentroCosto(context.Item)" />
-                        </MudTooltip>
-                    </CellTemplate>
-                </TemplateColumn>
-            </Columns>
-        </MudDataGrid>
+        <MudForm @ref="form" Model="Servicio" Validation="ServicioValidator.ValidateValue" ValidationDelay="0">
+            <MudDataGrid T="CentroCostoServicioModel" Items="centrosCostoPorServicio" EditMode="DataGridEditMode.Cell" ReadOnly="false">
+                <ToolBarContent>
+                    <MudSpacer />
+                    <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCentroCosto">Nuevo centro costo</MudButton>
+                </ToolBarContent>
+                <Columns>
+                    <PropertyColumn Property="x => x.CentroCosto" Title="Centro de costo">
+                        <EditTemplate>
+                            <MudForm Model="context.Item" Validation="Validator.ValidateValue">
+                                <MudSelect @bind-Value="context.Item.CentroCosto" Margin="Margin.Dense"
+                                           Variant="Variant.Text" Style="margin-top:0"
+                                           For="() => context.Item.CentroCosto"
+                                           ToStringFunc="x => x?.Nombre">
+                                    <ForIn Items="CentrosCosto" Context="centroCosto">
+                                        <MudSelectItem T="CentroCostoModel" Value="centroCosto" />
+                                    </ForIn>
+                                </MudSelect>
+                            </MudForm>
+                        </EditTemplate>
+                        <CellTemplate>
+                            @context.Item.CentroCosto?.Nombre
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.Nombre" Title="Nombre del servicio">
+                        <EditTemplate>
+                            <MudForm Model="context.Item" Validation="Validator.ValidateValue">
+                                <MudTextField @bind-Value="context.Item.Nombre" Margin="Margin.Dense"
+                                              Variant="Variant.Text" Style="margin-top:0"
+                                              For="() => context.Item.Nombre" Immediate="true" />
+                            </MudForm>
+                        </EditTemplate>
+                    </PropertyColumn>
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudTooltip Text="Eliminar">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="() => RemoveCentroCosto(context.Item)" />
+                            </MudTooltip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        </MudForm>
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
@@ -40,6 +55,7 @@
 </MudDialog>
 
 @code {
+    private MudForm form = default!;
     private ObservableCollection<CentroCostoServicioModel> centrosCostoPorServicio = [];
 
     [Parameter]
@@ -94,12 +110,17 @@
     {
         if (Servicio is not null && CommitChanges is not null)
         {
-            Servicio.CentrosCosto = [.. centrosCostoPorServicio];
-            bool result = await CommitChanges(Servicio);
+            await form.Validate();
 
-            if (result)
+            if (form.IsValid)
             {
-                await ChangeIsOpen(false);
+                Servicio.CentrosCosto = [.. centrosCostoPorServicio];
+                bool result = await CommitChanges(Servicio);
+
+                if (result)
+                {
+                    await ChangeIsOpen(false);
+                }
             }
         }
 

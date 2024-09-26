@@ -1,41 +1,48 @@
 ﻿@using OzyParkAdmin.Components.Admin.Shared
 @using System.Collections.ObjectModel
+@inject ServicioViewModelValidator ServicioValidator
+@inject CajaServicioModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
-        <MudDataGrid T="CajaServicioModel" Items="cajasPorServicio" EditMode="DataGridEditMode.Cell" ReadOnly="false">
-            <ToolBarContent>
-                <MudSpacer />
-                <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCentroCosto">Nueva caja</MudButton>
-            </ToolBarContent>
-            <Columns>
-                <PropertyColumn Property="x => x.Caja" Title="Caja">
-                    <EditTemplate>
-                        <MudSelect @bind-Value="context.Item.Caja" Margin="Margin.Dense"
-                                   Label="Caja" Variant="Variant.Outlined" Required="true" Class="mt-4"
-                                   ToStringFunc="x => x?.Nombre">
-                            <ForIn Items="Cajas" Context="caja">
-                                <MudSelectItem T="CajaModel" Value="caja" />
-                            </ForIn>
-                        </MudSelect>
-                    </EditTemplate>
-                    <CellTemplate>
-                        @context.Item.Caja?.Nombre
-                    </CellTemplate>
-                </PropertyColumn>
-                <PropertyColumn Property="x => x.NoUsaZona" Title="Nombre del servicio">
-                    <EditTemplate>
-                        <MudSwitch @bind-Value="context.Item.NoUsaZona" Label="No usa zona" Class="mt-4" Color="Color.Primary" />
-                    </EditTemplate>
-                </PropertyColumn>
-                <TemplateColumn>
-                    <CellTemplate>
-                        <MudTooltip Text="Eliminar">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="() => RemoveCentroCosto(context.Item)" />
-                        </MudTooltip>
-                    </CellTemplate>
-                </TemplateColumn>
-            </Columns>
-        </MudDataGrid>
+        <MudForm @ref="form" Model="Servicio" Validation="ServicioValidator.ValidateValue" ValidationDelay="0">
+            <MudDataGrid T="CajaServicioModel" Items="cajasPorServicio" EditMode="DataGridEditMode.Cell" ReadOnly="false">
+                <ToolBarContent>
+                    <MudSpacer />
+                    <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCentroCosto">Nueva caja</MudButton>
+                </ToolBarContent>
+                <Columns>
+                    <PropertyColumn Property="x => x.Caja" Title="Caja">
+                        <EditTemplate>
+                            <MudForm Model="context.Item" Validation="Validator.ValidateValue">
+                                <MudSelect @bind-Value="context.Item.Caja" Margin="Margin.Dense"
+                                           Variant="Variant.Text" Style="margin-top:0"
+                                           For="() => context.Item.Caja"
+                                           ToStringFunc="x => x?.Nombre" >
+                                    <ForIn Items="Cajas" Context="caja">
+                                        <MudSelectItem T="CajaModel" Value="caja" />
+                                    </ForIn>
+                                </MudSelect>
+                            </MudForm>
+                        </EditTemplate>
+                        <CellTemplate>
+                            @context.Item.Caja?.Nombre
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.NoUsaZona" Title="Nombre del servicio">
+                        <EditTemplate>
+                            <MudSwitch @bind-Value="context.Item.NoUsaZona" Style="margin-top:0" Color="Color.Primary" />
+                        </EditTemplate>
+                    </PropertyColumn>
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudTooltip Text="Eliminar">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="() => RemoveCentroCosto(context.Item)" />
+                            </MudTooltip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        </MudForm>
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
@@ -44,6 +51,7 @@
 </MudDialog>
 
 @code {
+    private MudForm form = default!;
     private ObservableCollection<CajaServicioModel> cajasPorServicio = [];
 
     [Parameter]
@@ -98,13 +106,18 @@
     {
         if (Servicio is not null && CommitChanges is not null)
         {
-            Servicio.Cajas = [..cajasPorServicio];
+            await form.Validate();
 
-            bool result = await CommitChanges(Servicio);
-
-            if (result)
+            if (form.IsValid)
             {
-                await ChangeIsOpen(false);
+                Servicio.Cajas = [.. cajasPorServicio];
+
+                bool result = await CommitChanges(Servicio);
+
+                if (result)
+                {
+                    await ChangeIsOpen(false);
+                }
             }
         }
     }

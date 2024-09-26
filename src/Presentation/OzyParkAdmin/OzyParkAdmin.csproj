@@ -29,7 +29,8 @@
     <Folder Include="Components\Admin\Bodegas\" />
     <Folder Include="Components\Admin\CajaControl\Coordenadas\" />
     <Folder Include="Components\Admin\CajaControl\CoordenadasEmergencia\" />
-    <Folder Include="Components\Admin\Mantenedores\Cupos\" />
+    <Folder Include="Components\Admin\Mantenedores\Cupos\Controls\" />
+    <Folder Include="Components\Admin\Mantenedores\Cupos\Models\" />
     <Folder Include="Components\Admin\Reportes\" />
   </ItemGroup>
 

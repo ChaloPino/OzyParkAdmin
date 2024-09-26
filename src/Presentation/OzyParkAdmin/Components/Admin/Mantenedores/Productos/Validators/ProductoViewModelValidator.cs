@@ -58,6 +58,8 @@ public sealed class ProductoViewModelValidator : BaseValidator<ProductoViewModel
         RuleFor(x => x.Orden)
             .InclusiveBetween(1, int.MaxValue);
 
+        RuleForEach(x => x.Partes)
+            .SetValidator(new ProductoParteModelValidator());
     }
 
     private async Task ValidateDuplicateAsync(string aka, ValidationContext<ProductoViewModel> context, CancellationToken cancellationToken)

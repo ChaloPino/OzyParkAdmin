@@ -360,16 +360,10 @@
 
             return result.Match(
                 onSuccess: info => LoadServicioInfo(servicio, info),
-                onFailure: AddFailure);
+                onFailure: failure => AddFailure(failure, "cargar el detalle del servicio"));
         }
 
         return true;
-    }
-
-    private bool AddFailure(Failure failure)
-    {
-        Snackbar.AddFailure(failure, "cargar el detalle del servicio");
-        return false;
     }
 
     private bool LoadServicioInfo(ServicioViewModel servicio, ServicioFullInfo info)

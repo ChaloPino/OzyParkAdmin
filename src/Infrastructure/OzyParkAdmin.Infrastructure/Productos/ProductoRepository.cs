@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dapper;
+using Microsoft.EntityFrameworkCore;
 using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.CentrosCosto;
@@ -15,47 +16,78 @@ namespace OzyParkAdmin.Infrastructure.Productos;
 /// </summary>
 public sealed class ProductoRepository(OzyParkAdminContext context) : Repository<Producto>(context), IProductoRepository
 {
-    private readonly DbSet<CategoriaProducto> _categoriaSet = context.Set<CategoriaProducto>();
+    /// <inheritdoc/>
+    public async Task<bool> ExistAkaAsync(int productoId, int franquiciaId, string? aka, CancellationToken cancellationToken) =>
+        await EntitySet.AnyAsync(x => x.FranquiciaId == franquiciaId && x.Aka == aka && x.Id != productoId, cancellationToken);
 
     /// <inheritdoc/>
-    public async Task<List<ProductoInfo>> ListComplementosByCategoriaAsync(int categoriaId, CancellationToken cancellationToken)
+    public async Task<Producto?> FindByIdAsync(int id, CancellationToken cancellationToken) =>
+        await EntitySet.AsSplitQuery().Include("Imagen").Include("Complementos.Complemento").Include("Relacionados.Relacionado").Include("Partes.Parte").Include("Cajas").FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+    /// <inheritdoc/>
+    public async Task<Producto?> FindByIdAsync(int id, ProductoDetail incluirDetalle, CancellationToken cancellationToken)
     {
-        List<int> categorias = [];
+        IQueryable<Producto> query = EntitySet.IgnoreAutoIncludes().AsSplitQuery();
 
-        await ConseguirCategoriasProductosRecursivoAsync(categoriaId, categorias, cancellationToken).ConfigureAwait(false);
+        if ((incluirDetalle & ProductoDetail.Cajas) == ProductoDetail.Cajas)
+        {
+            query = query.Include("Cajas");
+        }
 
+        if ((incluirDetalle & ProductoDetail.Partes) == ProductoDetail.Partes)
+        {
+            query = query.Include("Partes.Parte");
+        }
+
+        if ((incluirDetalle & ProductoDetail.Complementos) == ProductoDetail.Complementos)
+        {
+            query = query.Include("Complementos.Complemento");
+        }
+
+        if ((incluirDetalle & ProductoDetail.Relacionados) == ProductoDetail.Relacionados)
+        {
+            query = query.Include("Complementos.Complemento");
+        }
+
+        return await query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<Producto>> FindByIdsAsync(int[] productoIds, CancellationToken cancellationToken) =>
+        await EntitySet.AsSplitQuery().Where(x => productoIds.Contains(x.Id)).ToListAsync(cancellationToken);
+
+    /// <inheritdoc/>
+    public async Task<Producto?> FindByAkaAsync(int franquiciaId, string? aka, CancellationToken cancellationToken) =>
+        await EntitySet.FirstOrDefaultAsync(x => x.FranquiciaId == franquiciaId && x.Aka == aka, cancellationToken);
+
+    /// <inheritdoc/>
+    public async Task<List<ProductoInfo>> ListComplementosByCategoriaAsync(int categoriaId, int exceptoProductoId, CancellationToken cancellationToken)
+    {
+        CommandDefinition command = new(
+            commandText: "qsp_retornaComplementos_prc",
+                parameters: new Dictionary<string, object> { ["@EI_categoriaId"] = categoriaId, ["@EI_productoId"] = exceptoProductoId },
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken);
+        var productos = await Context.Database.GetDbConnection().QueryAsync<ProductoInfo>(command);
+        return productos.ToList();
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<ProductoInfo>> ListProductosParaPartesAsync(int franquiciaId, int exceptoProductoId, CancellationToken cancellationToken)
+    {
         return await EntitySet
-            .Where(x => categorias.Contains(x.Id) && x.EsComplemento)
-            .OrderBy(x => x.Nombre)
-            .Select(x => new ProductoInfo {  Id = x.Id, Aka = x.Aka, Nombre = x.Nombre, EsActivo = x.EsActivo })
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(x => x.FranquiciaId == franquiciaId && x.Id != exceptoProductoId && x.TipoProducto.ControlaInventario)
+            .Select(x => new ProductoInfo {  Id = x.Id, Aka = x.Aka, Sku = x.Sku, Nombre = x.Nombre, EsActivo = x.EsActivo })
             .ToListAsync(cancellationToken);
     }
 
-    private async Task ConseguirCategoriasProductosRecursivoAsync(int categoriaId, List<int> categorias, CancellationToken cancellationToken)
+    /// <inheritdoc/>
+    public async Task<int> MaxIdAsync(CancellationToken cancellationToken)
     {
-        CategoriaProducto? categoria = await _categoriaSet
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Include(x => x.Padre)
-            .Include(x => x.Hijos)
-            .FirstOrDefaultAsync(x => x.Id == categoriaId, cancellationToken);
-
-        if (categoria is null)
-        {
-            return;
-        }
-
-        categorias.Add(categoria.Id);
-
-        if (categoria.Padre is not null && !categorias.Contains(categoria.Padre.Id))
-        {
-            await ConseguirCategoriasProductosRecursivoAsync(categoria.Padre.Id, categorias, cancellationToken);
-        }
-
-        foreach (CategoriaProducto hijo in categoria.Hijos)
-        {
-            await ConseguirCategoriasProductosRecursivoAsync(hijo.Id, categorias, cancellationToken);
-        }
+        int? id = await EntitySet.MaxAsync(x => (int?)x.Id, cancellationToken);
+        return id ?? 0;
     }
 
     /// <inheritdoc/>
@@ -115,6 +147,11 @@ public sealed class ProductoRepository(OzyParkAdminContext context) : Repository
             UltimaModificacion = x.UltimaModificacion,
             UsuarioModificacion = new UsuarioInfo { Id = x.UsuarioModificacion.Id, UserName = x.UsuarioModificacion.UserName, FriendlyName = x.UsuarioModificacion.FriendlyName },
             EsActivo = x.EsActivo,
+            Complementos = x.Complementos.Select(c => new ProductoComplementarioInfo
+            {
+                Complemento = new ProductoInfo {  Id = c.Complemento.Id, Aka = c.Complemento.Aka, Sku = c.Complemento.Sku, Nombre = c.Complemento.Nombre, EsActivo = c.Complemento.EsActivo },
+                Orden = c.Orden,
+            })
         }).ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return new PagedList<ProductoFullInfo>
@@ -125,27 +162,4 @@ public sealed class ProductoRepository(OzyParkAdminContext context) : Repository
             Items = list,
         };
     }
-
-    /// <inheritdoc/>
-    public async Task<Producto?> FindByIdAsync(int id, CancellationToken cancellationToken) =>
-        await EntitySet.AsSplitQuery().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-
-    /// <inheritdoc/>
-    public async Task<IEnumerable<Producto>> FindByIdsAsync(int[] productoIds, CancellationToken cancellationToken) =>
-        await EntitySet.AsSplitQuery().Where(x => productoIds.Contains(x.Id)).ToListAsync(cancellationToken);
-
-    /// <inheritdoc/>
-    public async Task<int> MaxIdAsync(CancellationToken cancellationToken)
-    {
-        int? id = await EntitySet.MaxAsync(x => (int?)x.Id, cancellationToken);
-        return id ?? 0;
-    }
-
-    /// <inheritdoc/>
-    public async Task<Producto?> FindByAkaAsync(int franquiciaId, string? aka, CancellationToken cancellationToken) =>
-        await EntitySet.FirstOrDefaultAsync(x => x.FranquiciaId == franquiciaId && x.Aka == aka, cancellationToken);
-
-    /// <inheritdoc/>
-    public async Task<bool> ExistAkaAsync(int productoId, int franquiciaId, string? aka, CancellationToken cancellationToken) =>
-        await EntitySet.AnyAsync(x => x.FranquiciaId == franquiciaId && x.Aka == aka && x.Id != productoId, cancellationToken);
 }

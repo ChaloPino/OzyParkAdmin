@@ -274,22 +274,22 @@ internal static class ServicioMappers
     private static TipoVigencia ToEntity(this TipoVigenciaModel tipoVigencia) =>
         new(tipoVigencia.Id, tipoVigencia.Aka, tipoVigencia.Nombre, tipoVigencia.EsActivo);
 
-    public static AssignCentrosCosto ToAssignCentrosCosto(this ServicioViewModel servicio) =>
+    public static AssignCentrosCostoToServicio ToAssignCentrosCosto(this ServicioViewModel servicio) =>
         new(servicio.Id, servicio.CentrosCosto.ToInfo());
 
-    public static AssignTramos ToAssignTramos(this ServicioViewModel servicio) =>
+    public static AssignTramosToServicio ToAssignTramos(this ServicioViewModel servicio) =>
         new(servicio.Id, servicio.Tramos.ToInfo());
 
-    public static AssignPermisos ToAssignPermisos(this ServicioViewModel servicio) =>
+    public static AssignPermisosToServicio ToAssignPermisos(this ServicioViewModel servicio) =>
         new(servicio.Id, servicio.Permisos.ToInfo());
 
-    public static AssignZonas ToAssignZonas(this ServicioViewModel servicio) =>
+    public static AssignZonasToServicio ToAssignZonas(this ServicioViewModel servicio) =>
         new(servicio.Id, servicio.Zonas.ToInfo());
 
-    public static AssignGruposEtarios ToAssignGruposEtarios(this ServicioViewModel servicio) =>
+    public static AssignGruposEtariosToServicio ToAssignGruposEtarios(this ServicioViewModel servicio) =>
         new(servicio.Id, servicio.GruposEtarios.ToInfo());
 
-    public static AssignCajas ToAssignCajas(this ServicioViewModel servicio) =>
+    public static AssignCajasToServicio ToAssignCajas(this ServicioViewModel servicio) =>
         new(servicio.Id, servicio.Cajas.ToInfo());
 
     private static ImmutableArray<CentroCostoServicioInfo> ToInfo(this IEnumerable<CentroCostoServicioModel> source) =>

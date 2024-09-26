@@ -47,6 +47,7 @@ internal static class ProductoMapper
             nameof(ProductoViewModel.EsComplemento) => filterExpressions.Add(x => x.EsComplemento, filterDefinition.Operator!, filterDefinition.Value),
             nameof(ProductoViewModel.Orden) => filterExpressions.Add(x => x.Orden, filterDefinition.Operator!, filterDefinition.Value),
             nameof(ProductoViewModel.EsActivo) => filterExpressions.Add(x => x.EsActivo, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(ProductoViewModel.EnInventario) => filterExpressions.Add(x => x.EnInventario, filterDefinition.Operator!, filterDefinition.Value),
             "UsuarioCreacion.FriendlyName" => filterExpressions.Add(x => x.UsuarioCreacion.FriendlyName, filterDefinition.Operator!, filterDefinition.Value),
             nameof(ProductoViewModel.FechaSistema) => filterExpressions.Add(x => x.FechaSistema, filterDefinition.Operator!, filterDefinition.Value),
             "UsuarioModificacion.FriendlyName" => filterExpressions.Add(x => x.UsuarioModificacion.FriendlyName, filterDefinition.Operator!, filterDefinition.Value),
@@ -84,6 +85,7 @@ internal static class ProductoMapper
             nameof(ProductoViewModel.EsComplemento) => sortExpressions.Add(x => x.EsComplemento, sortDefinition.Descending),
             nameof(ProductoViewModel.Orden) => sortExpressions.Add(x => x.Orden, sortDefinition.Descending),
             nameof(ProductoViewModel.EsActivo) => sortExpressions.Add(x => x.EsActivo, sortDefinition.Descending),
+            nameof(ProductoViewModel.EnInventario) => sortExpressions.Add(x => x.EnInventario, sortDefinition.Descending),
             "UsuarioCreacion.FriendlyName" => sortExpressions.Add(x => x.UsuarioCreacion.FriendlyName, sortDefinition.Descending),
             nameof(ProductoViewModel.FechaSistema) => sortExpressions.Add(x => x.FechaSistema, sortDefinition.Descending),
             "UsuarioModificacion.FriendlyName" => sortExpressions.Add(x => x.UsuarioModificacion.FriendlyName, sortDefinition.Descending),
@@ -118,10 +120,7 @@ internal static class ProductoMapper
             UsuarioModificacion = producto.UsuarioModificacion,
             UltimaModificacion = producto.UltimaModificacion,
             EsActivo = producto.EsActivo,
-            Cajas = [.. producto.Cajas],
             Complementos = producto.Complementos.ToModel(),
-            Relacionados = producto.Relacionados.ToModel(),
-            Partes = producto.Partes.ToModel(),
         };
 
     public static CatalogoImagenModel ToModel(this CatalogoImagenInfo imagen) =>
@@ -190,4 +189,10 @@ internal static class ProductoMapper
 
     private static ProductoComplementarioInfo ToInfo(ProductoComplementarioModel complementario) =>
         new() { Complemento = complementario.Complemento, Orden = complementario.Orden };
+
+    public static ImmutableArray<ProductoParteInfo> ToInfo(this IEnumerable<ProductoParteModel> source) =>
+        [.. source.Select(ToInfo)];
+
+    private static ProductoParteInfo ToInfo(ProductoParteModel productoParte) =>
+        new() {  Parte = productoParte.Parte, Cantidad = productoParte.Cantidad, EsOpcional = productoParte.EsOpcional };
 }

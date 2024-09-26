@@ -35,6 +35,16 @@ public interface IProductoRepository
     Task<Producto?> FindByIdAsync(int id, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Busca un producto por su id indicando el detalle que se quiere incluir.
+    /// </summary>
+    /// <param name="id">El id del producto a buscar.</param>
+    /// <param name="incluirDetalle">El detalle del producto que se quiere incluir en la consulta.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El producto si existe.</returns>
+    Task<Producto?> FindByIdAsync(int id, ProductoDetail incluirDetalle, CancellationToken cancellationToken);
+
+
+    /// <summary>
     /// Busca los productos que coincidan con <paramref name="productoIds"/>.
     /// </summary>
     /// <param name="productoIds">Los ids de producto.</param>
@@ -46,9 +56,25 @@ public interface IProductoRepository
     /// Lista todos los productos que son complementos que pertenecen a una categoría de producto.
     /// </summary>
     /// <param name="categoriaId">El id de la categoría de producto.</param>
+    /// <param name="exceptoProductoId">El id del producto que no se quiere que se muestre en la lista.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>La lista de <see cref="ProductoInfo"/> que son complementos.</returns>
-    Task<List<ProductoInfo>> ListComplementosByCategoriaAsync(int categoriaId, CancellationToken cancellationToken);
+    /// <remarks>
+    /// El <paramref name="exceptoProductoId"/> tiene que ir con un valor distinto a <c>0</c> cuando se está consultando específicamente para editar ese producto.
+    /// </remarks>
+    Task<List<ProductoInfo>> ListComplementosByCategoriaAsync(int categoriaId, int exceptoProductoId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lista todos los productos que pueden ser partes de otro producto.
+    /// </summary>
+    /// <param name="franquiciaId">El id de la franquicia a la que pertenecen los productos.</param>
+    /// <param name="exceptoProductoId">El id del producto que no se quiere que se muestre en la lista.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>La lista de <see cref="ProductoInfo"/> que son complementos.</returns>
+    /// <remarks>
+    /// El <paramref name="exceptoProductoId"/> tiene que ir con un valor distinto a <c>0</c> cuando se está consultando específicamente para editar ese producto.
+    /// </remarks>
+    Task<List<ProductoInfo>> ListProductosParaPartesAsync(int franquiciaId, int exceptoProductoId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Devuelve el id máximo.

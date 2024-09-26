@@ -8,4 +8,4 @@ namespace OzyParkAdmin.Application.Servicios.Assigns;
 /// </summary>
 /// <param name="ServicioId">El id del servicio.</param>
 /// <param name="GruposEtarios">Los grupos etarios a ser asignados.</param>
-public sealed record AssignGruposEtarios(int ServicioId, ImmutableArray<GrupoEtarioInfo> GruposEtarios) : IServicioStateChangeable;
+public sealed record AssignGruposEtariosToServicio(int ServicioId, ImmutableArray<GrupoEtarioInfo> GruposEtarios) : IServicioStateChangeable;

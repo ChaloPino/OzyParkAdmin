@@ -4,18 +4,18 @@ using OzyParkAdmin.Domain.Shared;
 namespace OzyParkAdmin.Application.Servicios.Assigns;
 
 /// <summary>
-/// El manejador de <see cref="AssignTramos"/>.
+/// El manejador de <see cref="AssignTramosToServicio"/>.
 /// </summary>
-public sealed class AssignTramosHandler : ServicioStateChangeableHandler<AssignTramos>
+public sealed class AssignTramosToServicioHandler : ServicioStateChangeableHandler<AssignTramosToServicio>
 {
     private readonly ServicioManager _servicioManager;
 
     /// <summary>
-    /// Crea una nueva instancia de <see cref="AssignTramosHandler"/>.
+    /// Crea una nueva instancia de <see cref="AssignTramosToServicioHandler"/>.
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="servicioManager">El <see cref="ServicioManager"/>.</param>
-    public AssignTramosHandler(IOzyParkAdminContext context, ServicioManager servicioManager) 
+    public AssignTramosToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager) 
         : base(context)
     {
         ArgumentNullException.ThrowIfNull(servicioManager);
@@ -23,6 +23,6 @@ public sealed class AssignTramosHandler : ServicioStateChangeableHandler<AssignT
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignTramos request, CancellationToken cancellationToken) =>
+    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignTramosToServicio request, CancellationToken cancellationToken) =>
         await _servicioManager.AssignTramosAsync(request.ServicioId, request.Tramos, cancellationToken);
 }

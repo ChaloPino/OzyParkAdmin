@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.CatalogoImagenes;
+﻿using OzyParkAdmin.Domain.Cajas;
+using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.Contabilidad;
@@ -9,7 +10,7 @@ using System.Collections.Immutable;
 namespace OzyParkAdmin.Domain.Productos;
 
 /// <summary>
-/// Contiene todos los servicios transaccionales del <see cref="Producto"/>
+/// Administra toda la lógica de negocio del <see cref="Producto"/>
 /// </summary>
 public sealed class ProductoManager
 {
@@ -17,6 +18,7 @@ public sealed class ProductoManager
     private readonly ICategoriaProductoRepository _categoriaRepository;
     private readonly ICentroCostoRepository _centroCostoRepository;
     private readonly IUsuarioRepository _usuarioRepository;
+    private readonly ICajaRepository _cajaRepository;
     private readonly CatalogoImagenService _catalogoImagenService;
 
     /// <summary>
@@ -26,23 +28,27 @@ public sealed class ProductoManager
     /// <param name="categoriaRepository">El <see cref="ICategoriaProductoRepository"/>.</param>
     /// <param name="centroCostoRepository">El <see cref="ICentroCostoRepository"/>.</param>
     /// <param name="usuarioRepository">El <see cref="IUsuarioRepository"/>.</param>
+    /// <param name="cajaRepository">El <see cref="ICajaRepository"/>.</param>
     /// <param name="catalogoImagenService">El <see cref="CatalogoImagenService"/>.</param>
     public ProductoManager(
         IProductoRepository repository,
         ICategoriaProductoRepository categoriaRepository,
         ICentroCostoRepository centroCostoRepository,
         IUsuarioRepository usuarioRepository,
+        ICajaRepository cajaRepository,
         CatalogoImagenService catalogoImagenService)
     {
         ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(categoriaRepository);
         ArgumentNullException.ThrowIfNull(centroCostoRepository);
         ArgumentNullException.ThrowIfNull(usuarioRepository);
+        ArgumentNullException.ThrowIfNull(cajaRepository);
         ArgumentNullException.ThrowIfNull(catalogoImagenService);
         _repository = repository;
         _categoriaRepository = categoriaRepository;
         _centroCostoRepository = centroCostoRepository;
         _usuarioRepository = usuarioRepository;
+        _cajaRepository = cajaRepository;
         _catalogoImagenService = catalogoImagenService;
     }
 
@@ -228,6 +234,128 @@ public sealed class ProductoManager
             fechaAlta,
             usuarioCreacion,
             productoComplementos);
+    }
+
+    /// <summary>
+    /// Realiza la activación de un producto.
+    /// </summary>
+    /// <param name="productoId">El id del producto a activar.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El resultado de la activación del producto.</returns>
+    public async Task<ResultOf<Producto>> ActivarProductoAsync(int productoId, CancellationToken cancellationToken)
+    {
+        Producto? producto = await _repository.FindByIdAsync(productoId, cancellationToken);
+
+        if (producto is null)
+        {
+            return new NotFound();
+        }
+
+        producto.Activar();
+        return producto;
+    }
+
+    /// <summary>
+    /// Realiza la desactivación de un producto.
+    /// </summary>
+    /// <param name="productoId">El id del producto a desactivar.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El resultado de la desactivación del producto.</returns>
+    public async Task<ResultOf<Producto>> DesactivarProductoAsync(int productoId, CancellationToken cancellationToken)
+    {
+        Producto? producto = await _repository.FindByIdAsync(productoId, cancellationToken);
+
+        if (producto is null)
+        {
+            return new NotFound();
+        }
+
+        producto.Desactivar();
+        return producto;
+    }
+
+    /// <summary>
+    /// Realiza el bloqueo de un producto.
+    /// </summary>
+    /// <param name="productoId">El id del producto a bloquear.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El resultado del bloqueo del producto.</returns>
+    public async Task<ResultOf<Producto>> BloquearProductoAsync(int productoId, CancellationToken cancellationToken)
+    {
+        Producto? producto = await _repository.FindByIdAsync(productoId, cancellationToken);
+
+        if (producto is null)
+        {
+            return new NotFound();
+        }
+
+        producto.Bloquear();
+        return producto;
+    }
+
+    /// <summary>
+    /// Realiza el desbloqueo de un producto.
+    /// </summary>
+    /// <param name="productoId">El id del producto a desbloquear.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El resultado del desbloqueo del producto.</returns>
+    public async Task<ResultOf<Producto>> DesbloquearProductoAsync(int productoId, CancellationToken cancellationToken)
+    {
+        Producto? producto = await _repository.FindByIdAsync(productoId, cancellationToken);
+
+        if (producto is null)
+        {
+            return new NotFound();
+        }
+
+        producto.Desbloquear();
+        return producto;
+    }
+
+    /// <summary>
+    /// Asigna o desasigna cajas de un producto.
+    /// </summary>
+    /// <param name="productoId">El id del producto a asignar las cajas.</param>
+    /// <param name="cajasAsociar">Las cajas a asignar.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El resultado de asignar las cajas.</returns>
+    public async Task<ResultOf<Producto>> AssignCajasAsync(int productoId, ImmutableArray<CajaInfo> cajasAsociar, CancellationToken cancellationToken)
+    {
+        Producto? producto = await _repository.FindByIdAsync(productoId, ProductoDetail.Todo, cancellationToken);
+
+        if (producto is null)
+        {
+            return new NotFound();
+        }
+
+        IEnumerable<Caja> cajas = await _cajaRepository.FindByIdsAsync(cajasAsociar.Select(x => x.Id).ToArray(), cancellationToken);
+
+        return producto.AssignCajas(cajas);
+    }
+
+    /// <summary>
+    /// Asigna o desasigna partes de un producto.
+    /// </summary>
+    /// <param name="productoId">El id del producto al que se le asignarán las partes..</param>
+    /// <param name="partesAsignar">Las partes a asignar.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El resultado de asignar las partes.</returns>
+    public async Task<ResultOf<Producto>> AssignPartesAsync(int productoId, ImmutableArray<ProductoParteInfo> partesAsignar, CancellationToken cancellationToken)
+    {
+        Producto? producto = await _repository.FindByIdAsync(productoId, ProductoDetail.Todo, cancellationToken);
+
+        if (producto is null)
+        {
+            return new NotFound();
+        }
+
+        IEnumerable<Producto> productos = await _repository.FindByIdsAsync(partesAsignar.Select(x => x.Parte.Id).ToArray(), cancellationToken);
+
+        IEnumerable<(ProductoParteInfo Info, Producto Producto)> partes = (from parte in partesAsignar
+                                                                           join productoParte in productos on parte.Parte.Id equals productoParte.Id
+                                                                           select (parte, productoParte)).ToList();
+
+        return producto.AssignPartes(partes);
     }
 
     private async Task<int> GenerateIdAysnc(CancellationToken cancellationToken)

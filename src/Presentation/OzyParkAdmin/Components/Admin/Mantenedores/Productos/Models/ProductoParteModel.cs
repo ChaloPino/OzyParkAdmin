@@ -10,15 +10,15 @@ public sealed record ProductoParteModel
     /// <summary>
     /// La parte del producto.
     /// </summary>
-    public required ProductoInfo Parte { get; set; }
+    public ProductoInfo Parte { get; set; } = default!;
 
     /// <summary>
     /// La cantidad de la parte.
     /// </summary>
-    public required decimal Cantidad { get; set; }
+    public decimal Cantidad { get; set; } = 1;
 
     /// <summary>
     /// Si la parte es opcional.
     /// </summary>
-    public required bool EsOpcional { get; set; }
+    public bool EsOpcional { get; set; }
 }

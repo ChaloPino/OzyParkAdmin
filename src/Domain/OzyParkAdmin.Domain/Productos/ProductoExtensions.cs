@@ -25,10 +25,10 @@ public static class ProductoExtensions
             Sku = producto.Sku,
             Nombre = producto.Nombre,
             FranquiciaId = producto.FranquiciaId,
-            CentroCosto = producto.CentroCosto.ToInfo(),
-            Categoria = producto.Categoria.ToInfo(),
-            CategoriaDespliegue = producto.CategoriaDespliegue.ToInfo(),
-            Imagen = producto.Imagen.ToInfo(),
+            CentroCosto = producto.CentroCosto?.ToInfo() ?? null!,
+            Categoria = producto.Categoria?.ToInfo() ?? null!,
+            CategoriaDespliegue = producto.CategoriaDespliegue?.ToInfo() ?? null!,
+            Imagen = producto.Imagen?.ToInfo() ?? null!,
             Familia = producto.Familia,
             TipoProducto = producto.TipoProducto,
             Orden = producto.Orden,
@@ -36,14 +36,14 @@ public static class ProductoExtensions
             EsComplemento = producto.EsComplemento,
             EnInventario = producto.EnInventario,
             FechaSistema = producto.FechaSistema,
-            UsuarioCreacion = producto.UsuarioCreacion.ToInfo(),
+            UsuarioCreacion = producto.UsuarioCreacion?.ToInfo() ?? null!,
             UltimaModificacion = producto.UltimaModificacion,
-            UsuarioModificacion = producto.UsuarioModificacion.ToInfo(),
+            UsuarioModificacion = producto.UsuarioModificacion?.ToInfo() ?? null!,
             EsActivo = producto.EsActivo,
-            Cajas = producto.Cajas.ToInfo(),
             Complementos = producto.Complementos.ToInfo(),
-            Relacionados = producto.Relacionados.ToInfo(),
+            Cajas = producto.Cajas.ToInfo(),
             Partes = producto.Partes.ToInfo(),
+            Relacionados = producto.Relacionados.ToInfo(),
         };
 
     private static ImmutableArray<ProductoComplementarioInfo> ToInfo(this IEnumerable<ProductoComplementario> source) =>
@@ -70,5 +70,5 @@ public static class ProductoExtensions
     /// <param name="producto">El producto a convertir.</param>
     /// <returns>El <see cref="ProductoInfo"/> convertido desde <paramref name="producto"/>.</returns>
     public static ProductoInfo ToInfo(this Producto producto) =>
-        new() {  Id = producto.Id, Aka = producto.Aka, Nombre = producto.Nombre, EsActivo = producto.EsActivo };
+        new() {  Id = producto.Id, Aka = producto.Aka, Sku = producto.Sku, Nombre = producto.Nombre, EsActivo = producto.EsActivo };
 }

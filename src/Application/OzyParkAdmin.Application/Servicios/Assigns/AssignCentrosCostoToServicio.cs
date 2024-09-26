@@ -8,4 +8,4 @@ namespace OzyParkAdmin.Application.Servicios.Assigns;
 /// </summary>
 /// <param name="ServicioId">El id del servicio.</param>
 /// <param name="CentrosCosto">Los centros de costo a asignar.</param>
-public sealed record AssignCentrosCosto(int ServicioId, ImmutableArray<CentroCostoServicioInfo> CentrosCosto) : IServicioStateChangeable;
+public sealed record AssignCentrosCostoToServicio(int ServicioId, ImmutableArray<CentroCostoServicioInfo> CentrosCosto) : IServicioStateChangeable;

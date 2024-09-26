@@ -215,6 +215,18 @@ public sealed class Producto
         return this;
     }
 
+    internal void Activar() =>
+        EsActivo = true;
+
+    internal void Desactivar() =>
+        EsActivo = false;
+
+    internal void Bloquear() =>
+        EnInventario = true;
+
+    internal void Desbloquear() =>
+        EnInventario = false;
+
     private void AssignFamilia(AgrupacionContable familia)
     {
         if (_productoAgrupacion is not null && _productoAgrupacion.AgrupacionContable != familia)
@@ -257,4 +269,63 @@ public sealed class Producto
 
     private static void UpdateComplemento((ProductoComplementario Complementario, int Orden) info) =>
         info.Complementario.Update(info.Orden);
+
+    internal ResultOf<Producto> AssignCajas(IEnumerable<Caja> cajasToAssign)
+    {
+        List<Caja> toAdd = (from cajaToAssign in cajasToAssign
+                            join persited in _cajas on cajaToAssign.Id equals persited.Id into cajas
+                            from caja in cajas.DefaultIfEmpty()
+                            where caja is null
+                            select cajaToAssign).ToList();
+
+        List<Caja> toRemove = (from cajaToRemove in _cajas
+                               join cajaToAssign in cajasToAssign on cajaToRemove.Id equals cajaToAssign.Id into cajas
+                               from caja in cajas.DefaultIfEmpty()
+                               where caja is null
+                               select cajaToRemove).ToList();
+
+        toAdd.ForEach(AddCaja);
+        toRemove.ForEach(RemoveCaja);
+
+        return this;
+    }
+
+    private void AddCaja(Caja caja) =>
+        _cajas.Add(caja);
+
+    private void RemoveCaja(Caja caja) =>
+        _cajas.Remove(caja);
+
+    internal ResultOf<Producto> AssignPartes(IEnumerable<(ProductoParteInfo Info, Producto Producto)> partes)
+    {
+        var toAdd = (from parteToAssign in partes
+                     join persisted in _partes on parteToAssign.Producto.Id equals persisted.Parte.Id into defPartes
+                     from parte in defPartes.DefaultIfEmpty()
+                     where parte is null
+                     select (parteToAssign.Producto, parteToAssign.Info.Cantidad, parteToAssign.Info.EsOpcional)).ToList();
+
+        var toRemove = (from parteToRemove in _partes
+                        join parteToAssign in partes on parteToRemove.Parte.Id equals parteToAssign.Producto.Id into defPartes
+                        from parte in defPartes.DefaultIfEmpty()
+                        where parte.Producto is null
+                        select parteToRemove).ToList();
+
+        var toUpdate = (from parteToUpdate in _partes
+                        join parteToAssign in partes on parteToUpdate.Parte.Id equals parteToAssign.Producto.Id
+                        select (parteToUpdate, parteToAssign.Info.Cantidad, parteToAssign.Info.EsOpcional)).ToList();
+
+        toAdd.ForEach(AddParte);
+        toRemove.ForEach(RemoveParte);
+        toUpdate.ForEach(UpdateParte);
+        return this;
+    }
+
+    private void AddParte((Producto Parte, decimal Cantidad, bool EsOpcional) parteToAdd) =>
+        _partes.Add(ProductoParte.Create(parteToAdd.Parte, parteToAdd.Cantidad, parteToAdd.EsOpcional));
+
+    private void RemoveParte(ProductoParte parteToRemove) =>
+        _partes.Remove(parteToRemove);
+
+    private static void UpdateParte((ProductoParte Parte, decimal Cantidad, bool EsOpcional) parteToUpdate) =>
+        parteToUpdate.Parte.Update(parteToUpdate.Cantidad, parteToUpdate.EsOpcional);
 }

@@ -16,6 +16,11 @@ public sealed record ProductoInfo
     public string Aka { get; init; } = string.Empty;
 
     /// <summary>
+    /// El sky del producto.
+    /// </summary>
+    public string Sku { get; init; } = string.Empty;
+
+    /// <summary>
     /// El nombre del producto.
     /// </summary>
     public string Nombre { get; init; } = string.Empty;

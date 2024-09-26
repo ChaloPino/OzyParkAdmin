@@ -25,7 +25,6 @@ internal sealed class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.Navigation(x => x.CategoriaDespliegue).AutoInclude();
 
         builder.HasOne(x => x.Imagen).WithMany().HasForeignKey("CatalogoImagenAka");
-        builder.Navigation(x => x.Imagen).AutoInclude();
 
         builder.HasOne(x => x.UsuarioCreacion).WithMany().HasForeignKey("UsuarioCreacionId");
         builder.Navigation(x => x.UsuarioCreacion).AutoInclude();

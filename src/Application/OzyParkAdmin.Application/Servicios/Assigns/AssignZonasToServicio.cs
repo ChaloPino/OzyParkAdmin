@@ -8,4 +8,4 @@ namespace OzyParkAdmin.Application.Servicios.Assigns;
 /// </summary>
 /// <param name="ServicioId">El id del servicio.</param>
 /// <param name="Zonas">Las zonas a ser asignadas.</param>
-public sealed record AssignZonas(int ServicioId, ImmutableArray<ZonaPorTramoInfo> Zonas) : IServicioStateChangeable;
+public sealed record AssignZonasToServicio(int ServicioId, ImmutableArray<ZonaPorTramoInfo> Zonas) : IServicioStateChangeable;

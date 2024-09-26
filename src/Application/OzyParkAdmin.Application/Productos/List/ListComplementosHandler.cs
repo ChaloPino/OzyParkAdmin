@@ -24,6 +24,6 @@ public sealed class ListComplementosHandler : MediatorRequestHandler<ListComplem
     protected override async Task<ResultListOf<ProductoInfo>> Handle(ListComplementos request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        return await _repository.ListComplementosByCategoriaAsync(request.CategoriaId, cancellationToken);
+        return await _repository.ListComplementosByCategoriaAsync(request.CategoriaId, request.ExceptoProductoId, cancellationToken);
     }
 }

@@ -1,0 +1,184 @@
+﻿@using System.Collections.ObjectModel
+@using OzyParkAdmin.Domain.Productos
+@inject ProductoParteModelValidator Validator
+@inject ProductoViewModelValidator ProductoValidator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <IfThen Condition="Producto?.Loading ?? false">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudForm Model="Producto" @ref="form" Validation="ProductoValidator.ValidateValue" ValidationDelay="0">
+            <MudDataGrid T="ProductoParteModel" Items="partes" EditMode="DataGridEditMode.Cell" ReadOnly="false">
+                <ToolBarContent>
+                    <MudSpacer />
+                    <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddParte">Nueva parte</MudButton>
+                </ToolBarContent>
+                <Columns>
+                    <PropertyColumn Property="x => x.Parte" Title="Parte">
+                        <EditTemplate>
+                            <MudForm Model="context.Item" Validation="Validator.ValidateValue">
+                                <MudAutocomplete @bind-Value="context.Item.Parte"
+                                                 Variant="Variant.Text"
+                                                 Margin="Margin.Dense"
+                                                 Dense="true"
+                                                 Style="margin-top:0"
+                                                 SearchFunc="SearchProducto"
+                                                 ToStringFunc="GetProductoName"
+                                                 CoerceText="false"
+                                                 CoerceValue="true"
+                                                 For="() => context.Item.Parte"
+                                                 Immediate="true"/>
+                            </MudForm>
+                        </EditTemplate>
+                        <CellTemplate>
+                            @context.Item.Parte?.Nombre
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.Cantidad" Title="Cantidad">
+                        <EditTemplate>
+                            <MudForm Model="context.Item" Validation="Validator.ValidateValue">
+                                <MudNumericField @bind-Value="context.Item.Cantidad" Margin="Margin.Dense" Min="1M" Max="decimal.MaxValue"
+                                                 For="() => context.Item.Cantidad" Variant="@Variant.Text" Style="margin-top:0" Immediate="true" />
+                            </MudForm>
+                        </EditTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="x => x.EsOpcional" Title="Opcional">
+                        <EditTemplate>
+                            <MudSwitch @bind-Value="context.Item.EsOpcional" Color="Color.Primary" Style="margin-top:0" />
+                        </EditTemplate>
+                    </PropertyColumn>
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudTooltip Text="Eliminar">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.DeleteForever" OnClick="() => RemoveParte(context.Item)" />
+                            </MudTooltip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form = default!;
+
+    private ObservableCollection<ProductoParteModel> partes = [];
+    private List<ProductoInfo> productosParte { get; set; } = [];
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public ProductoViewModel? Producto { get; set; }
+
+    [Parameter]
+    public Func<int, int, Task<List<ProductoInfo>>>? LoadProductosParte { get; set; }
+
+    [Parameter]
+    public Func<ProductoViewModel, Task>? LoadProductoDetalle { get; set; }
+
+    [Parameter]
+    public Func<ProductoViewModel, Task<bool>>? CommitChanges { get; set; }
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen && Producto is not null)
+        {
+            Producto.Loading = true;
+            Task[] tasks = [LoadProductoDetalleAsync(), LoadProductosParteAsync()];
+            await Task.WhenAll(tasks);
+            partes = new(Producto.Partes);
+            Producto.Loading = false;
+        }
+    }
+
+    private async Task LoadProductoDetalleAsync()
+    {
+        if (LoadProductoDetalle is not null && Producto is not null)
+        {
+            await LoadProductoDetalle(Producto);
+        }
+    }
+
+    private async Task LoadProductosParteAsync()
+    {
+        if (LoadProductosParte is not null && Producto is not null)
+        {
+            productosParte = await LoadProductosParte(Producto.FranquiciaId, Producto.Id);
+        }
+    }
+
+    private async Task<IEnumerable<ProductoInfo>> SearchProducto(string? text, CancellationToken cancellationToken)
+    {
+        await Task.Delay(5, cancellationToken);
+
+        int[] partesId = partes.Where(x => x.Parte is not null).Select(x => x.Parte.Id).ToArray();
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return productosParte.FindAll(x => !partesId.Contains(x.Id));
+        }
+
+        return productosParte.FindAll( x =>
+            !partesId.Contains(x.Id) &&
+            (x.Sku.Contains(text, StringComparison.OrdinalIgnoreCase) ||
+            x.Nombre.Contains(text, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    private string GetProductoName(ProductoInfo? producto) =>
+        producto is null ? string.Empty : $"{producto.Nombre} ({producto.Sku})";
+
+    private void AddParte()
+    {
+        partes.Add(new ProductoParteModel());
+    }
+
+    private void RemoveParte(ProductoParteModel parte)
+    {
+        partes.Remove(parte);
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        partes = [];
+        await ChangeIsOpen(false);
+    }
+
+    private async Task CommitItemChangesAsync()
+    {
+        if (Producto is not null && CommitChanges is not null)
+        {
+            await form.Validate();
+
+            if (form.IsValid)
+            {
+                Producto.Partes = [.. partes];
+                bool result = await CommitChanges(Producto);
+
+                if (result)
+                {
+                    await ChangeIsOpen(false);
+                }
+            }
+        }
+    }
+}

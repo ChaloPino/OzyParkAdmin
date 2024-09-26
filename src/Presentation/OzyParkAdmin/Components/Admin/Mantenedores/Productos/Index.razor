@@ -7,8 +7,14 @@
 @using OzyParkAdmin.Application.Contabilidad.List
 @using OzyParkAdmin.Application.Franquicias.List
 @using OzyParkAdmin.Application.Productos
+@using OzyParkAdmin.Application.Productos.Activar
+@using OzyParkAdmin.Application.Productos.Assign
+@using OzyParkAdmin.Application.Productos.Desactivar
+@using OzyParkAdmin.Application.Productos.Find
 @using OzyParkAdmin.Application.Productos.List
+@using OzyParkAdmin.Application.Productos.Lock
 @using OzyParkAdmin.Application.Productos.Search
+@using OzyParkAdmin.Application.Productos.Unlock
 @using OzyParkAdmin.Components.Admin.Shared
 @using OzyParkAdmin.Domain.Cajas
 @using OzyParkAdmin.Domain.CategoriasProducto
@@ -24,7 +30,7 @@
 <MudText Typo="Typo.h4">Productos</MudText>
 
 <MudDataGrid @ref="dataGrid" T="ProductoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
-             ServerData="LoadProductosAsync" SortMode="SortMode.Multiple" Groupable="true" Hideable="true" GroupExpanded="true"
+             ServerData="LoadProductosAsync" SortMode="SortMode.Multiple" Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
              Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
         <MudSpacer />
@@ -33,12 +39,12 @@
     </ToolBarContent>
     <Columns>
         <HierarchyColumn T="ProductoViewModel" Hideable="false" />
-        <PropertyColumn Property="x => x.Sku" Title="Sku" Groupable="false">
+        <PropertyColumn Property="x => x.Sku" Title="Sku" Groupable="false" Hideable="false">
             <CellTemplate>
                 <MudHighlighter Text="@context.Item.Sku" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false">
+        <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false" Hideable="false">
             <CellTemplate>
                 <MudHighlighter Text="@context.Item.Aka" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
@@ -97,7 +103,7 @@
                 <MudHighlighter Text="@context.Item.Categoria.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Familia.Aka" Title="Familia contable">
+        <PropertyColumn Property="x => x.Familia.Aka" Hidden="true" Title="Familia contable">
             <GroupTemplate>
                 <StringGrouping Title="Familia contable" GroupDefinition="context" />
             </GroupTemplate>
@@ -141,6 +147,20 @@
                               StateChanged="async (esActivo) => await SaveEsActivoAsync(context.Item, esActivo)" />
             </CellTemplate>
         </PropertyColumn>
+        <PropertyColumn Property="x => x.EnInventario" Editable="false" Title="Inventario">
+            <FilterTemplate>
+                <StateFilter FilterContext="context" TrueLabel="Bloqueado" FalseLabel="Desbloqueado" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <IsActiveGrouping GroupDefinition="context" />
+            </GroupTemplate>
+            <CellTemplate>
+                <StateControl State="@context.Item.EnInventario" CanChangeStatus="context.Item.TipoProducto.ControlaInventario"
+                              TrueIcon="@Icons.Material.Filled.Lock" TrueLabel="Bloqueado" TrueColor="Color.Error"
+                              FalseIcon="@Icons.Material.Outlined.LockOpen" FalseLabel="Desbloqueado" FalseColor="Color.Success"
+                              StateChanged="async (enInventario) => await SaveEnInventarioAsync(context.Item, enInventario)" />
+            </CellTemplate>
+        </PropertyColumn>
         <PropertyColumn Property="x => x.FechaSistema" Title="Fecha creación" Hidden="true">
             <GroupTemplate>
                 <Grouping GroupDefinition="context" Title="Fecha creación" T="ProductoViewModel" TValue="DateTime" />
@@ -173,6 +193,16 @@
                     <MudTooltip Text="Editar">
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEditingAsync(context)" />
                     </MudTooltip>
+                    <MudTooltip Text="Asignar cajas">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Devices" OnClick="async () => await ShowCajasAsync(context)" />
+                    </MudTooltip>
+                    <IfThen Condition="!context.Item.TipoProducto.ControlaInventario && context.Item.TipoProducto.ControlaStock">
+                        <Then>
+                            <MudTooltip Text="Asignar partes">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.SettingsInputComponent" OnClick="async () => await ShowPartesAsync(context)" />
+                            </MudTooltip>
+                        </Then>
+                    </IfThen>
                 </div>
             </CellTemplate>
         </TemplateColumn>
@@ -258,9 +288,15 @@
 
 <CascadingValue Value="true" Name="IsNested">
     <ProductoEditDialog @bind-IsOpen="openEditing" Producto="currentProducto" CentrosCosto="centrosCosto" Franquicias="franquicias"
-        TiposProducto="tiposProducto" Categorias="categorias" CategoriasDespliegue="categoriasDespliegue" Complementos="complementos"
-        Familias="familias" LoadCategorias="OnLoadCategoriasAsync" LoadComplementos="LoadComplementosAsync"
-        CommitChanges="SaveProductoAsync" DialogOptions="dialogOptions" />
+                        TiposProducto="tiposProducto" Familias="familias"
+                        LoadCategorias="LoadCategoriasAsync" LoadCategoriasDespliegue="LoadCategoriasDespliegueAsync" LoadComplementos="LoadComplementosAsync"
+                        CommitChanges="SaveProductoAsync" DialogOptions="dialogOptions" />
+
+    <CajasDialog @bind-IsOpen="openCajas" Cajas="cajas" Producto="currentProducto" CommitChanges="SaveCajasAsync" 
+                 LoadProductoDetalle="LoadProductoDetailAsync"  DialogOptions="dialogOptions" />
+
+    <PartesDialog @bind-IsOpen="openPartes" Producto="currentProducto" LoadProductosParte="LoadProductosParteAsync" CommitChanges="SavePartesAsync" 
+                  LoadProductoDetalle="LoadProductoDetailAsync" DialogOptions="dialogOptions" />
 </CascadingValue>
 
 @code {
@@ -279,13 +315,12 @@
     private List<CentroCostoInfo> centrosCosto = [];
     private List<FranquiciaModel> franquicias = [];
     private List<CajaInfo> cajas = [];
-    private List<CategoriaProductoInfo> categorias = [];
-    private List<CategoriaProductoInfo> categoriasDespliegue = [];
     private List<TipoProducto> tiposProducto = [];
     private List<AgrupacionContable> familias = [];
-    private List<ProductoInfo> complementos = [];
 
     private bool openEditing;
+    private bool openCajas;
+    private bool openPartes;
     private ProductoViewModel? currentProducto;
 
     [CascadingParameter]
@@ -343,34 +378,28 @@
         tiposProducto = result.Items.ToList();
     }
 
-    private async Task OnLoadCategoriasAsync(int franquiciaId)
-    {
-        Task[] loadingTasks =
-        [
-            LoadCategoriasAsync(franquiciaId), LoadCategoriasDespliegueAsync(franquiciaId),
-    ];
-
-        await Task.WhenAll(loadingTasks);
-
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task LoadCategoriasAsync(int franquiciaId)
+    private async Task<List<CategoriaProductoInfo>> LoadCategoriasAsync(int franquiciaId)
     {
         ResultListOf<CategoriaProductoInfo> result = await Mediator.SendRequest(new ListCategoriasProductoFinales(franquiciaId));
-        categorias = result.Items.ToList();
+        return result.Items.ToList();
     }
 
-    private async Task LoadCategoriasDespliegueAsync(int franquiciaId)
+    private async Task<List<CategoriaProductoInfo>> LoadCategoriasDespliegueAsync(int franquiciaId)
     {
         ResultListOf<CategoriaProductoInfo> result = await Mediator.SendRequest(new ListCategoriasProducto(franquiciaId));
-        categoriasDespliegue = result.Items.ToList();
+        return result.Items.ToList();
     }
 
-    private async Task LoadComplementosAsync(int categoriaId)
+    private async Task<List<ProductoInfo>> LoadComplementosAsync(int categoriaId, int exceptoProductoId)
     {
-        ResultListOf<ProductoInfo> result = await Mediator.SendRequest(new ListComplementos(categoriaId));
-        complementos = result.Items.ToList();
+        ResultListOf<ProductoInfo> result = await Mediator.SendRequest(new ListComplementos(categoriaId, exceptoProductoId));
+        return result.Items.ToList();
+    }
+
+    private async Task<List<ProductoInfo>> LoadProductosParteAsync(int franquiciaId, int exceptoProductoId)
+    {
+        ResultListOf<ProductoInfo> result = await Mediator.SendRequest(new ListProductosParaPartes(franquiciaId, exceptoProductoId));
+        return result.Items.ToList();
     }
 
     public async Task<GridData<ProductoViewModel>> LoadProductosAsync(GridState<ProductoViewModel> state)
@@ -400,9 +429,34 @@
         }
     }
 
-    private Task SaveEsActivoAsync(ProductoViewModel producto, bool esActivo)
+    private Task ShowCajasAsync(CellContext<ProductoViewModel> context)
     {
+        currentProducto = context.Item;
+        openCajas = true;
         return Task.CompletedTask;
+    }
+
+    private Task ShowPartesAsync(CellContext<ProductoViewModel> context)
+    {
+        currentProducto = context.Item;
+        openPartes = true;
+        return Task.CompletedTask;
+    }
+
+    private async Task LoadProductoDetailAsync(ProductoViewModel producto)
+    {
+        ResultOf<ProductoFullInfo> result = await Mediator.SendRequest(new FindProducto(producto.Id));
+
+        result.Switch(
+                onSuccess: info => LoadProductoInfo(producto, info),
+                onFailure: failure => AddFailure(failure, "cargar el detalle del producto"));
+    }
+
+    private void LoadProductoInfo(ProductoViewModel producto, ProductoFullInfo info)
+    {
+        producto.DetailLoaded = true;
+        producto.Cajas = [.. info.Cajas];
+        producto.Partes = info.Partes.ToModel();
     }
 
     private async Task<bool> SaveProductoAsync(ProductoViewModel producto)
@@ -413,6 +467,40 @@
 
         var result = await Mediator.SendRequest(changeStatus);
         return UpdateProducto(producto, result, producto.IsNew ? "crear producto" : "modificar producto");
+    }
+
+    private async Task SaveEsActivoAsync(ProductoViewModel producto, bool esActivo)
+    {
+        IProductoStateChangeable changeStatus = esActivo
+            ? new ActivarProducto(producto.Id)
+            : new DesactivarProducto(producto.Id);
+
+        var result = await Mediator.SendRequest(changeStatus);
+        UpdateProducto(producto, result, esActivo ? "activar producto" : "desactivar producto");
+    }
+
+    private async Task SaveEnInventarioAsync(ProductoViewModel producto, bool enInventario)
+    {
+        IProductoStateChangeable changeStatus = enInventario
+            ? new LockProducto(producto.Id)
+            : new UnlockProducto(producto.Id);
+
+        var result = await Mediator.SendRequest(changeStatus);
+        UpdateProducto(producto, result, enInventario ? "bloquear producto" : "desbloquear producto");
+    }
+
+    private async Task<bool> SaveCajasAsync(ProductoViewModel producto)
+    {
+        IProductoStateChangeable changeStatus = new AssignCajasToProducto(producto.Id, [.. producto.Cajas]);
+        var result = await Mediator.SendRequest(changeStatus);
+        return UpdateProducto(producto, result, "asignar cajas");
+    }
+
+    private async Task<bool> SavePartesAsync(ProductoViewModel producto)
+    {
+        IProductoStateChangeable changeStatus = new AssignPartesToProducto(producto.Id, [.. producto.Partes.ToInfo()]);
+        var result = await Mediator.SendRequest(changeStatus);
+        return UpdateProducto(producto, result, "asignar partes");
     }
 
     private bool UpdateProducto(ProductoViewModel producto, ResultOf<ProductoFullInfo> result, string action)

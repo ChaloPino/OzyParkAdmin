@@ -4,18 +4,18 @@ using OzyParkAdmin.Domain.Shared;
 namespace OzyParkAdmin.Application.Servicios.Assigns;
 
 /// <summary>
-/// El manejador de <see cref="AssignZonas"/>.
+/// El manejador de <see cref="AssignZonasToServicio"/>.
 /// </summary>
-public sealed class AssignZonasHandler : ServicioStateChangeableHandler<AssignZonas>
+public sealed class AssignZonasToServicioHandler : ServicioStateChangeableHandler<AssignZonasToServicio>
 {
     private readonly ServicioManager _servicioManager;
 
     /// <summary>
-    /// Crea una nueva instancia de <see cref="AssignZonasHandler"/>.
+    /// Crea una nueva instancia de <see cref="AssignZonasToServicioHandler"/>.
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="servicioManager">El <see cref="ServicioManager"/>.</param>
-    public AssignZonasHandler(IOzyParkAdminContext context, ServicioManager servicioManager)
+    public AssignZonasToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager)
         : base(context)
     {
         ArgumentNullException.ThrowIfNull(servicioManager);
@@ -23,6 +23,6 @@ public sealed class AssignZonasHandler : ServicioStateChangeableHandler<AssignZo
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignZonas request, CancellationToken cancellationToken) =>
+    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignZonasToServicio request, CancellationToken cancellationToken) =>
         await _servicioManager.AssignZonasAsync(request.ServicioId, request.Zonas, cancellationToken);
 }

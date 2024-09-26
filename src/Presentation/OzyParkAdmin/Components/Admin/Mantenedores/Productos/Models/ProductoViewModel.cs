@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Cajas;
+﻿using Microsoft.CodeAnalysis;
+using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.Contabilidad;
@@ -137,6 +138,8 @@ public sealed record ProductoViewModel
     /// </summary>
     public bool IsNew { get; set; }
 
+    internal bool Loading { get; set; }
+
     /// <summary>
     /// Si el detalle del producto fue cargado.
     /// </summary>
@@ -167,12 +170,34 @@ public sealed record ProductoViewModel
         Sku = producto.Sku;
         Nombre = producto.Nombre;
         FranquiciaId = producto.FranquiciaId;
-        Categoria = producto.Categoria;
-        CategoriaDespliegue = producto.CategoriaDespliegue;
-        Imagen = producto.Imagen.ToModel();
-        TipoProducto = producto.TipoProducto;
+
+        if (producto.Categoria is not null)
+        {
+            Categoria = producto.Categoria;
+        }
+
+        if (producto.CategoriaDespliegue is not null)
+        {
+            CategoriaDespliegue = producto.CategoriaDespliegue;
+        }
+
+        if (producto.Imagen is not null)
+        {
+            Imagen = producto.Imagen.ToModel();
+        }
+
+        if (producto.TipoProducto is not null)
+        {
+            TipoProducto = producto.TipoProducto;
+        }
+
         Orden = producto.Orden;
-        Familia = producto.Familia;
+
+        if (producto.Familia is not null)
+        {
+            Familia = producto.Familia;
+        }
+
         EsComplemento = producto.EsComplemento;
         EnInventario = producto.EnInventario;
         FechaAlta = producto.FechaAlta;
@@ -181,8 +206,8 @@ public sealed record ProductoViewModel
         UsuarioModificacion = producto.UsuarioModificacion;
         UltimaModificacion = producto.UltimaModificacion;
         EsActivo = producto.EsActivo;
-        Cajas = [.. producto.Cajas];
         Complementos = producto.Complementos.ToModel();
+        Cajas = [.. producto.Cajas];
         Relacionados = producto.Relacionados.ToModel();
         Partes = producto.Partes.ToModel();
     }

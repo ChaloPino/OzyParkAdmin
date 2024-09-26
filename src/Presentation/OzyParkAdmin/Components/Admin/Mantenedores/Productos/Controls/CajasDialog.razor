@@ -1,0 +1,109 @@
+﻿@using OzyParkAdmin.Components.Admin.Shared
+@using System.Collections.ObjectModel
+@using OzyParkAdmin.Domain.Cajas
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <IfThen Condition="Producto?.Loading ?? false">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudSelect @bind-SelectedValues="cajas" Margin="Margin.Dense" MultiSelection="true"
+                   Label="Cajas asignadas" ToStringFunc="x => x?.Descripcion" MultiSelectionTextFunc="GetCajasNames">
+            <ForIn Items="Cajas" Context="caja">
+                <MudSelectItem T="CajaInfo" Value="caja" />
+            </ForIn>
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private IEnumerable<CajaInfo> cajas = [];
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public ProductoViewModel? Producto { get; set; }
+
+    [Parameter]
+    public IEnumerable<CajaInfo> Cajas { get; set; } = [];
+
+    [Parameter]
+    public Func<ProductoViewModel, Task>? LoadProductoDetalle { get; set; }
+
+    [Parameter]
+    public Func<ProductoViewModel, Task<bool>>? CommitChanges { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen && Producto is not null)
+        {
+            Producto.Loading = true;
+            await LoadProductoDetalleAsync();
+            Producto.Loading = false;
+        }
+    }
+
+    private async Task LoadProductoDetalleAsync()
+    {
+        if (LoadProductoDetalle is not null && Producto is not null)
+        {
+            await LoadProductoDetalle(Producto);
+        }
+    }
+
+    private string GetCajasNames(List<string> cajas)
+    {
+        if (cajas.Count <= 3)
+        {
+            return string.Join(", ", cajas);
+        }
+
+        return $"{cajas.Count} cajas asignadas";
+    }
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Producto is not null)
+        {
+            cajas = new List<CajaInfo>(Producto.Cajas);
+        }
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        cajas = [];
+        await ChangeIsOpen(false);
+    }
+
+    private async Task CommitItemChangesAsync()
+    {
+        if (Producto is not null && CommitChanges is not null)
+        {
+            Producto.Cajas = [.. cajas];
+            bool result = await CommitChanges(Producto);
+
+            if (result)
+            {
+                await ChangeIsOpen(false);
+            }
+        }
+    }
+}

@@ -7,6 +7,11 @@
 @inject ProductoViewModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
+        <IfThen Condition="Producto.Loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
         <MudForm Model="Producto" @ref="form" Validation="Validator.ValidateValue" ValidationDelay="0">
             <MudSelect T="int" Value="Producto.FranquiciaId" ValueChanged="FranquiciaChanged" Variant="Variant.Outlined" Margin="Margin.Dense"
                        Label="Franquicia" Required="true" Class="mt-4" ToStringFunc="GetFranquicia"
@@ -28,7 +33,7 @@
                 <MudSelect T="CategoriaProductoInfo" Value="Producto.Categoria" ValueChanged="CategoriaChanged" Variant="Variant.Outlined" Margin="Margin.Dense"
                            Label="Categoria" ToStringFunc="(x) => x?.Nombre"
                            For="() => Producto.Categoria" Immediate="true">
-                    <ForIn Items="Categorias" Context="categoria">
+                    <ForIn Items="categorias" Context="categoria">
                         <MudSelectItem T="CategoriaProductoInfo" Value="categoria"></MudSelectItem>
                     </ForIn>
                 </MudSelect>
@@ -36,7 +41,7 @@
                 <MudSelect @bind-Value="Producto.CategoriaDespliegue" Variant="Variant.Outlined" Margin="Margin.Dense"
                            Label="Categoria de despliegue" ToStringFunc="(x) => x?.Nombre"
                            For="() => Producto.CategoriaDespliegue" Immediate="true">
-                    <ForIn Items="CategoriasDespliegue" Context="categoria">
+                    <ForIn Items="categoriasDespliegue" Context="categoria">
                         <MudSelectItem T="CategoriaProductoInfo" Value="categoria"></MudSelectItem>
                     </ForIn>
                 </MudSelect>
@@ -79,27 +84,33 @@
 
             <ImageViewer Imagen="Producto.Imagen" Class="mt-4" />
 
-            <MudSwitch @bind-Value="Producto.EsComplemento" Label="Es complemento" Color="Color.Primary" Class="mt-4" />
+            <MudSwitch T="bool" Value="Producto.EsComplemento" ValueChanged="EsComplementoChanged" Label="Es complemento" Color="Color.Primary" Class="mt-4" />
 
             <IfThen Condition="PuedeAsociarComplementos">
                 <Then>
                     <MudStack Row="true" Spacing="2" Class="mt-4">
                         <MudPaper>
-                            <MudList T="ProductoInfo" SelectedValues="_complementosSelecionados" SelectedValuesChanged="SelectComplementos" SelectionMode="SelectionMode.MultiSelection">
+                            <MudList T="ProductoInfo" SelectedValues="_complementosSelecionados" SelectedValuesChanged="SelectComplementos" SelectionMode="SelectionMode.MultiSelection" CheckBoxColor="Color.Tertiary">
                                 <MudListSubheader>
                                     Seleccione los complementos
                                 </MudListSubheader>
+                                <ForIn Items="complementos" Context="complemento">
+                                    <MudListItem T="ProductoInfo" Value="complemento" Text="@complemento.Nombre" />
+                                </ForIn>
                             </MudList>
-                            <ForIn Items="Complementos" Context="complemento">
-                                <MudListItem T="ProductoInfo" Value="complemento" Text="@complemento.Nombre" />
-                            </ForIn>
                         </MudPaper>
 
                         <MudPaper>
-                            <MudDataGrid T="ProductoComplementarioModel" Items="_complementosProducto" Filterable="false" EditMode="DataGridEditMode.Cell" EditTrigger="DataGridEditTrigger.OnRowClick">
+                            <MudDataGrid T="ProductoComplementarioModel" Items="_complementosProducto" ReadOnly="false" Filterable="false" EditMode="DataGridEditMode.Cell" EditTrigger="DataGridEditTrigger.OnRowClick">
                                 <Columns>
-                                    <PropertyColumn Property="x => x.Complemento.Nombre" Sortable="false" Editable="false" />
-                                    <PropertyColumn Property="x => x.Orden" Sortable="true" />
+                                    <PropertyColumn Property="x => x.Complemento.Nombre" Editable="false" />
+                                    <PropertyColumn Property="x => x.Orden">
+                                        <EditTemplate>
+                                            <MudNumericField @bind-Value="context.Item.Orden" Margin="Margin.Dense" Min="1" Max="int.MaxValue"
+                                                             Required="true" Variant="@Variant.Text" Style="margin-top:0" />
+                                                
+                                        </EditTemplate>
+                                    </PropertyColumn>
                                     <TemplateColumn Editable="true">
                                         <EditTemplate>
                                             <MudTooltip Text="Eliminar">
@@ -126,6 +137,9 @@
     private const int MaxInt = int.MaxValue;
     private const string TipoCatalogo = "Producto";
     private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
+    private List<CategoriaProductoInfo> categorias = [];
+    private List<CategoriaProductoInfo> categoriasDespliegue = [];
+    private List<ProductoInfo> complementos = [];
 
     private MudForm form = default!;
     private MudFileUpload<IBrowserFile>? fileUpload;
@@ -153,35 +167,49 @@
     public List<FranquiciaModel> Franquicias { get; set; } = [];
 
     [Parameter]
-    public List<CategoriaProductoInfo> Categorias { get; set; } = [];
-
-    [Parameter]
-    public List<CategoriaProductoInfo> CategoriasDespliegue { get; set; } = [];
-
-    [Parameter]
     public List<AgrupacionContable> Familias { get; set; } = [];
 
     [Parameter]
     public List<TipoProducto> TiposProducto { get; set; } = [];
 
     [Parameter]
-    public List<ProductoInfo> Complementos { get; set; } = [];
+    public Func<int, Task<List<CategoriaProductoInfo>>>? LoadCategorias { get; set; }
 
     [Parameter]
-    public Func<int, Task>? LoadCategorias { get; set; }
+    public Func<int, Task<List<CategoriaProductoInfo>>>? LoadCategoriasDespliegue { get; set; }
 
     [Parameter]
-    public Func<int, Task>? LoadComplementos { get; set; }
+    public Func<int, int, Task<List<ProductoInfo>>>? LoadComplementos { get; set; }
 
     [Parameter]
     public Func<ProductoViewModel, Task<bool>>? CommitChanges { get; set; }
 
-    private bool PuedeAsociarComplementos => Complementos.Count > 0 && !Producto.EsComplemento;
+    private bool PuedeAsociarComplementos => complementos.Count > 0 && !Producto.EsComplemento;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen && Producto is not null && !Producto.IsNew && !Producto.Loading)
+        {
+            Producto.Loading = true;
+            await OnLoadAllCategoriasAsync(Producto.FranquiciaId);
+            await OnLoadComplementosAsync(Producto.Categoria);
+            PrepareComplementos();
+            Producto.Loading = false;
+        }
+    }
 
     private async Task ChangeIsOpen(bool isOpen)
     {
         IsOpen = isOpen;
         await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    private void PrepareComplementos()
+    {
+        _complementosProducto = [.. Producto.Complementos];
+        _complementosSelecionados = (from complemento in complementos
+                                     join productoComplemento in _complementosProducto on complemento.Id equals productoComplemento.Complemento.Id
+                                     select complemento).ToList();
     }
 
     private string GetFranquicia(int franquiciaId)
@@ -192,20 +220,63 @@
     private async Task FranquiciaChanged(int franquiciaId)
     {
         Producto.FranquiciaId = franquiciaId;
+        Producto.Loading = true;
+        await OnLoadAllCategoriasAsync(franquiciaId);
+        Producto.Loading = false;
+    }
 
+    private async Task OnLoadAllCategoriasAsync(int franquiciaId)
+    {
+        Task[] tasks = [OnLoadCategoriasAsync(franquiciaId), OnLoadCategoriasDespliegueAsync(franquiciaId)];
+
+        await Task.WhenAll(tasks);
+    }
+
+    private async Task OnLoadCategoriasAsync(int franquiciaId)
+    {
         if (LoadCategorias is not null)
         {
-            await LoadCategorias(franquiciaId);
+            categorias = await LoadCategorias(franquiciaId);
+        }
+    }
+
+    private async Task OnLoadCategoriasDespliegueAsync(int franquiciaId)
+    {
+        if (LoadCategoriasDespliegue is not null)
+        {
+            categoriasDespliegue = await LoadCategoriasDespliegue(franquiciaId);
         }
     }
 
     private async Task CategoriaChanged(CategoriaProductoInfo categoria)
     {
         Producto.Categoria = categoria;
+        Producto.Loading = true;
+        await OnLoadComplementosAsync(categoria);
+        Producto.Loading = false;
+    }
 
+    private async Task OnLoadComplementosAsync(CategoriaProductoInfo categoria)
+    {
         if (LoadComplementos is not null)
         {
-            await LoadComplementos(categoria.Id);
+            complementos = await LoadComplementos(categoria.Id, Producto.Id);
+        }
+    }
+
+    private void EsComplementoChanged(bool esComplemento)
+    {
+        Producto.EsComplemento = esComplemento;
+        TryCleanComplementos();
+    }
+
+    private void TryCleanComplementos()
+    {
+        if (Producto.EsComplemento)
+        {
+            _complementosProducto = [];
+            _complementosSelecionados = [];
+            Producto.Complementos = [];
         }
     }
 
@@ -238,7 +309,7 @@
                                                       select complemento).ToList();
 
         toRemove.ForEach(x => _complementosProducto.Remove(x));
-        toAdd.ForEach(x => new ProductoComplementarioModel { Complemento = x, Orden = _complementosProducto.Count });
+        toAdd.ForEach(x => _complementosProducto.Add(new ProductoComplementarioModel { Complemento = x, Orden = _complementosProducto.Count }));
     }
 
     private void RemoveComplemento(CellContext<ProductoComplementarioModel> context)
@@ -248,13 +319,14 @@
         if (complemento is not null)
         {
             _complementosProducto.Remove(complemento);
-            _complementosSelecionados.RemoveAll(x => x.Id == complemento.Complemento.Id);
+            _complementosSelecionados = _complementosSelecionados.Where(x => x.Id != complemento.Complemento.Id).ToList();
         }
     }
 
     private async Task CancelEditingItemAsync()
     {
         await ChangeIsOpen(false);
+        Clean();
     }
 
     private async Task CommitItemChangesAsync()
@@ -274,7 +346,17 @@
             if (result)
             {
                 await ChangeIsOpen(false);
+                Clean();
             }
         }
+    }
+
+    private void Clean()
+    {
+        categorias = [];
+        categoriasDespliegue = [];
+        complementos = [];
+        _complementosSelecionados = [];
+        _complementosProducto = [];
     }
 }

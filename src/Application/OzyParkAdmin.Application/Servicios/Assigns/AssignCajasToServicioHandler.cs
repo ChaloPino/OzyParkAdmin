@@ -4,18 +4,18 @@ using OzyParkAdmin.Domain.Shared;
 namespace OzyParkAdmin.Application.Servicios.Assigns;
 
 /// <summary>
-/// El manejador de <see cref="AssignCajas"/>.
+/// El manejador de <see cref="AssignCajasToServicio"/>.
 /// </summary>
-public sealed class AssignCajasHandler : ServicioStateChangeableHandler<AssignCajas>
+public sealed class AssignCajasToServicioHandler : ServicioStateChangeableHandler<AssignCajasToServicio>
 {
     private readonly ServicioManager _servicioManager;
 
     /// <summary>
-    /// Crea una nueva instancia de <see cref="AssignCajas"/>.
+    /// Crea una nueva instancia de <see cref="AssignCajasToServicio"/>.
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="servicioManager">El <see cref="ServicioManager"/>.</param>
-    public AssignCajasHandler(IOzyParkAdminContext context, ServicioManager servicioManager)
+    public AssignCajasToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager)
         : base(context)
     {
         ArgumentNullException.ThrowIfNull(servicioManager);
@@ -23,6 +23,6 @@ public sealed class AssignCajasHandler : ServicioStateChangeableHandler<AssignCa
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignCajas request, CancellationToken cancellationToken) =>
+    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignCajasToServicio request, CancellationToken cancellationToken) =>
         await _servicioManager.AssignCajasAsync(request.ServicioId, request.Cajas, cancellationToken);
 }

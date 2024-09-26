@@ -4,18 +4,18 @@ using OzyParkAdmin.Domain.Shared;
 namespace OzyParkAdmin.Application.Servicios.Assigns;
 
 /// <summary>
-/// El manejador de <see cref="AssignCentrosCosto"/>.
+/// El manejador de <see cref="AssignCentrosCostoToServicio"/>.
 /// </summary>
-public sealed class AssignCentrosCostoHandler : ServicioStateChangeableHandler<AssignCentrosCosto>
+public sealed class AssignCentrosCostoToServicioHandler : ServicioStateChangeableHandler<AssignCentrosCostoToServicio>
 {
     private readonly ServicioManager _servicioManager;
 
     /// <summary>
-    /// Crea una nueva instancia de <see cref="AssignCentrosCostoHandler"/>.
+    /// Crea una nueva instancia de <see cref="AssignCentrosCostoToServicioHandler"/>.
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="servicioManager">El <see cref="ServicioManager"/>.</param>
-    public AssignCentrosCostoHandler(IOzyParkAdminContext context, ServicioManager servicioManager)
+    public AssignCentrosCostoToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager)
         : base(context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -24,6 +24,6 @@ public sealed class AssignCentrosCostoHandler : ServicioStateChangeableHandler<A
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignCentrosCosto request, CancellationToken cancellationToken) =>
+    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignCentrosCostoToServicio request, CancellationToken cancellationToken) =>
         await _servicioManager.AssignCentrosCostoAsync(request.ServicioId, request.CentrosCosto, cancellationToken);
 }

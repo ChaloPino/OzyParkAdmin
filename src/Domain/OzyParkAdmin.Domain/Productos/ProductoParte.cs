@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Domain.Productos;
+﻿
+
+namespace OzyParkAdmin.Domain.Productos;
 
 /// <summary>
 /// Define un producto parte de un producto.
@@ -19,4 +21,13 @@ public sealed class ProductoParte
     /// Si la parte es opcional para conformar el producto.
     /// </summary>
     public bool EsOpcional { get; private set; }
+
+    internal static ProductoParte Create(Producto parte, decimal cantidad, bool esOpcional) =>
+        new() {  Parte = parte, Cantidad = cantidad, EsOpcional = esOpcional };
+
+    internal void Update(decimal cantidad, bool esOpcional) 
+    {
+        Cantidad = cantidad;
+        EsOpcional = esOpcional;
+    }
 }

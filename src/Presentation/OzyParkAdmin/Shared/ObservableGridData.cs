@@ -37,15 +37,9 @@ internal class ObservableGridData<T> : GridData<T>
     }
 }
 
-internal sealed class ObservableGridData<T, TKey> : ObservableGridData<T>
+internal sealed class ObservableGridData<T, TKey>(IEnumerable<T> items, int totalItems, IMudStateHasChanged stateHasChanged, Func<T, TKey> keySelector) : ObservableGridData<T>(items, totalItems, stateHasChanged)
 {
-    private readonly Func<T, TKey> _keySelector;
-
-    public ObservableGridData(IEnumerable<T> items, int totalItems, IMudStateHasChanged stateHasChanged, Func<T, TKey> keySelector) 
-        : base(items, totalItems, stateHasChanged)
-    {
-        _keySelector = keySelector;
-    }
+    private readonly Func<T, TKey> _keySelector = keySelector;
 
     public override bool Remove(T item)
     {

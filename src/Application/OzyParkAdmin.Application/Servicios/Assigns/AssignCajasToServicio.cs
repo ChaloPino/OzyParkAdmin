@@ -8,4 +8,4 @@ namespace OzyParkAdmin.Application.Servicios.Assigns;
 /// </summary>
 /// <param name="ServicioId">El id del servicio.</param>
 /// <param name="Cajas">Las cajas a ser asignadas.</param>
-public sealed record AssignCajas(int ServicioId, ImmutableArray<ServicioPorCajaInfo> Cajas) : IServicioStateChangeable;
+public sealed record AssignCajasToServicio(int ServicioId, ImmutableArray<ServicioPorCajaInfo> Cajas) : IServicioStateChangeable;

@@ -114,22 +114,22 @@ public sealed record ProductoFullInfo
     public bool EsActivo { get; init; }
 
     /// <summary>
-    /// Las cajas asignadas al producto.
-    /// </summary>
-    public ImmutableArray<CajaInfo> Cajas { get; set; } = [];
-
-    /// <summary>
     /// Las complementos del producto.
     /// </summary>
-    public ImmutableArray<ProductoComplementarioInfo> Complementos { get; set; } = [];
+    public IEnumerable<ProductoComplementarioInfo> Complementos { get; set; } = [];
 
     /// <summary>
-    /// Los productos relacionados.
+    /// Las cajas asociadas al producto.
     /// </summary>
-    public ImmutableArray<ProductoRelacionadoInfo> Relacionados { get; set; } = [];
+    public ImmutableArray<CajaInfo> Cajas { get; set; } = [];
 
     /// <summary>
     /// Las partes del producto.
     /// </summary>
     public ImmutableArray<ProductoParteInfo> Partes { get; set; } = [];
+
+    /// <summary>
+    /// Los productos relacionados.
+    /// </summary>
+    public ImmutableArray<ProductoRelacionadoInfo> Relacionados { get; set; } = [];
 }

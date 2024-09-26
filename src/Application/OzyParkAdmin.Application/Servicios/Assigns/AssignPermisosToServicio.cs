@@ -8,4 +8,4 @@ namespace OzyParkAdmin.Application.Servicios.Assigns;
 /// </summary>
 /// <param name="ServicioId">El id del servicio.</param>
 /// <param name="Permisos">Los permisos a ser asignados.</param>
-public sealed record AssignPermisos(int ServicioId, ImmutableArray<PermisoServicioInfo> Permisos) : IServicioStateChangeable;
+public sealed record AssignPermisosToServicio(int ServicioId, ImmutableArray<PermisoServicioInfo> Permisos) : IServicioStateChangeable;

@@ -1,0 +1,173 @@
+﻿@using MudBlazor.Interfaces
+@using OzyParkAdmin.Domain.Cajas
+@using OzyParkAdmin.Domain.Servicios;
+@inject ILocalizationInterceptor Interceptor
+
+<IfThen Condition="dataGrid is not null">
+    <Then>
+        <SwitchCase Value="dataGrid!.FilterMode">
+            <CaseWhen T="DataGridFilterMode" Condition="(mode) => mode == DataGridFilterMode.ColumnFilterRow">
+                <MudStack Row="true">
+                    <MudSelect T="EstadoDia?" Value="estadoDia" ValueChanged="EstadoDiaFilterChangedAsync" FullWidth="true" Dense="true" Margin="Margin.Dense">
+                        <MudSelectItem T="EstadoDia?" Value="@(null)">Todos</MudSelectItem>
+                        <MudSelectItem T="EstadoDia?" Value="EstadoDia.Abierto">Abierto</MudSelectItem>
+                        <MudSelectItem T="EstadoDia?" Value="EstadoDia.Cerrado">Cerrado</MudSelectItem>
+                    </MudSelect>
+                    <MudMenu Icon="@Icons.Material.Filled.FilterAlt" Size="Size.Small" Dense="true">
+                        <ForIn Items="Operators" Context="o">
+                            <IfThen Condition="!string.IsNullOrWhiteSpace(o)">
+                                <Then>
+                                    <MudMenuItem Style="@ChosenOperatorStyle(o)" OnClick="async () => await ChangeOperatorAsync(o)">@Interceptor.Handle(FilterOperatorUtils.GetTranslationKeyByOperatorName(o))</MudMenuItem>
+                                </Then>
+                            </IfThen>
+                        </ForIn>
+                    </MudMenu>
+                    <MudIconButton Class="align-self-center" Icon="@Icons.Material.Filled.FilterAltOff" Size="Size.Small" OnClick="ClearFilterAsync" />
+                </MudStack>
+            </CaseWhen>
+            <CaseWhen T="DataGridFilterMode" Condition="(mode) => mode == DataGridFilterMode.ColumnFilterMenu">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudGrid Spacing="0">
+                            <MudItem xs="12">
+                                <MudSelect @bind-Value="FilterContext!.FilterDefinition!.Operator" FullWidth="true" Label="Operador" Dense="true" Margin="Margin.Dense"
+                                           Class="filter-operator">
+                                    <ForIn Items="Operators" Context="fieldOperator">
+                                        <MudSelectItem Value="@fieldOperator">@Interceptor.Handle(FilterOperatorUtils.GetTranslationKeyByOperatorName(fieldOperator))</MudSelectItem>
+                                    </ForIn>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSelect T="EstadoDia?" Value="estadoDia" ValueChanged="EstadoDiaFilterChanged" FullWidth="true" Dense="true" Margin="Margin.Dense">
+                                    <MudSelectItem T="EstadoDia?" Value="@(null)">Todos</MudSelectItem>
+                                    <MudSelectItem T="EstadoDia?" Value="EstadoDia.Abierto">Abierto</MudSelectItem>
+                                    <MudSelectItem T="EstadoDia?" Value="EstadoDia.Cerrado">Cerrado</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                    <MudItem xs="12" Class="d-flex justify-end">
+                        <MudButton Class="clear-filter-button" OnClick="ClearFilterAsync">Limpiar</MudButton>
+                        <MudButton Class="apply-filter-button" Color="Color.Primary" OnClick="ApplyFilterAsync">Filtrar</MudButton>
+                    </MudItem>
+                </MudGrid>
+            </CaseWhen>
+        </SwitchCase>
+    </Then>
+</IfThen>
+
+@code {
+    private EstadoDia? estadoDia;
+
+    [CascadingParameter]
+    private MudDataGrid<AperturaCajaViewModel>? DataGrid { get; set; }
+
+    private MudDataGrid<AperturaCajaViewModel>? dataGrid => DataGrid ?? FilterContext?.FilterDefinition?.Column?.DataGrid;
+
+    [Parameter]
+    public FilterContext<AperturaCajaViewModel>? FilterContext { get; set; }
+
+    private string[] Operators => [FilterOperator.Enum.Is, FilterOperator.Enum.IsNot];
+
+    private string? Operator => FilterContext?.FilterDefinition?.Operator ?? Operators.FirstOrDefault();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            estadoDia = (EstadoDia?)FilterContext.FilterDefinition.Value;
+        }
+    }
+
+    private string ChosenOperatorStyle(string o)
+    {
+        return o == Operator ? "color:var(--mud-palette-primary-text);background-color:var(--mud-palette-primary)" : "";
+    }
+
+    private async Task ChangeOperatorAsync(string o)
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            FilterContext.FilterDefinition.Operator = o;
+            await ApplyFilterAsync(FilterContext.FilterDefinition);
+        }
+    }
+
+    private async Task EstadoDiaFilterChangedAsync(EstadoDia? value)
+    {
+        estadoDia = value;
+
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            if (estadoDia is not null)
+            {
+                FilterContext.FilterDefinition.Value = estadoDia;
+                await ApplyFilterAsync(FilterContext.FilterDefinition);
+            }
+            else
+            {
+                await ClearFilterAsync();
+            }
+        }
+    }
+
+    private void EstadoDiaFilterChanged(EstadoDia? value)
+    {
+        estadoDia = value;
+
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            if (estadoDia is not null)
+            {
+                FilterContext.FilterDefinition.Value = estadoDia;
+                dataGrid?.GroupItems();
+            }
+            else
+            {
+                FilterContext.FilterDefinition.Value = null;
+            }
+        }
+    }
+
+    private async Task ApplyFilterAsync()
+    {
+        if (dataGrid is not null)
+        {
+            if (dataGrid.FilterDefinitions.All(x => x.Id != FilterContext!.FilterDefinition!.Id))
+            {
+                dataGrid.FilterDefinitions.Add(FilterContext!.FilterDefinition);
+            }
+
+            await dataGrid.ReloadServerData();
+
+            dataGrid.GroupItems();
+            ((IMudStateHasChanged)dataGrid).StateHasChanged();
+        }
+    }
+
+    private async Task ApplyFilterAsync(IFilterDefinition<AperturaCajaViewModel> filterDefinition)
+    {
+        if (dataGrid is not null)
+        {
+            if (dataGrid.FilterDefinitions.All(x => x.Id != filterDefinition.Id))
+            {
+                dataGrid.FilterDefinitions.Add(filterDefinition);
+            }
+
+            await dataGrid.ReloadServerData();
+
+            dataGrid.GroupItems();
+            ((IMudStateHasChanged)dataGrid).StateHasChanged();
+        }
+    }
+
+    private async Task ClearFilterAsync()
+    {
+        if (FilterContext is not null && FilterContext.FilterDefinition is not null)
+        {
+            await FilterContext.Actions.ClearFilterAsync(FilterContext.FilterDefinition);
+            ((IMudStateHasChanged)dataGrid!).StateHasChanged();
+        }
+    }
+}

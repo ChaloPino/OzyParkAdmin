@@ -29,8 +29,16 @@ public interface IServicioRepository
     /// </summary>
     /// <param name="franquiciaId">El id de franquicia a la que pertenecen los servicios que se buscan.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
-    /// <returns>La lista de servicios que pertenecen a la franquicia del servicio.</returns>
+    /// <returns>La lista de servicios que pertenecen a la franquicia.</returns>
     Task<List<ServicioInfo>> ListAsync(int franquiciaId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Lista todos los servicios que pertenezcan al <paramref name="centroCostoId"/>.
+    /// </summary>
+    /// <param name="centroCostoId">El id del centro de costo al que pertenecesn los servicios que se buscan.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>La lista de servicios que pertenecen al centro de costo.</returns>
+    Task<List<ServicioInfo>> ListByCentroCostoAsync(int centroCostoId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Devuelve el id máximo.

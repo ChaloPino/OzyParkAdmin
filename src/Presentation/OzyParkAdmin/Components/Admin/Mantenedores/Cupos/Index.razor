@@ -1,0 +1,268 @@
+﻿@page "/Mantenedores/Cupos"
+@using OzyParkAdmin.Application
+@using OzyParkAdmin.Application.CanalesVenta.List
+@using OzyParkAdmin.Application.Cupos.Create
+@using OzyParkAdmin.Application.Cupos.Search
+@using OzyParkAdmin.Application.Cupos.Update
+@using OzyParkAdmin.Application.DiasSemana.List
+@using OzyParkAdmin.Application.EscenariosCupo.List
+@using OzyParkAdmin.Components.Admin.Mantenedores.Cupos.Models
+@using System.Security.Claims
+@using OzyParkAdmin.Domain.CanalesVenta
+@using OzyParkAdmin.Domain.Cupos
+@using OzyParkAdmin.Domain.Entidades
+@using OzyParkAdmin.Domain.EscenariosCupo
+@using OzyParkAdmin.Domain.Shared
+@inject IMediator Mediator
+@inject ISnackbar Snackbar
+@inject DialogOptions DialogOptions
+
+<PageTitle>Cupos</PageTitle>
+<MudText Typo="Typo.h4">Cupos</MudText>
+
+<MudDataGrid @ref="dataGrid" T="CupoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
+             ServerData="LoadCuposAsync" SortMode="SortMode.Multiple"
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+    <ToolBarContent>
+        <MudSpacer />
+        <SearchControl @bind-SearchText="searchText" />
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCupoAsync">Nuevo cupos</MudButton>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.CalendarMonth" Variant="Variant.Filled" Class="ml-3" OnClick="ShowCalendarioAsync">Calendario</MudButton>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.FechaEfectiva" Title="Fecha efectiva" Hideable="false">
+            <FilterTemplate>
+                <DateOnlyFilter FilterContext="context" />
+            </FilterTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.EscenarioCupo.Nombre" Title="Escenario de cupo">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.EscenarioCupo.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Escenario de cupo" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.CanalVenta.Nombre" Title="Canal de venta">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.CanalVenta.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Canal de venta" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.DiaSemana.Aka" Title="Día de semana">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.DiaSemana.Aka" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Dia de semana" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.HoraInicio" Title="Hora inicio">
+            <FilterTemplate>
+                <TimeSpanFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <Grouping Title="Hora inicio" GroupDefinition="context" T="CupoViewModel" TValue="TimeSpan" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.HoraFin" Title="Hora fin">
+            <FilterTemplate>
+                <TimeSpanFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <Grouping Title="Hora fin" GroupDefinition="context" T="CupoViewModel" TValue="TimeSpan" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Total" Title="Total">
+            <GroupTemplate>
+                <Grouping Title="Total" GroupDefinition="context" T="CupoViewModel" TValue="int" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.SobreCupo" Title="Sobrecupo">
+            <GroupTemplate>
+                <Grouping Title="Sobrecupo" GroupDefinition="context" T="CupoViewModel" TValue="int" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.TopeEnCupo" Title="Tope en cupo">
+            <GroupTemplate>
+                <Grouping Title="Tope en cupo" GroupDefinition="context" T="CupoViewModel" TValue="int" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.UltimaModificacion" Title="Última modificación">
+            <GroupTemplate>
+                <Grouping Title="Última modificación" GroupDefinition="context" T="CupoViewModel" TValue="DateTime" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <TemplateColumn Hideable="false" Groupable="false" Filterable="false" Sortable="false">
+            <CellTemplate>
+                <div class="d-flex justify-end">
+                    <MudTooltip Text="Editar">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEditingAsync(context)" />
+                    </MudTooltip>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="CupoViewModel" />
+    </PagerContent>
+</MudDataGrid>
+
+<CascadingValue Value="true" Name="IsNested">
+    <CreateCuposDialog @bind-IsOpen="openCreating" EscenariosCupo="escenariosCupo" DiasSemana="diasSemana" CanalesVenta="canalesVenta"
+        CommitChanges="SaveCuposAsync" DialogOptions="DialogOptions" />
+
+    <CupoEditorDialog @bind-IsOpen="openEditing" EscenariosCupo="escenariosCupo" DiasSemana="diasSemana" CanalesVenta="canalesVenta" Cupo="currentCupo"
+                       CommitChanges="SaveCupoAsync" DialogOptions="DialogOptions" />
+
+    <CalendarDialog @ref="calendario" @bind-IsOpen="openCalendario" DialogOptions="DialogOptions" />
+</CascadingValue>
+@code {
+    private ClaimsPrincipal? user;
+    private MudDataGrid<CupoViewModel> dataGrid = default!;
+    private CalendarDialog calendario = default!;
+    private ObservableGridData<CupoViewModel>? currentCupos;
+    private string? searchText;
+
+    private List<EscenarioCupoInfo> escenariosCupo = [];
+    private List<CanalVenta> canalesVenta = [];
+    private List<DiaSemana> diasSemana = [];
+
+    private bool openCreating;
+    private bool openEditing;
+    private bool openCalendario;
+    private CupoViewModel? currentCupo;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationState).User;
+        await LoadReferencesAsync();
+    }
+
+    private async Task LoadReferencesAsync()
+    {
+        Task[] loadingTasks =
+        [
+            LoadEscenariosCupo(), LoadCanalesVenta(), LoadDiasSemana(),
+    ];
+
+        await Task.WhenAll(loadingTasks);
+    }
+
+    private async Task LoadEscenariosCupo()
+    {
+        ResultListOf<EscenarioCupoInfo> result = await Mediator.SendRequest(new ListEscenariosCupo(user!));
+        escenariosCupo = result.Items.ToList();
+    }
+
+    private async Task LoadCanalesVenta()
+    {
+        ResultListOf<CanalVenta> result = await Mediator.SendRequest(new ListCanalesVenta());
+        canalesVenta = result.Items.ToList();
+    }
+
+    private async Task LoadDiasSemana()
+    {
+        ResultListOf<DiaSemana> result = await Mediator.SendRequest(new ListDiasSemana());
+        diasSemana = result.Items.ToList();
+    }
+
+    public async Task<GridData<CupoViewModel>> LoadCuposAsync(GridState<CupoViewModel> state)
+    {
+        SearchCupos searchCupos = state.ToSearch(user!, searchText);
+        PagedList<CupoFullInfo> cupos = await Mediator.SendRequest(searchCupos);
+        currentCupos = cupos.ToGridData(dataGrid);
+        return currentCupos;
+    }
+
+    private Task AddCupoAsync()
+    {
+        openCreating = true;
+        return Task.CompletedTask;
+    }
+
+    private Task ShowEditingAsync(CellContext<CupoViewModel> context)
+    {
+        currentCupo = dataGrid.CloneStrategy.CloneObject(context.Item);
+
+        if (currentCupo is not null)
+        {
+            openEditing = true;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task ShowCalendarioAsync()
+    {
+        await calendario.ShowAsync();
+    }
+
+    private async Task<bool> SaveCuposAsync(CuposModel cupos)
+    {
+        CreateCupos changeStatus = cupos.ToCreate();
+        var result = await Mediator.SendRequest(changeStatus);
+        return CreateCupos(result);
+    }
+
+    private bool CreateCupos(ResultOf<List<CupoFullInfo>> result)
+    {
+        return result.Match(
+           onSuccess: (cupos) => CreateCupos(cupos),
+           onFailure: (failure) => AddFailure(failure, "crear cupos")
+       );
+    }
+
+    private bool CreateCupos(List<CupoFullInfo> cupos)
+    {
+        foreach (var cupo in cupos)
+        {
+            currentCupos?.Add(cupo.ToViewModel());
+        }
+
+        return true;
+    }
+
+    
+    private async Task<bool> SaveCupoAsync(CupoViewModel cupo)
+    {
+        UpdateCupo changeStatus = cupo.ToUpdate();
+        var result = await Mediator.SendRequest(changeStatus);
+        return UpdateCupo(cupo, result, "modificar cupo");
+    }
+
+    private bool UpdateCupo(CupoViewModel cupo, ResultOf<CupoFullInfo> result, string action)
+    {
+        return result.Match(
+           onSuccess: (info) => UpdateCupo(cupo, info),
+           onFailure: (failure) => AddFailure(failure, action)
+       );
+    }
+
+    private bool UpdateCupo(CupoViewModel cupo, CupoFullInfo info)
+    {
+        cupo.Save(info);
+
+        CupoViewModel? persistent = currentCupos?.Find(c => c.Id == cupo.Id);
+
+        if (persistent is not null)
+        {
+            persistent.Update(cupo);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool AddFailure(Failure failure, string action)
+    {
+        Snackbar.AddFailure(failure, action);
+        return false;
+    }
+}

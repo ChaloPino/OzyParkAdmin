@@ -1,5 +1,6 @@
 ﻿@using MudBlazor.Interfaces
 @using OzyParkAdmin.Domain.Servicios;
+@inject ILocalizationInterceptor Interceptor
 
 <IfThen Condition="dataGrid is not null">
     <Then>
@@ -16,7 +17,7 @@
                         <ForIn Items="Operators" Context="o">
                             <IfThen Condition="!string.IsNullOrWhiteSpace(o)">
                                 <Then>
-                                    <MudMenuItem Style="@ChosenOperatorStyle(o)" OnClick="async () => await ChangeOperatorAsync(o)">@o</MudMenuItem>
+                                    <MudMenuItem Style="@ChosenOperatorStyle(o)" OnClick="async () => await ChangeOperatorAsync(o)">@Interceptor.Handle(FilterOperatorUtils.GetTranslationKeyByOperatorName(o))</MudMenuItem>
                                 </Then>
                             </IfThen>
                         </ForIn>
@@ -32,7 +33,7 @@
                                 <MudSelect @bind-Value="FilterContext!.FilterDefinition!.Operator" FullWidth="true" Label="Operador" Dense="true" Margin="Margin.Dense"
                                            Class="filter-operator">
                                     <ForIn Items="Operators" Context="fieldOperator">
-                                        <MudSelectItem Value="@fieldOperator">@fieldOperator</MudSelectItem>
+                                        <MudSelectItem Value="@fieldOperator">@Interceptor.Handle(FilterOperatorUtils.GetTranslationKeyByOperatorName(fieldOperator))</MudSelectItem>
                                     </ForIn>
                                 </MudSelect>
                             </MudItem>
@@ -167,6 +168,7 @@
         if (FilterContext is not null && FilterContext.FilterDefinition is not null)
         {
             await FilterContext.Actions.ClearFilterAsync(FilterContext.FilterDefinition);
+            ((IMudStateHasChanged)dataGrid!).StateHasChanged();
         }
     }
 }

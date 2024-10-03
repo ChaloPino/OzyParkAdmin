@@ -3,52 +3,9 @@
 /// <summary>
 /// Entidad canal de venta.
 /// </summary>
-public sealed class CanalVenta
-{
-    /// <summary>
-    /// Identificador único del canal de venta.
-    /// </summary>
-    public int Id { get; private set; }
-
-    /// <summary>
-    /// Aka del canal de venta.
-    /// </summary>
-    public string Aka { get; private set; } = string.Empty;
-
-    /// <summary>
-    /// Nombre del canal de venta.
-    /// </summary>
-    public string Nombre { get; private set; } = string.Empty;
-
-    /// <summary>
-    /// Nombre visual del canal de venta.
-    /// </summary>
-    public string Texto { get; private set; } = string.Empty;
-
-    /// <summary>
-    /// Si el canal de venta está activo o no.
-    /// </summary>
-    public bool EsActivo { get; private set; }
-
-    /// <summary>
-    /// Crea un nuevo canal de venta.
-    /// </summary>
-    /// <param name="id">Identificador único.</param>
-    /// <param name="aka">Aka.</param>
-    /// <param name="nombre">Nombre.</param>
-    /// <param name="texto">Texto.</param>
-    /// <returns>Un nuevo <see cref="CanalVenta"/>.</returns>
-    public static CanalVenta Crear(
-        int id,
-        string aka,
-        string nombre,
-        string texto) =>
-        new()
-        {
-            Id = id,
-            Aka = aka,
-            Nombre = nombre,
-            Texto = texto,
-            EsActivo = true
-        };
-}
+/// <param name="Id">El id del canal de venta.</param>
+/// <param name="Aka">El aka del canal de venta.</param>
+/// <param name="Nombre">El nombre del canal de venta.</param>
+/// <param name="Texto">El texto a desplegarse.</param>
+/// <param name="EsActivo">Si el canal de venta está activo.</param>
+public sealed record CanalVenta(int Id, string Aka, string Nombre, string? Texto, bool EsActivo);

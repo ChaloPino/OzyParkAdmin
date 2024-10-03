@@ -24,6 +24,7 @@
 @using OzyParkAdmin.Domain.Zonas
 @inject IMediator Mediator
 @inject ISnackbar Snackbar
+@inject DialogOptions DialogOptions
 
 <PageTitle>Servicios</PageTitle>
 <MudText Typo="Typo.h4">Servicios</MudText>
@@ -195,25 +196,19 @@
         <MudDataGridPager T="ServicioViewModel" />
     </PagerContent>
 </MudDataGrid>
+
 <CascadingValue Value="true" Name="IsNested">
     <ServicioEditDialog @bind-IsOpen="openEditing" Servicio="currentServicio" CentrosCosto="centrosCosto" Franquicias="franquicias" TiposDistribucion="tiposDistribucion"
         TiposVigencia="tiposVigencia" TiposControl="tiposControl" Servicios="servicios" Plantillas="plantillas" LoadServicios="LoadServiciosAsync"
-        CommitChanges="SaveServicioAsync" DialogOptions="dialogOptions" />
-    <CentrosCostoDialog @bind-IsOpen="openCentrosCosto" CentrosCosto="centrosCosto" Servicio="currentServicio" CommitChanges="SaveCentrosCostoAsync" DialogOptions="dialogOptions" />
-    <TramosDialog @bind-IsOpen="openTramos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SaveTramosAsync" DialogOptions="dialogOptions" />
-    <PermisosDialog @bind-IsOpen="openPermisos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SavePermisosAsync" DialogOptions="dialogOptions" />
-    <ZonasDialog @bind-IsOpen="openZonas" Tramos="tramos" Zonas="zonas" Servicio="currentServicio" CommitChanges="SaveZonasAsync" DialogOptions="dialogOptions" />
-    <GruposEtariosDialog @bind-IsOpen="openGruposEtarios" GruposEtarios="gruposEtarios" Servicio="currentServicio" CommitChanges="SaveGruposEtariosAsync" DialogOptions="dialogOptions" />
-    <CajasDialog @bind-IsOpen="openCajas" Cajas="cajas" Servicio="currentServicio" CommitChanges="SaveCajasAsync" DialogOptions="dialogOptions" />
+        CommitChanges="SaveServicioAsync" DialogOptions="DialogOptions" />
+    <CentrosCostoDialog @bind-IsOpen="openCentrosCosto" CentrosCosto="centrosCosto" Servicio="currentServicio" CommitChanges="SaveCentrosCostoAsync" DialogOptions="DialogOptions" />
+    <TramosDialog @bind-IsOpen="openTramos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SaveTramosAsync" DialogOptions="DialogOptions" />
+    <PermisosDialog @bind-IsOpen="openPermisos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SavePermisosAsync" DialogOptions="DialogOptions" />
+    <ZonasDialog @bind-IsOpen="openZonas" Tramos="tramos" Zonas="zonas" Servicio="currentServicio" CommitChanges="SaveZonasAsync" DialogOptions="DialogOptions" />
+    <GruposEtariosDialog @bind-IsOpen="openGruposEtarios" GruposEtarios="gruposEtarios" Servicio="currentServicio" CommitChanges="SaveGruposEtariosAsync" DialogOptions="DialogOptions" />
+    <CajasDialog @bind-IsOpen="openCajas" Cajas="cajas" Servicio="currentServicio" CommitChanges="SaveCajasAsync" DialogOptions="DialogOptions" />
 </CascadingValue>
 @code {
-    private static readonly DialogOptions dialogOptions = new()
-        {
-            Position = DialogPosition.Center,
-            FullWidth = true,
-            BackdropClick = false,
-        };
-
     private ClaimsPrincipal? user;
     private MudDataGrid<ServicioViewModel> dataGrid = default!;
     private ObservableGridData<ServicioViewModel>? currentServicios;

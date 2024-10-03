@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using FluentValidation;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using MudBlazor;
 using MudBlazor.Services;
 using MudBlazor.Translations;
 using OzyParkAdmin.Components;
@@ -27,6 +28,15 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+builder.Services.AddSingleton(new DialogOptions
+{
+    CloseButton = true,
+    Position = DialogPosition.Center,
+    FullWidth = true,
+    BackdropClick = false,
+    MaxWidth = MaxWidth.ExtraLarge,
+});
 
 builder.Services.AddMudServices();
 builder.Services.AddMudTranslations();

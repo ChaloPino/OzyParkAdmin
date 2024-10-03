@@ -26,6 +26,9 @@ using SixLabors.ImageSharp.Formats.Webp;
 using OzyParkAdmin.Infrastructure.CatalogoImagenes;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.CatalogoImagenes;
+using OzyParkAdmin.Domain.Cupos;
+using OzyParkAdmin.Domain.Cajas;
+using OzyParkAdmin.Infrastructure.Seguridad.Permisos;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -83,8 +86,11 @@ public static class OzyParkAdminHostApplicationExtensions
         services.AddScoped<ProductoManager>();
         services.AddScoped<ProductoValidator>();
         services.AddScoped<CatalogoImagenService>();
+        services.AddScoped<CupoManager>();
         services.AddSingleton(_ => CreateImageFormatManager());
         services.AddScoped<ImagenService>();
+        services.AddScoped<CajaManager>();
+        services.AddScoped<PermisoCajaService>();
         return services;
     }
 

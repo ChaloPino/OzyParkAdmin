@@ -10,8 +10,5 @@ internal sealed class PuntoVentaConfiguration : IEntityTypeConfiguration<PuntoVe
         builder.ToTable("mkt_PuntosVenta_td");
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).HasColumnName("PuntoVentaId").ValueGeneratedNever();
-
-        builder.HasOne(x => x.CanalVenta).WithMany().HasForeignKey("CanalVentaId");
-        builder.Navigation(x => x.CanalVenta).AutoInclude();
     }
 }

@@ -10,7 +10,7 @@ namespace OzyParkAdmin.Domain.Cajas;
 public sealed class Caja
 {
     private readonly List<Gaveta> _gavetas = [];
-    //private readonly List<CategoriaPorCaja> _categorias = [];
+
     /// <summary>
     /// Identificador único de la caja.
     /// </summary>

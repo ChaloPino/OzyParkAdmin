@@ -1,0 +1,103 @@
+﻿@using OzyParkAdmin.Domain.Cajas
+
+<IfThen Condition="AperturaCaja is not null && AperturaCaja.Id is not null">
+    <Then>
+        <MudGrid Spacing="2">
+            <MudItem xs="12" md="6">
+                <MudCard>
+                    <MudCardContent>
+                        <MudSimpleTable Dense="true">
+                            <MudTr>
+                                <MudTh>Fecha cierre</MudTh>
+                                <MudTd>@AperturaCaja?.FechaCierre</MudTd>
+                            </MudTr>
+                            <MudTr>
+                                <MudTh>Efectivo cierre</MudTh>
+                                <MudTd>@AperturaCaja?.EfectivoCierre</MudTd>
+                            </MudTr>
+                            <MudTr>
+                                <MudTh>Monto Transbank cierre</MudTh>
+                                <MudTd>@AperturaCaja?.MontoTransbankCierre</MudTd>
+                            </MudTr>
+                            <MudTr>
+                                <MudTh>Ejecutivo</MudTh>
+                                <MudTd>@AperturaCaja?.Usuario</MudTd>
+                            </MudTr>
+                            <MudTr>
+                                <MudTh>Supervisor</MudTh>
+                                <MudTd>@AperturaCaja?.Supervisor</MudTd>
+                            </MudTr>
+                            <MudTr>
+                                <MudTh>Comentario</MudTh>
+                                <MudTd>@AperturaCaja?.Comentario</MudTd>
+                            </MudTr>
+                        </MudSimpleTable>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudCard>
+                    <MudCardContent>
+                        <IfThenElse Condition="loading">
+                            <Then>
+                                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+                            </Then>
+                            <Else>
+                                <MudStack>
+                                    <ForIn Items="AperturaCaja?.Turnos" Context="turno">
+                                        <MudChip T="TurnoCajaModel" Icon="@Icons.Material.Outlined.RemoveRedEye" Color="ShiftColor(turno)" Label="true" OnClick="() => OnShowShiftAsync(turno)">@turno.FechaInicio (@turno.Estado) - @turno.Usuario</MudChip>
+                                    </ForIn>
+                                </MudStack>
+                            </Else>
+                        </IfThenElse>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </Then>
+</IfThen>
+
+@code {
+    private bool loading;
+    private TurnoCajaModel? selectedTurno;
+
+    [Parameter]
+    public AperturaCajaViewModel? AperturaCaja { get; set; }
+
+    [Parameter]
+    public Func<AperturaCajaViewModel, Task> LoadDetails { get; set; } = (apertura) => Task.CompletedTask;
+
+    [Parameter]
+    public Func<TurnoCajaModel, Task> ShowShift { get; set; } = (turno) => Task.CompletedTask;
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (AperturaCaja is not null && AperturaCaja.Id is not null && !AperturaCaja.Turnos.Any())
+        {
+            await OnLoadDetailsAsync(AperturaCaja);
+        }
+    }
+
+    private async Task OnLoadDetailsAsync(AperturaCajaViewModel aperturaCaja)
+    {
+        loading = true;
+        await LoadDetails(aperturaCaja);
+        loading = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnShowShiftAsync(TurnoCajaModel turno)
+    {
+        selectedTurno = turno;
+        await ShowShift(turno);
+    }
+
+    private Color ShiftColor(TurnoCajaModel turno) =>
+       turno.Estado switch
+       {
+           EstadoTurno.Abierto => Color.Error,
+           EstadoTurno.Pendiente => Color.Warning,
+           _ => Color.Success
+       };
+}

@@ -1,0 +1,68 @@
+﻿@using OzyParkAdmin.Domain.Cajas
+<MudDataGrid @ref="dataGrid" T="DetalleTurnoInfo" Items="Detalle" Dense="true" ReadOnly="true">
+    <Columns>
+        <PropertyColumn Property="x => x.Fecha" Title="Fecha" />
+        <PropertyColumn Property="x => x.Hora" Title="Hora" />
+        <PropertyColumn Property="x => x.Tipo" Title="Motivo" />
+        <PropertyColumn Property="x => x.EsAbono" Title="Tipo">
+            <CellTemplate>
+                <IfThenElse Condition="context.Item.EsAbono">
+                    <Then>+</Then>
+                    <Else>-</Else>
+                </IfThenElse>
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Monto" Title="Monto" AggregateDefinition="MontoAggregateDefinition" />
+        <PropertyColumn Property="x => x.NumeroReferencia" Title="Número Referencia" />
+        <PropertyColumn Property="x => x.Usuario" Title="Usuario" />
+        <PropertyColumn Property="x => x.Movimiento" Title="Movimiento" />
+    </Columns>
+    <PagerContent>
+        <IfThen Condition="Paginate">
+            <Then>
+                <MudDataGridPager />
+            </Then>
+        </IfThen>
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    private MudDataGrid<DetalleTurnoInfo> dataGrid = default!;
+
+    [Parameter]
+    public IEnumerable<DetalleTurnoInfo> Detalle { get; set; } = [];
+
+    [Parameter]
+    public bool Paginate { get; set; } = true;
+
+    [Parameter]
+    public bool SummarizeMonto{ get; set; }
+
+    private AggregateDefinition<DetalleTurnoInfo>? MontoAggregateDefinition =>
+        SummarizeMonto 
+        ? new()
+        {
+            Type = AggregateType.Custom,
+            CustomAggregate = Summarize
+        }
+        : null;
+
+
+    private string Summarize(IEnumerable<DetalleTurnoInfo> detalles)
+    {
+        decimal total = detalles.Sum(x => x.Monto);
+
+
+        if (Paginate)
+        {
+            decimal totalPaginado = detalles.Skip(dataGrid.CurrentPage * dataGrid.RowsPerPage).Take(dataGrid.RowsPerPage).Sum(x => x.Monto);
+
+            if (totalPaginado != total)
+            {
+                return $"{totalPaginado} ({total})";
+            }
+        }
+
+        return $"{total}";
+    }
+}

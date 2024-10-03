@@ -25,6 +25,7 @@
 @using OzyParkAdmin.Domain.Shared
 @inject IMediator Mediator
 @inject ISnackbar Snackbar
+@inject DialogOptions DialogOptions
 
 <PageTitle>Productos</PageTitle>
 <MudText Typo="Typo.h4">Productos</MudText>
@@ -291,23 +292,16 @@
     <ProductoEditDialog @bind-IsOpen="openEditing" Producto="currentProducto" CentrosCosto="centrosCosto" Franquicias="franquicias"
                         TiposProducto="tiposProducto" Familias="familias"
                         LoadCategorias="LoadCategoriasAsync" LoadCategoriasDespliegue="LoadCategoriasDespliegueAsync" LoadComplementos="LoadComplementosAsync"
-                        CommitChanges="SaveProductoAsync" DialogOptions="dialogOptions" />
+                        CommitChanges="SaveProductoAsync" DialogOptions="DialogOptions" />
 
     <CajasDialog @bind-IsOpen="openCajas" Cajas="cajas" Producto="currentProducto" CommitChanges="SaveCajasAsync" 
-                 LoadProductoDetalle="LoadProductoDetailAsync"  DialogOptions="dialogOptions" />
+                 LoadProductoDetalle="LoadProductoDetailAsync"  DialogOptions="DialogOptions" />
 
     <PartesDialog @bind-IsOpen="openPartes" Producto="currentProducto" LoadProductosParte="LoadProductosParteAsync" CommitChanges="SavePartesAsync" 
-                  LoadProductoDetalle="LoadProductoDetailAsync" DialogOptions="dialogOptions" />
+                  LoadProductoDetalle="LoadProductoDetailAsync" DialogOptions="DialogOptions" />
 </CascadingValue>
 
 @code {
-    private static readonly DialogOptions dialogOptions = new()
-        {
-            Position = DialogPosition.Center,
-            FullWidth = true,
-            BackdropClick = false,
-        };
-
     private ClaimsPrincipal? user;
     private MudDataGrid<ProductoViewModel> dataGrid = default!;
     private ObservableGridData<ProductoViewModel>? currentProductos;

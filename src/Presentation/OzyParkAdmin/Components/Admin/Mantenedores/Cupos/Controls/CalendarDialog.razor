@@ -1,0 +1,255 @@
+﻿@using OzyParkAdmin.Application.CanalesVenta.List
+@using OzyParkAdmin.Application.CentrosCosto.List
+@using OzyParkAdmin.Application.Cupos.Search
+@using OzyParkAdmin.Application.Servicios.List
+@using OzyParkAdmin.Application.Zonas.List
+@using OzyParkAdmin.Domain.CanalesVenta
+@using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Cupos
+@using OzyParkAdmin.Domain.Servicios
+@using OzyParkAdmin.Domain.Zonas
+@using System.Security.Claims
+@inject IMediator Mediator
+@inject CalendarioSearchModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <IfThen Condition="loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudGrid Spacing="3">
+            <MudItem xs="12">
+                <MudForm @ref="form" Model="search" Validation="Validator.ValidateValue" ValidationDelay="0">
+                    <MudGrid Spacing="3">
+                        <MudItem>
+                            <MudSelect T="CentroCostoInfo"
+                                       Value="search.CentroCosto"
+                                       ValueChanged="CentroCostoChangedAsync"
+                                       Label="Centro de costo"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Dense="true"
+                                       ToStringFunc="x => x?.Descripcion"
+                                       For="() => search.CentroCosto">
+                                <ForIn Items="centrosCosto" Context="centroCosto">
+                                    <MudSelectItem T="CentroCostoInfo" Value="centroCosto" />
+                                </ForIn>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem>
+                            <MudSelect @bind-Value="search.CanalVenta"
+                                       Label="Canal de venta"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Dense="true"
+                                       ToStringFunc="x => x?.Nombre"
+                                       For="() => search.CanalVenta">
+                                <ForIn Items="canalesVenta" Context="canalVenta">
+                                    <MudSelectItem T="CanalVenta" Value="canalVenta" />
+                                </ForIn>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem>
+                            <MudSelect @bind-Value="search.Alcance"
+                                       Label="Alcance"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Dense="true"
+                                       ToStringFunc="x => x?.Nombre"
+                                       For="() => search.Alcance">
+                                <MudSelectItem T="CupoAlcance" Value="CupoAlcance.Venta" />
+                                <MudSelectItem T="CupoAlcance" Value="CupoAlcance.Revalidacion" />
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem>
+                            <MudSelect @bind-Value="search.Servicio"
+                                       Label="Servicio"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Dense="true"
+                                       ToStringFunc="x => x?.Nombre"
+                                       For="() => search.Servicio">
+                                <ForIn Items="servicios" Context="servicio">
+                                    <MudSelectItem T="ServicioInfo" Value="servicio" />
+                                </ForIn>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem>
+                            <MudSelect @bind-Value="search.ZonaOrigen"
+                                       Label="Zona origen"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Dense="true"
+                                       ToStringFunc="@(x => x?.Descripcion ?? "Sin zona de origen")"
+                                       For="() => search.ZonaOrigen">
+                                <MudSelectItem T="ZonaInfo" Value="(ZonaInfo?)null" />
+                                <ForIn Items="zonas" Context="zona">
+                                    <MudSelectItem T="ZonaInfo" Value="zona" />
+                                </ForIn>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SearchAsync" StartIcon="@Icons.Material.Filled.Search">Buscar</MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </MudForm>
+            </MudItem>
+            <MudItem xs="12">
+                <MudCalendar @ref="calendar" Items="events" ShowTodayButton="false" ShowWeek="true" ShowDay="false" ShowMonth="false" DateRangeChanged="OnDateChangesAsync" DayTimeInterval="CalendarTimeInterval.Minutes20">
+                    <CellTemplate>
+                        <div class="mud-cal-cell-template">
+                            <MudBreakpointProvider>
+                                <MudHidden Breakpoint="Breakpoint.MdAndUp" Invert="true">
+                                    <IfThenElse Condition="cupoEvents[context].HayCupo">
+                                        <Then>
+                                            <MudChip T="string" Label="true" Color="Color.Primary" Class="mud-cal-cell-template-chip">@context.Text</MudChip>
+                                        </Then>
+                                        <Else>
+                                            <MudChip T="string" Label="true" Color="Color.Primary" Disabled="true" Class="mud-cal-cell-template-chip">@context.Text</MudChip>
+                                        </Else>
+                                    </IfThenElse>
+                                </MudHidden>
+                                <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
+                                    <IfThenElse Condition="cupoEvents[context].HayCupo">
+                                        <Then>
+                                            <MudChip T="string" Label="true" Color="Color.Primary" Class="mud-cal-cell-template-chip">@($"{cupoEvents[context].Disponible}/{cupoEvents[context].Total}")</MudChip>
+                                        </Then>
+                                        <Else>
+                                            <MudChip T="string" Label="true" Color="Color.Primary" Disabled="true" Class="mud-cal-cell-template-chip">ND</MudChip>
+                                        </Else>
+                                    </IfThenElse>
+                                </MudHidden>
+                            </MudBreakpointProvider>
+                        </div>
+                    </CellTemplate>
+                </MudCalendar>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+</MudDialog>
+@code {
+    private MudForm form = default!;
+    private MudCalendar calendar = default!;
+    private ClaimsPrincipal user = default!;
+    private List<CalendarItem> events = [];
+    private Dictionary<CalendarItem, CupoHoraInfo> cupoEvents = [];
+    private bool loading = false;
+    private CalendarioSearchModel search = new();
+    private List<CentroCostoInfo> centrosCosto = [];
+    private List<CanalVenta> canalesVenta = [];
+    private List<ServicioInfo> servicios = [];
+    private List<ZonaInfo> zonas = [];
+    private DateRange dateRange = default!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationState).User;
+        dateRange = new CalendarDateRange(DateTime.Today, CalendarView.Week, DayOfWeek.Monday);
+    }
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+
+        if (isOpen)
+        {
+            await InitializeAsync();
+        }
+
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    /// <summary>
+    /// Muestra el calendario.
+    /// </summary>
+    /// <returns>Una tarea que representa la operación asíncrona.</returns>
+    public Task ShowAsync() =>
+        ChangeIsOpen(true);
+
+    private async Task InitializeAsync()
+    {
+        loading = true;
+        Task[] tasks = [LoadCentrosCostoAsync(), LoadCanalesVentaAsync(), LoadZonasAsync()];
+        await Task.WhenAll(tasks);
+        loading = false;
+    }
+
+    private async Task LoadCentrosCostoAsync()
+    {
+        var result = await Mediator.SendRequest(new ListCentrosCosto(user));
+        centrosCosto = result.Items.ToList();
+    }
+
+    private async Task LoadCanalesVentaAsync()
+    {
+        var result = await Mediator.SendRequest(new ListCanalesVenta());
+        canalesVenta = result.Items.ToList();
+    }
+
+    private async Task LoadZonasAsync()
+    {
+        var result = await Mediator.SendRequest(new ListZonas());
+        zonas = result.Items.ToList();
+    }
+
+    private async Task CentroCostoChangedAsync(CentroCostoInfo centroCosto)
+    {
+        search.CentroCosto = centroCosto;
+        var result = await Mediator.SendRequest(new ListServiciosPorCentroCosto(centroCosto.Id));
+        servicios = result.Items.ToList();
+    }
+
+    private async Task SearchAsync()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            loading = true;
+            var result = await Mediator.SendRequest(new SearchCalendario(
+                    search.CanalVenta,
+                    search.Alcance,
+                    search.Servicio,
+                    search.ZonaOrigen,
+                    dateRange.Start,
+                    dateRange.End
+                ));
+
+            cupoEvents.Clear();
+
+            events = result.Items.SelectMany(x => x.Horario, (fecha, horario) =>
+            {
+                var item = new CalendarItem
+                    {
+                        Start = fecha.Fecha.Date.Add(horario.HoraInicio),
+                        End = fecha.Fecha.Date.Add(horario.HoraFin),
+                        Text = horario.HayCupo ? $"Disponible ({horario.Disponible} de {horario.Total})" : "No disponible",
+                        AllDay = false,
+                    };
+
+                cupoEvents.Add(item, horario);
+                return item;
+            }).ToList();
+
+            loading = false;
+        }
+    }
+
+    private async Task OnDateChangesAsync(DateRange range)
+    {
+        dateRange = range;
+        await SearchAsync();
+    }
+}

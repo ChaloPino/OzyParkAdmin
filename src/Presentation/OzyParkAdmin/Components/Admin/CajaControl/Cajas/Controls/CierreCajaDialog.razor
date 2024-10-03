@@ -1,0 +1,193 @@
+﻿@using OzyParkAdmin.Domain.Cajas
+@using System.Globalization
+@using System.Numerics
+@inject AperturaCajaViewModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <IfThen Condition="loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudSimpleTable Dense="true" Elevation="2" Class="mt-4">
+            <MudTr>
+                <MudTh>Punto de venta</MudTh>
+                <MudTd>@Apertura?.PuntoVenta</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Caja</MudTh>
+                <MudTd>@Apertura?.Aka</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Efectivo cierre</MudTh>
+                <MudTd>@Apertura?.EfectivoCierre</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Monto Transbank</MudTh>
+                <MudTd>@Apertura?.MontoTransbankCierre</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Monto voucher</MudTh>
+                <MudTd>@Apertura?.MontoVoucher</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Total deposito</MudTh>
+                <MudTd>@Apertura?.TotalDeposito</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Supervisor</MudTh>
+                <MudTd>@Apertura?.Supervisor</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Comentarios</MudTh>
+                <MudTd>
+                    <IfThenElse Condition="Apertura.Editable && Apertura.DiaAbiertoTurnosCerrados">
+                        <Then>
+                            <MudForm @ref="form" Model="Apertura" Validation="Validator.ValidateValue" ValidationDelay="0">
+                                <MudTextField @bind-Value="Apertura.Comentario"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              For="() => Apertura.Comentario"
+                                              Immediate="true"
+                                              Lines="4" />
+                            </MudForm>
+                        </Then>
+                        <Else>
+                            <MudField Variant="Variant.Outlined" Margin="Margin.Dense">
+                                @Apertura.Comentario
+                            </MudField>
+                        </Else>
+                    </IfThenElse>
+
+                </MudTd>
+            </MudTr>
+        </MudSimpleTable>
+
+        <MudExpansionPanels Class="mt-4">
+            <ForIn Items="Apertura.Turnos" Context="turno">
+                <MudExpansionPanel Text="@turno.Descripcion">
+                    <DetalleTurnoTable Detalle="turno.Detalle" Paginate="true" SummarizeMonto="true" />
+                </MudExpansionPanel>
+            </ForIn>
+
+            <IfThen Condition="Apertura.Servicios.Count > 0">
+                <Then>
+                    <MudExpansionPanel Text="Pasajeros y Guías">
+                        <PasajerosGuiasTable Servicios="Apertura.Servicios" Paginate="true" />
+
+                        <IfThen Condition="Apertura.Editable && Apertura.DiaAbiertoTurnosCerrados">
+                            <Then>
+                                <MudGrid Justify="Justify.FlexEnd" Class="mt-4">
+                                    <MudItem>
+                                        <MudSwitch @bind-Value="reviewed" Color="Color.Primary" Label="Revisado" />
+                                    </MudItem>
+                                </MudGrid>
+                            </Then>
+                        </IfThen>
+                    </MudExpansionPanel>
+                </Then>
+            </IfThen>
+        </MudExpansionPanels>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <IfThen Condition="Apertura.Editable">
+            <Then>
+                <IfThen Condition="Apertura.DiaAbiertoTurnosCerrados && Apertura.PuedeCerrarDia">
+                    <Then>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CloseDayAsync" Disabled="Apertura.Servicios.Count > 0 && !reviewed" Class="px-10">Cerrar Día</MudButton>
+                    </Then>
+                </IfThen>
+                <IfThen Condition="Apertura.Estado == EstadoDia.Cerrado && Apertura.PuedeReabrirDia">
+                    <Then>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ReopenDayAsync" Class="px-10">Reabrir Día</MudButton>
+                    </Then>
+                </IfThen>
+            </Then>
+        </IfThen>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form = default!;
+    private bool loading;
+    private bool reviewed;
+
+    [Parameter]
+    public AperturaCajaViewModel Apertura { get; set; } = default!;
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public Func<AperturaCajaViewModel, Task<bool>> CloseDay { get; set; } = (apertura) => Task.FromResult(false);
+
+    [Parameter]
+    public Func<AperturaCajaViewModel, Task<bool>> ReopenDay { get; set; } = (apertura) => Task.FromResult(false);
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    private void ShowDetalle(ResumenTurnoModel resumen)
+    {
+        resumen.ShowDetail = !resumen.ShowDetail;
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        reviewed = false;
+        await ChangeIsOpen(false);
+    }
+
+    private async Task CloseDayAsync()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            loading = true;
+
+            if (await CloseDay(Apertura))
+            {
+                await ChangeIsOpen(false);
+            }
+
+            loading = false;
+        }
+    }
+
+    private async Task ReopenDayAsync()
+    {
+        loading = true;
+
+        if (await ReopenDay(Apertura))
+        {
+            await ChangeIsOpen(false);
+        }
+
+        loading = false;
+    }
+
+    private string CalculateTotal<T, TProperty>(List<T> source, Func<T, TProperty> memberFunc, MudTable<T> table)
+        where TProperty : struct, INumber<TProperty>
+    {
+        TProperty total = source.Select(memberFunc).Aggregate(TProperty.Zero, (a, b) => a + b);
+        TProperty paginado = source.Skip(table.CurrentPage * table.RowsPerPage).Take(table.RowsPerPage).Select(memberFunc).Aggregate(TProperty.Zero, (a, b) => a + b);
+
+        if (total == paginado)
+        {
+            return $"{total}";
+        }
+
+        return $"{paginado} ({total})";
+    }
+}

@@ -1,7 +1,4 @@
 ﻿@using OzyParkAdmin.Components.Account.Shared
-@using OzyParkAdmin.Infrastructure.Layout
-@implements IDisposable
-@inject LayoutService LayoutService
 <Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
@@ -12,49 +9,3 @@
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
-
-<MudThemeProvider @ref="themeProvider" IsDarkMode="LayoutService.IsDarkMode" IsDarkModeChanged="LayoutService.SetDarkMode" />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
-
-@code{
-    private MudThemeProvider themeProvider = default!;
-
-    protected override void OnInitialized()
-    {
-        LayoutService.MajorUpdateOccurred += OnMajorUpdateOccurred;
-        base.OnInitialized();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-
-        if (firstRender)
-        {
-            await ApplyUserPreferences();
-            await themeProvider.WatchSystemPreference(OnSystemPreferenceChanged);
-            StateHasChanged();
-        }
-    }
-
-    private async Task ApplyUserPreferences()
-    {
-        bool defaultDarkModel = await themeProvider.GetSystemPreference();
-        await LayoutService.ApplyUserPreferences(defaultDarkModel);
-    }
-
-    private async Task OnSystemPreferenceChanged(bool newValue)
-    {
-        await LayoutService.OnSystemPreferenceChanged(newValue);
-    }
-
-    private void OnMajorUpdateOccurred(object? sender, EventArgs e) =>
-        StateHasChanged();
-
-    public void Dispose()
-    {
-        LayoutService.MajorUpdateOccurred -= OnMajorUpdateOccurred;
-    }
-}

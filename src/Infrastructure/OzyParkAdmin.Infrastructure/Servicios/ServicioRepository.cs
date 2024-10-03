@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.Franquicias;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Infrastructure.Shared;
@@ -28,6 +29,15 @@ public sealed class ServicioRepository(OzyParkAdminContext context) : Repository
     public async Task<List<ServicioInfo>> ListAsync(int franquiciaId, CancellationToken cancellationToken)
     {
         return await EntitySet.AsNoTracking().AsSingleQuery().Where(x => x.FranquiciaId == franquiciaId)
+            .OrderBy(x => x.Nombre)
+            .Select(x => new ServicioInfo { Id = x.Id, Aka = x.Aka, Nombre = x.Nombre })
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<ServicioInfo>> ListByCentroCostoAsync(int centroCostoId, CancellationToken cancellationToken)
+    {
+        return await EntitySet.AsNoTracking().AsSingleQuery().Where(x => x.CentroCosto.Id == centroCostoId && x.EsActivo)
             .OrderBy(x => x.Nombre)
             .Select(x => new ServicioInfo { Id = x.Id, Aka = x.Aka, Nombre = x.Nombre })
             .ToListAsync(cancellationToken);

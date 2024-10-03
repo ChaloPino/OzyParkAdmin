@@ -1,0 +1,265 @@
+﻿@using OzyParkAdmin.Domain.Cajas
+@inject TurnoCajaModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <IfThen Condition="loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudSimpleTable Dense="true" Elevation="2" Class="mt-4">
+            <MudTr>
+                <MudTh>Punto de venta</MudTh>
+                <MudTd>@Turno?.PuntoVenta</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Caja</MudTh>
+                <MudTd>@Turno?.Caja</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Gaveta</MudTh>
+                <MudTd>@Turno?.Gaveta</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Usuario</MudTh>
+                <MudTd>@Turno?.Usuario</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Fecha de inicio</MudTh>
+                <MudTd>@Turno?.FechaInicio</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Ip apertura</MudTh>
+                <MudTd>@Turno?.IpAddressApertura</MudTd>
+            </MudTr>
+            <MudTr>
+                <MudTh>Ip cierre</MudTh>
+                <MudTd>@Turno?.IpAddressCierre</MudTd>
+            </MudTr>
+        </MudSimpleTable>
+
+        <MudExpansionPanels Class="mt-4">
+            <MudExpansionPanel Text="Resumen">
+                <MudTable Items="Turno?.Resumen" Dense="true">
+                    <HeaderContent>
+                        <MudTh></MudTh>
+                        <MudTh>Movimiento</MudTh>
+                        <MudTh>Tipo</MudTh>
+                        <MudTh>Cantidad</MudTh>
+                        <MudTh>Monto</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>
+                            <MudTooltip Text="Ver detalle">
+                                <MudIconButton Variant="Variant.Text" Icon="@Icons.Material.Outlined.RemoveRedEye" Color="Color.Primary" OnClick="() => ShowDetalle(context)" />
+                            </MudTooltip>
+                        </MudTd>
+                        <MudTd DataLabel="Movimiento">@context.Movimiento</MudTd>
+                        <MudTd DataLabel="Tipo">@context.Tipo</MudTd>
+                        <MudTd DataLabel="Cantidad">@context.Cantidad</MudTd>
+                        <MudTd DataLabel="Monto">@context.Monto</MudTd>
+                    </RowTemplate>
+                    <ChildRowContent>
+                        <IfThen Condition="context.ShowDetail">
+                            <Then>
+                                <MudTr>
+                                    <td colspan="5">
+                                        <DetalleTurnoTable Detalle="context.Detalle" Paginate="false" SummarizeMonto="false" />
+                                    </td>
+                                </MudTr>
+                            </Then>
+                        </IfThen>
+                    </ChildRowContent>
+                </MudTable>
+            </MudExpansionPanel>
+
+            <MudExpansionPanel Text="Flujo Caja">
+                <DetalleTurnoTable Detalle="Turno.Detalle" Paginate="true" SummarizeMonto="true" />
+            </MudExpansionPanel>
+
+            <IfThen Condition="Turno.PuedeVisualizarDetalle || (Turno.PuedeVisualizarDetalleCerrado && Turno.Estado != EstadoTurno.Abierto)">
+                <Then>
+                    <MudExpansionPanel Text="Detalle" Expanded="true">
+                        <MudForm Model="Turno" @ref="form" Validation="Validator.ValidateValue" ValidationDelay="0">
+                            <MudSimpleTable Dense="true">
+                                <MudTr>
+                                    <MudTh>Fecha cierre</MudTh>
+                                    <MudTd>@Turno?.FechaCierre</MudTd>
+                                </MudTr>
+                                <MudTr>
+                                    <MudTh>Monto inicio</MudTh>
+                                    <MudTd>@Turno?.MontoInicio</MudTd>
+                                </MudTr>
+                                <MudTr>
+                                    <MudTh>Efectivo en cierre</MudTh>
+                                    <MudTd>@Turno?.EfectivoCierre</MudTd>
+                                </MudTr>
+                                <MudTr>
+                                    <MudTh>Monto Transbank en cierre</MudTh>
+                                    <MudTd>@Turno?.MontoTransbank</MudTd>
+                                </MudTr>
+                                <MudTr>
+                                    <MudTh>Monto Voucher en cierre</MudTh>
+                                    <MudTd>@Turno?.MontoVoucher</MudTd>
+                                </MudTr>
+                                <MudTr>
+                                    <MudTh>Diferencia en efectivo</MudTh>
+                                    <MudTd>@Turno?.DiferenciaEfectivo</MudTd>
+                                </MudTr>
+                                <MudTr>
+                                    <MudTh>Diferencia en monto Transbank</MudTh>
+                                    <MudTd>@Turno?.DiferenciaMontoTransbank</MudTd>
+                                </MudTr>
+                                <MudTr>
+                                    <MudTh>Sugerido sistema</MudTh>
+                                    <MudTd>@Turno?.EfectivoSistema</MudTd>
+                                </MudTr>
+                                <MudTr>
+                                    <MudTh>Sugerido Transbank</MudTh>
+                                    <MudTd>@Turno?.TransbankSistema</MudTd>
+                                </MudTr>
+                                <IfThen Condition="Turno.ShowRegularizacion">
+                                    <Then>
+                                        <MudTr>
+                                            <MudTh>Regularización de efectivo</MudTh>
+                                            <MudTd>
+                                                <MudNumericField @bind-Value="Turno.EfectivoCierreSupervisor"
+                                                                 Variant="Variant.Outlined"
+                                                                 Margin="Margin.Dense"
+                                                                 For="() => Turno.EfectivoCierreSupervisor"
+                                                                 Immediate="true" />
+                                            </MudTd>
+                                        </MudTr>
+                                        <MudTr>
+                                            <MudTh>Regularización de Transbank</MudTh>
+                                            <MudTd>
+                                                <MudNumericField @bind-Value="Turno.MontoTransbankSupervisor"
+                                                                 Variant="Variant.Outlined"
+                                                                 Margin="Margin.Dense"
+                                                                 For="() => Turno.MontoTransbankSupervisor"
+                                                                 Immediate="true" />
+                                            </MudTd>
+                                        </MudTr>
+                                        <MudTr>
+                                            <MudTh>Número depósito</MudTh>
+                                            <MudTd>
+                                                <MudTextField @bind-Value="Turno.NumeroDepositoFinal"
+                                                              Variant="Variant.Outlined"
+                                                              Margin="Margin.Dense"
+                                                              For="() => Turno.NumeroDepositoFinal"
+                                                              Immediate="true" />
+                                            </MudTd>
+                                        </MudTr>
+                                    </Then>
+                                </IfThen>
+                                <MudTr>
+                                    <MudTh>Comentarios</MudTh>
+                                    <MudTd>
+                                        <MudTextField @bind-Value="Turno.Comentario"
+                                                      Variant="Variant.Outlined"
+                                                      Margin="Margin.Dense"
+                                                      For="() => Turno.Comentario"
+                                                      Immediate="true"
+                                                      Lines="4"
+                                                      Disabled="!Turno.ShowRegularizacion" />
+                                    </MudTd>
+                                </MudTr>
+                            </MudSimpleTable>
+                        </MudForm>
+                    </MudExpansionPanel>
+                </Then>
+            </IfThen>
+        </MudExpansionPanels>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <IfThen Condition="Turno.EstadoDia == EstadoDia.Abierto">
+            <Then>
+                <IfThenElse Condition="Turno.Estado != EstadoTurno.Cerrado">
+                    <Then>
+                        <IfThen Condition="Turno.PuedeCerrarTurno">
+                            <Then>
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CloseShiftAsync" Class="px-10">Cerrar Turno</MudButton>
+                            </Then>
+                        </IfThen>
+                    </Then>
+                    <Else>
+                        <IfThen Condition="Turno.PuedeReabrirTurno">
+                            <Then>
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ReopenShiftAsync" Class="px-10">Reabrir Turno</MudButton>
+                            </Then>
+                        </IfThen>
+                    </Else>
+                </IfThenElse>
+            </Then>
+        </IfThen>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form = default!;
+    private bool loading;
+
+    [Parameter]
+    public TurnoCajaModel Turno { get; set; } = default!;
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public Func<TurnoCajaModel, Task<bool>> CloseShift { get; set; } = (turno) => Task.FromResult(false);
+
+    [Parameter]
+    public Func<TurnoCajaModel, Task<bool>> ReopenShift { get; set; } = (turno) => Task.FromResult(false);
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    private void ShowDetalle(ResumenTurnoModel resumen)
+    {
+        resumen.ShowDetail = !resumen.ShowDetail;
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        await ChangeIsOpen(false);
+    }
+
+    private async Task CloseShiftAsync()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            loading = true;
+
+            if (await CloseShift(Turno))
+            {
+                await ChangeIsOpen(false);
+            }
+
+            loading = false;
+        }
+    }
+
+    private async Task ReopenShiftAsync()
+    {
+        loading = true;
+
+        if (await ReopenShift(Turno))
+        {
+            await ChangeIsOpen(false);
+        }
+
+        loading = false;
+    }
+}

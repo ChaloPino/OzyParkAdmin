@@ -1,0 +1,224 @@
+﻿@using OzyParkAdmin.Domain.CanalesVenta
+@using OzyParkAdmin.Domain.Entidades
+@using OzyParkAdmin.Domain.EscenariosCupo
+@inject CuposModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <IfThen Condition="cupos.Loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudForm @ref="form" Model="cupos" Validation="Validator.ValidateValue" ValidationDelay="0">
+            <MudGrid Spacing="3" Class="mt-4">
+                <MudItem xs="4">
+                    <MudDatePicker @bind-Date="cupos.FechaEfectivaDate" 
+                                   Label="Fecha efectiva"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   For="() => cupos.FechaEfectivaDate"
+                                   Editable="true"
+                                   ImmediateText="true" />
+                </MudItem>
+                <MudItem xs="8">
+                    <MudSelect @bind-Value="cupos.EscenarioCupo"
+                               Label="Escenario"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x?.Nombre"
+                               For="() => cupos.EscenarioCupo">
+                        <ForIn Items="EscenariosCupo" Context="escenario">
+                            <MudSelectItem T="EscenarioCupoInfo" Value="escenario" />
+                        </ForIn>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+            <MudGrid Spacing="3" Class="mt-4">
+                <MudItem xs="3">
+                    <MudNumericField @bind-Value="cupos.Total"
+                                     Label="Cupo"
+                                     Min="0" Max="int.MaxValue"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     For="() => cupos.Total"
+                                     Immediate="true" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudNumericField @bind-Value="cupos.SobreCupo"
+                                     Label="SobreCupo"
+                                     Min="0" Max="int.MaxValue"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     For="() => cupos.SobreCupo"
+                                     Immediate="true" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudNumericField @bind-Value="cupos.TopeEnCupo"
+                                     Label="Tope en cupo"
+                                     Min="0" Max="int.MaxValue"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     For="() => cupos.TopeEnCupo"
+                                     Immediate="true" />
+                </MudItem>
+            </MudGrid>
+            <MudGrid Spacing="3" Class="mt-4">
+                <MudItem xs="6">
+                    <MudSelect @bind-SelectedValues="cupos.CanalesVenta"
+                               SelectAll="true"
+                               SelectAllText="Seleccionar todos"
+                               Label="Canales de venta"
+                               MultiSelection="true"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x?.Nombre"
+                               MultiSelectionTextFunc="CanalesVentaDescriptions"
+                               For="() => cupos.CanalVenta">
+                        <ForIn Items="CanalesVenta" Context="canalVenta">
+                            <MudSelectItem T="CanalVenta" Value="canalVenta" />
+                        </ForIn>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect @bind-SelectedValues="cupos.DiasSemana"
+                               SelectAll="true"
+                               SelectAllText="Seleccionar todos"
+                               Label="Dias de semana"
+                               MultiSelection="true"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x?.Aka"
+                               MultiSelectionTextFunc="DiasSemanaDescriptions"
+                               For="() => cupos.DiaSemana">
+                        <ForIn Items="DiasSemana" Context="diaSemana">
+                            <MudSelectItem T="DiaSemana" Value="diaSemana" />
+                        </ForIn>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+            <MudGrid Spacing="3" Class="mt-4">
+                <MudItem xs="4">
+                    <MudTimePicker @bind-Time="cupos.HoraInicio"
+                                   Label="Hora de inicio"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Editable="true"
+                                   ImmediateText="true"
+                                   For="() => cupos.HoraInicio" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTimePicker @bind-Time="cupos.HoraTermino"
+                                   Label="Hora de término"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Editable="true"
+                                   ImmediateText="true"
+                                   For="() => cupos.HoraTermino" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudNumericField @bind-Value="cupos.IntervaloMinutos"
+                                     Label="Intérvalo (mins)"
+                                     Min="10" Max="int.MaxValue"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     For="() => cupos.IntervaloMinutos"
+                                     Immediate="true" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Disabled="cupos.Loading" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="cupos.Loading" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form = default!;
+    private CuposModel cupos = new();
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public Func<CuposModel, Task<bool>>? CommitChanges{ get; set; }
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public List<EscenarioCupoInfo> EscenariosCupo { get; set; } = [];
+
+    [Parameter]
+    public List<CanalVenta> CanalesVenta { get; set; } = [];
+
+    [Parameter]
+    public List<DiaSemana> DiasSemana { get; set; } = [];
+
+    private string CanalesVentaDescriptions(List<string> canalesVenta)
+    {
+        if (canalesVenta.Count == 0)
+        {
+            return "Seleccione canales de venta";
+        }
+        if (canalesVenta.Count == 1)
+        {
+            return canalesVenta[0];
+        }
+
+        return $"{canalesVenta.Count} canales de venta seleccionados";
+    }
+
+    private string DiasSemanaDescriptions(List<string> diasSemana)
+    {
+        if (diasSemana.Count == 0)
+        {
+            return "Seleccione días de semana";
+        }
+        if (diasSemana.Count == 1)
+        {
+            return diasSemana[0];
+        }
+
+        return $"{diasSemana.Count} días de semana seleccionados";
+    }
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        cupos = new();
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    private async Task CommitItemChangesAsync()
+    {
+        if (cupos is not null && CommitChanges is not null)
+        {
+            await form.Validate();
+
+            if (form.IsValid)
+            {
+                cupos.Loading = true;
+                bool result = await CommitChanges(cupos);
+
+                if (result)
+                {
+                    await ChangeIsOpen(false);
+                }
+
+                cupos.Loading = false;
+            }
+        }
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        await ChangeIsOpen(false);
+    }
+}

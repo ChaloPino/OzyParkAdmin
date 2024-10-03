@@ -2,15 +2,21 @@
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Home">Home</MudNavLink>
     <AuthorizeView>
         <Authorized>
+            <AuthorizedNavGroup Icon="@Icons.Material.Outlined.DesktopWindows" Title="Control Cajas" Resource="CajaControl">
+                <AuthorizedNavLink Href="CajaControl/Cajas" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Devices">Cajas</AuthorizedNavLink>
+            </AuthorizedNavGroup>
             <AuthorizedNavGroup Icon="@Icons.Material.Outlined.Settings" Title="Mantenedores" Resource="Mantenedores">
                 <AuthorizedNavGroup Icon="@Icons.Material.Outlined.People" Title="Seguridad" Resource="Seguridad">
                     <AuthorizedNavLink Href="Mantenedores/Seguridad/Usuarios" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.People">Usuarios</AuthorizedNavLink>
                 </AuthorizedNavGroup>
-                <AuthorizedNavGroup Icon="@Icons.Material.Outlined.TravelExplore" Title="Servicios" Resource="Servicios">
-                    <AuthorizedNavLink Href="Mantenedores/Servicios" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.TravelExplore">Servicios</AuthorizedNavLink>
+                <AuthorizedNavGroup Icon="@Icons.Material.Outlined.Train" Title="Servicios" Resource="Servicios">
+                    <AuthorizedNavLink Href="Mantenedores/Servicios" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Train">Servicios</AuthorizedNavLink>
                 </AuthorizedNavGroup>
                 <AuthorizedNavGroup Icon="@Icons.Material.Outlined.ShoppingCartCheckout" Title="Productos" Resource="Productos">
                     <AuthorizedNavLink Href="Mantenedores/Productos" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.ShoppingCartCheckout">Productos</AuthorizedNavLink>
+                </AuthorizedNavGroup>
+                <AuthorizedNavGroup Icon="@Icons.Material.Outlined.AirplaneTicket" Title="Cupos" Resource="Cupos">
+                    <AuthorizedNavLink Href="Mantenedores/Cupos" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.AirplaneTicket">Cupos</AuthorizedNavLink>
                 </AuthorizedNavGroup>
             </AuthorizedNavGroup>
         </Authorized>

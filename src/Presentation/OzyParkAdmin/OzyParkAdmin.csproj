@@ -8,6 +8,7 @@
     <PackageReference Include="Blazored.LocalStorage" />
     <PackageReference Include="Extensions.MudBlazor.StaticInput" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Heron.MudCalendar" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
@@ -29,8 +30,6 @@
     <Folder Include="Components\Admin\Bodegas\" />
     <Folder Include="Components\Admin\CajaControl\Coordenadas\" />
     <Folder Include="Components\Admin\CajaControl\CoordenadasEmergencia\" />
-    <Folder Include="Components\Admin\Mantenedores\Cupos\Controls\" />
-    <Folder Include="Components\Admin\Mantenedores\Cupos\Models\" />
     <Folder Include="Components\Admin\Reportes\" />
   </ItemGroup>
 

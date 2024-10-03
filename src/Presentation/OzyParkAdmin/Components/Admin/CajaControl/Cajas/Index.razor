@@ -1,9 +1,304 @@
 ﻿@page "/CajaControl/Cajas"
+@using OzyParkAdmin.Application.Cajas.Dia
+@using OzyParkAdmin.Application.Cajas.Find
+@using OzyParkAdmin.Application.Cajas.Search
+@using OzyParkAdmin.Application.Cajas.Turno
+@using OzyParkAdmin.Application.CentrosCosto.List
+@using OzyParkAdmin.Domain.Cajas
+@using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Shared
+@using System.Security.Claims
+@using OzyParkAdmin.Infrastructure.Seguridad.Permisos
+@inject ISnackbar Snackbar
+@inject IMediator Mediator
+@inject DialogOptions DialogOptions
+@inject PermisoCajaService PermisoService
+
 <PageTitle>Cajas</PageTitle>
 <MudText Typo="Typo.h4">Cajas</MudText>
+<MudDataGrid @ref="dataGrid" T="AperturaCajaViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
+             ServerData="LoadCajasAsync" SortMode="SortMode.Multiple" 
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+    <ToolBarContent>
+        <MudSpacer />
+        <MudSelect T="CentroCostoInfo" Value="centroCosto" ValueChanged="CentroCostoChanged" Margin="Margin.Dense" Dense="true"
+                   Variant="Variant.Outlined" ToStringFunc="x => x?.Descripcion" Class="me-3">
+            <ForIn Items="centrosCosto" Context="centro">
+                <MudSelectItem T="CentroCostoInfo" Value="centro" />
+            </ForIn>
+        </MudSelect>
 
+        <MudDatePicker Date="searchDate" DateChanged="SearchDateChanged" Margin="Margin.Dense"
+                       Variant="Variant.Outlined" ImmediateText="true" Class="me-3" />
+        <SearchControl @bind-SearchText="searchText" />
+    </ToolBarContent>
+    <Columns>
+        <HierarchyColumn Hideable="false" ButtonDisabledFunc="x => x.Id is null" />
+        <PropertyColumn Property="x => x.CajaId" Title="Id" Hideable="false" Groupable="false" />
+        <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Aka" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Descripcion" Title="Nombre" Groupable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Equipo" Title="Equipo" Groupable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Equipo" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.CentroCosto" Title="Centro de costo">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.CentroCosto" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Centro de costo" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Franquicia" Title="Franquicia">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Franquicia" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Franquicia" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.PuntoVenta" Title="Punto de venta">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.PuntoVenta" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Punto de venta" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.DiaApertura" Title="Día apertura">
+            <FilterTemplate>
+                <DateOnlyFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <Grouping Title="Día apertura" GroupDefinition="context" T="AperturaCajaViewModel" TValue="DateOnly" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.FechaApertura" Title="Hora apertura" Filterable="false">
+            <GroupTemplate>
+                <Grouping Title="Hora apertura" GroupDefinition="context" T="AperturaCajaViewModel" TValue="TimeSpan" />
+            </GroupTemplate>
+            <CellTemplate>
+                @context.Item.HoraApertura
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Estado" Title="Estado">
+            <FilterTemplate>
+                <EstadoDiaFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <Grouping Title="Estado" GroupDefinition="context" T="AperturaCajaViewModel" TValue="EstadoDia" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <TemplateColumn Hideable="false" Groupable="false" Filterable="false" Sortable="false">
+            <CellTemplate>
+                <div class="d-flex justify-end">
+                    <IfThen Condition="context.Item.Id is not null && context.Item.UltimoTurnoId is not null">
+                        <Then>
+                            <IfThen Condition="context.Item.UltimoTurnoId is not null">
+                                <Then>
+                                    <MudTooltip Text="Abrir último turno">
+                                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.RemoveRedEye" Color="context.Item.UltimoTurnoEstadoColor" OnClick="async () => await ShowLastShiftAsync(context)" />
+                                    </MudTooltip>
+                                </Then>
+                            </IfThen>
+                    
+                            <MudTooltip Text="Detalle del día">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Devices" Color="context.Item.EstadoColor" OnClick="async () => await ShowCloseDayAsync(context)" />
+                            </MudTooltip>
+                        </Then>
+                    </IfThen>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <ChildRowContent>
+        <AperturaDiaDetail AperturaCaja="context.Item" LoadDetails="OnLoadDetailsAsync" ShowShift="ShowShiftAsync" />
+    </ChildRowContent>
+    <PagerContent>
+        <MudDataGridPager T="AperturaCajaViewModel" />
+    </PagerContent>
+</MudDataGrid>
 
-
+<CascadingValue Value="true" Name="IsNested">
+    <TurnoDialog DialogOptions="DialogOptions" @bind-IsOpen="openCloseShift" Turno="currentTurno" CloseShift="CloseShiftAsync" ReopenShift="ReopenShiftAsync" />
+    <CierreCajaDialog DialogOptions="DialogOptions" @bind-IsOpen="openCloseDay" Apertura="currentCaja" CloseDay="CloseDayAsync" ReopenDay="ReopenDayAsync" />
+</CascadingValue>
 @code {
+    private ClaimsPrincipal user = default!;
+    private MudDataGrid<AperturaCajaViewModel> dataGrid = default!;
+    private ObservableGridData<AperturaCajaViewModel>? currentCajas;
+    private List<CentroCostoInfo> centrosCosto = [];
+    private string? searchText;
+    private DateTime? searchDate = DateTime.Today;
+    private CentroCostoInfo centroCosto = default!;
+    private CajaAcciones acciones = CajaAcciones.None;
 
+    private bool openCloseDay;
+    private bool openCloseShift;
+    private AperturaCajaViewModel? currentCaja;
+    private TurnoCajaModel? currentTurno;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationState).User;
+        acciones = await PermisoService.FindPermisosByUser(user);
+        await LoadCentrosCostoAsync();
+    }
+
+    private async Task LoadCentrosCostoAsync()
+    {
+        var result = await Mediator.SendRequest(new ListCentrosCosto(user));
+        centrosCosto = result.Items.ToList();
+        centroCosto = centrosCosto.First();
+    }
+
+    private async Task SearchDateChanged(DateTime? date)
+    {
+        searchDate = date;
+        await dataGrid.ReloadServerData();
+    }
+
+    private async Task CentroCostoChanged(CentroCostoInfo info)
+    {
+        centroCosto = info;
+        await dataGrid.ReloadServerData();
+    }
+
+    private async Task<GridData<AperturaCajaViewModel>> LoadCajasAsync(GridState<AperturaCajaViewModel> state)
+    {
+        if (centroCosto is null)
+        {
+            await LoadCentrosCostoAsync();
+        }
+
+        SearchAperturasCaja searchCajas = state.ToSearch(searchText, searchDate, centroCosto);
+        PagedList<AperturaCajaInfo> aperturas = await Mediator.SendRequest(searchCajas);
+        currentCajas = aperturas.ToGridData(dataGrid, acciones);
+        return currentCajas;
+    }
+
+    private async Task OnLoadDetailsAsync(AperturaCajaViewModel aperturaCaja)
+    {
+        if (aperturaCaja.Id is not null)
+        {
+            var find = new FindAperturaCajaDetalle(aperturaCaja.Id.Value);
+            var request = await Mediator.SendRequest(find);
+
+            request.Switch(
+                onSuccess: detalle =>
+                {
+                    aperturaCaja.Turnos = detalle.Turnos.ToModel(acciones);
+                    aperturaCaja.Servicios = detalle.Servicios;
+                },
+                onFailure: failure => AddFailure(failure, "busando el detalle de la apertura de la caja."));
+        }
+    }
+
+    private async Task ShowCloseDayAsync(CellContext<AperturaCajaViewModel> context)
+    {
+        await OnLoadDetailsAsync(context.Item);
+        currentCaja = context.Item;
+        openCloseDay = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ShowLastShiftAsync(CellContext<AperturaCajaViewModel> context)
+    {
+        if (context.Item.UltimoTurnoId is not null)
+        {
+            await OnLoadDetailsAsync(context.Item);
+            TurnoCajaModel? turno = context.Item.Turnos.Find(x => x.Id == context.Item.UltimoTurnoId.Value);
+
+            if (turno is not null)
+            {
+                await ShowShiftAsync(turno);
+            }
+        }
+    }
+
+    private async Task ShowShiftAsync(TurnoCajaModel turno)
+    {
+        currentTurno = turno;
+        openCloseShift = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task<bool> CloseDayAsync(AperturaCajaViewModel apertura)
+    {
+        CerrarDia cerrarDia = new CerrarDia(apertura.Id!.Value, user, apertura.Comentario!, apertura.MontoEfectivoParaCierre, apertura.MontoTransbankParaCierre);
+        var result = await Mediator.SendRequest(cerrarDia);
+        return result.Match(
+            onSuccess: info => UpdateDay(apertura, info),
+            onFailure: failure => AddFailure(failure, "cerrar día.")
+        );
+    }
+
+    private async Task<bool> ReopenDayAsync(AperturaCajaViewModel apertura)
+    {
+        ReabrirDia cerrarDia = new ReabrirDia(apertura.Id!.Value);
+        var result = await Mediator.SendRequest(cerrarDia);
+        return result.Match(
+            onSuccess: info => UpdateDay(apertura, info),
+            onFailure: failure => AddFailure(failure, "cerrar día.")
+        );
+    }
+
+    private async Task<bool> CloseShiftAsync(TurnoCajaModel turno)
+    {
+        CerrarTurno cerrarTurno = new CerrarTurno(turno.DiaId, turno.Id, user, turno.EfectivoCierreSupervisor!.Value, turno.MontoTransbankSupervisor!.Value, turno.Comentario!, [..turno.Detalle]);
+        var result = await Mediator.SendRequest(cerrarTurno);
+        return result.Match(
+            onSuccess: info => UpdateShift(turno, info),
+            onFailure: failure => AddFailure(failure, "cerrar turno.")
+        );
+    }
+
+    private async Task<bool> ReopenShiftAsync(TurnoCajaModel turno)
+    {
+        ReabrirTurno reabrirTurno = new ReabrirTurno(turno.DiaId, turno.Id, [..turno.Detalle]);
+        var result = await Mediator.SendRequest(reabrirTurno);
+        return result.Match(
+            onSuccess: info => UpdateShift(turno, info),
+            onFailure: failure => AddFailure(failure, "reabrir turno.")
+        );
+    }
+
+    private bool UpdateDay(AperturaCajaViewModel apertura, AperturaCajaInfo info)
+    {
+        apertura.Update(info);
+        return true;
+    }
+
+    private bool UpdateShift(TurnoCajaModel turno, TurnoCajaInfo info)
+    {
+        turno.Update(info);
+        AperturaCajaViewModel? apertura = currentCajas?.Find(x => x.Id == turno.DiaId);
+
+        if (apertura is not null)
+        {
+            apertura.TryUpdateLastShift(turno);
+        }
+
+        return true;
+    }
+
+
+    private bool AddFailure(Failure failure, string action)
+    {
+        Snackbar.AddFailure(failure, action);
+        return false;
+    }
 }

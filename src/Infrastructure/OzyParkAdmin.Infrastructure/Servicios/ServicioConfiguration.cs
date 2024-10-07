@@ -165,5 +165,6 @@ internal sealed class ServicioConfiguration : IEntityTypeConfiguration<Servicio>
 
         builder.Ignore(x => x.Tramos);
         builder.Ignore(x => x.Cajas);
+        builder.Ignore(x => x.Politicas);
     }
 }

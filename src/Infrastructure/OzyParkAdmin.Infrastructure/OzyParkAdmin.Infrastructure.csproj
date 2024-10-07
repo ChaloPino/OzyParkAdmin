@@ -5,10 +5,16 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" />
+    <PackageReference Include="itext7" />
+    <PackageReference Include="itext7.bouncy-castle-adapter" />
+    <PackageReference Include="itext7.pdfhtml" />
     <PackageReference Include="MassTransit" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
+    <PackageReference Include="RazorEngineCore" />
     <PackageReference Include="SixLabors.ImageSharp" />
+    <PackageReference Include="ZXing.Net" />
+    <PackageReference Include="ZXing.Net.Bindings.ImageSharp.V2" />
   </ItemGroup>
 
   <ItemGroup>

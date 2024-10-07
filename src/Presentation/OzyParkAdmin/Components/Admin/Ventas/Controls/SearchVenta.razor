@@ -1,0 +1,59 @@
+﻿@inject SearchVentaModelValidator Validator
+<MudCard Elevation="2">
+    <MudCardContent>
+        <MudForm @ref="form" Model="Search" Validation="Validator.ValidateValue" ValidationDelay="0">
+            <MudGrid Spacing="3">
+                <MudItem xs="12" md="6">
+                    <MudDatePicker @bind-Date="Search.Fecha" Label="Fecha" Variant="Variant.Outlined" For="() => Search.Fecha" ImmediateText="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Search.NumeroOrden" Label="Nro. Orden" Variant="Variant.Outlined" For="() => Search.NumeroOrden" Immediate="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Search.VentaId" Label="Nro. Venta" Variant="Variant.Outlined" For="() => Search.VentaId" Immediate="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Search.TicketId" Label="Nro. Ticket" Variant="Variant.Outlined" For="() => Search.TicketId" Immediate="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Search.Email" Label="Email" Variant="Variant.Outlined" For="() => Search.Email" Immediate="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Search.Telefono" Label="Teléfono" Variant="Variant.Outlined" For="() => Search.Telefono" Immediate="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Search.Nombres" Label="Nombres" Variant="Variant.Outlined" For="() => Search.Nombres" Immediate="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Search.Apellidos" Label="Apellidos" Variant="Variant.Outlined" For="() => Search.Apellidos" Immediate="true" Margin="Margin.Dense" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="ModelAsync" Disabled="loading">Buscar</MudButton>
+    </MudCardActions>
+</MudCard>
+@code {
+    private MudForm form = default!;
+    private bool loading;
+
+    [Parameter]
+    public SearchVentaModel Search { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<SearchVentaModel> SearchChanged { get; set; }
+
+
+    private async Task ModelAsync()
+    {
+        await form.Validate();
+
+        if (form.IsValid)
+        {
+            loading = true;
+            await SearchChanged.InvokeAsync(Search);
+            loading = false;
+        }
+    }
+}

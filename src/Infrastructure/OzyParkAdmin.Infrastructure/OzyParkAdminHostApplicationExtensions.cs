@@ -29,6 +29,14 @@ using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.Cupos;
 using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Infrastructure.Seguridad.Permisos;
+using OzyParkAdmin.Domain.Tickets;
+using OzyParkAdmin.Infrastructure.Plantillas;
+using OzyParkAdmin.Domain.Plantillas;
+using RazorEngineCore;
+using OzyParkAdmin.Domain.Franquicias;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using OzyParkAdmin.Application.Shared;
+using OzyParkAdmin.Infrastructure.Middlewares;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -91,6 +99,14 @@ public static class OzyParkAdminHostApplicationExtensions
         services.AddScoped<ImagenService>();
         services.AddScoped<CajaManager>();
         services.AddScoped<PermisoCajaService>();
+        services.AddScoped<IDocumentGenerator, DocumentGenerator>();
+        services.AddSingleton<IRazorEngine, RazorEngine>();
+        services.AddSingleton(_ => new AssemblyProvider().AddAssemblies(typeof(OzyParkAdminHostApplicationExtensions).Assembly).AddAssemblies(typeof(Franquicia).Assembly));
+        services.AddSingleton<HtmlGenerator>();
+        services.AddScoped<TicketManager>();
+
+        services.AddHttpContextAccessor();
+        services.AddSingleton<IClientIpService, ClientIpService>();
         return services;
     }
 

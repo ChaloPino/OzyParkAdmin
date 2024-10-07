@@ -1,0 +1,111 @@
+﻿@page "/Ventas/VentasOrden"
+@using OzyParkAdmin.Application.Tickets.Download
+@using OzyParkAdmin.Application.Ventas.Search
+@using OzyParkAdmin.Domain.Shared
+@using OzyParkAdmin.Domain.Ventas
+@using System.Security.Claims
+@inject ISnackbar Snackbar
+@inject IMediator Mediator
+@inject DialogOptions DialogOptions
+<PageTitle>Ventas por Orden</PageTitle>
+<MudText Typo="Typo.h4">Ventas por Orden</MudText>
+
+<SearchVenta Search="search" SearchChanged="OnSearch" />
+
+<MudDataGrid T="VentaOrdenInfo" @ref="dataGrid" ServerData="SearchVentasAsync" ReadOnly="true" Filterable="false" SortMode="SortMode.Multiple" Loading="loading">
+    <Columns>
+        <HierarchyColumn />
+        <PropertyColumn Property="x => x.VentaId" Title="Nro. Venta" />
+        <PropertyColumn Property="x => x.FechaVenta" Title="Fecha de venta" />
+        <PropertyColumn Property="x => x.Nombres" Title="Nombre cliente" />
+        <PropertyColumn Property="x => x.Apellidos" Title="Apellidos cliente" />
+        <PropertyColumn Property="x => x.Email" Title="Email" />
+        <PropertyColumn Property="x => x.Telefono" Title="Teléfono" />
+    </Columns>
+    <ChildRowContent>
+        @RenderTickets(context.Item)
+    </ChildRowContent>
+    <PagerContent>
+        <MudDataGridPager />
+    </PagerContent>
+</MudDataGrid>
+
+<CascadingValue Value="true" Name="IsNested">
+    <PdfViewerDialog File="downloadedTicket" @bind-IsOpen="openViewer" DialogOptions="DialogOptions" />
+</CascadingValue>
+
+@code {
+    private SearchVentaModel search = new();
+    private MudDataGrid<VentaOrdenInfo> dataGrid = default!;
+    private TicketOrdenInfo? selectedTicket;
+    private ClaimsPrincipal? user;
+    private bool loading;
+    private DownloadedTicketModel? downloadedTicket;
+    private bool openViewer;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationState).User;
+    }
+
+
+    private async Task OnSearch(SearchVentaModel searchModel)
+    {
+        search = searchModel;
+        await dataGrid.ReloadServerData();
+    }
+
+    private async Task<GridData<VentaOrdenInfo>> SearchVentasAsync(GridState<VentaOrdenInfo> state)
+    {
+        SearchVentasOrden searchVentasOrden = state.ToSearch(search);
+        var result = await Mediator.SendRequest(searchVentasOrden);
+        return result.ToGridData();
+    }
+
+    private async Task DownloadTicketAsync(CellContext<TicketOrdenInfo> context, VentaOrdenInfo ventaOrden)
+    {
+        loading = true;
+
+        DownloadTicket downloadTicket = new DownloadTicket(context.Item.TicketId, ventaOrden.VentaId, user!);
+        var result = await Mediator.SendRequest(downloadTicket);
+        result.Switch(
+            onSuccess: SetDownloadedTicket,
+            onFailure: failure => AddFailure(failure, "descargando ticket"));
+
+        loading = false;
+    }
+
+    private void SetDownloadedTicket(DownloadedTicket ticket)
+    {
+        byte[] buffer = Convert.FromBase64String(ticket.Base64);
+        downloadedTicket = new(ticket.TicketId, new MemoryStream(buffer), "application/pdf");
+        openViewer = true;
+    }
+
+    private void AddFailure(Failure failure, string action) =>
+        Snackbar.AddFailure(failure, action);
+
+    private RenderFragment RenderTickets(VentaOrdenInfo ventaOrden) =>
+    @<text>
+        <MudDataGrid T="TicketOrdenInfo" Items="@ventaOrden.Tickets" SortMode="SortMode.Multiple" Filterable="false">
+            <Columns>
+                <PropertyColumn Property="x => x.TicketId" Title="Nro. Ticket" />
+                <PropertyColumn Property="x => x.InicioVigencia" Title="Inicio vigencia" />
+                <PropertyColumn Property="x => x.InicioVigencia" Title="Fin vigencia" />
+                <PropertyColumn Property="x => x.NumeroPasajeros" Title="Pasajeros" />
+                <TemplateColumn Sortable="false">
+                    <CellTemplate>
+                        <MudTooltip Text="@(context.Item.PuedeDescargarse ? "Descargar ticket" : "El ticket está anulado o ya fue usado")">
+                            <MudIconButton Color="Color.Default" Icon="@Icons.Material.Outlined.Download" Size="Size.Small"
+                                           Disabled="!context.Item.PuedeDescargarse || loading"
+                                           OnClick="async () => await DownloadTicketAsync(context, ventaOrden)" />
+                        </MudTooltip>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </text>;
+}

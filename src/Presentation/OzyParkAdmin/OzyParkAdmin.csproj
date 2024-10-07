@@ -2,7 +2,25 @@
 
   <PropertyGroup>
     <UserSecretsId>aspnet-OzyParkAdmin-1b38ffc0-63e0-4bbb-b881-329c75169e96</UserSecretsId>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="wwwroot\fonts\font_gobCL_Bold.ttf" />
+    <None Remove="wwwroot\fonts\font_SHI.ttf" />
+    <None Remove="wwwroot\fonts\segoeui.ttf" />
+    <None Remove="wwwroot\fonts\segoeuib.ttf" />
+    <None Remove="wwwroot\fonts\segoeuii.ttf" />
+    <None Remove="wwwroot\fonts\segoeuil.ttf" />
+    <None Remove="wwwroot\fonts\segoeuisl.ttf" />
+    <None Remove="wwwroot\fonts\segoeuiz.ttf" />
+    <None Remove="wwwroot\fonts\seguibl.ttf" />
+    <None Remove="wwwroot\fonts\seguibli.ttf" />
+    <None Remove="wwwroot\fonts\seguili.ttf" />
+    <None Remove="wwwroot\fonts\seguisb.ttf" />
+    <None Remove="wwwroot\fonts\seguisbi.ttf" />
+    <None Remove="wwwroot\fonts\seguisli.ttf" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" />
@@ -13,6 +31,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
     <PackageReference Include="MudBlazor" />
+    <PackageReference Include="MudBlazor.Extensions" />
     <PackageReference Include="MudBlazor.Translations" />
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Enrichers.Environment" />

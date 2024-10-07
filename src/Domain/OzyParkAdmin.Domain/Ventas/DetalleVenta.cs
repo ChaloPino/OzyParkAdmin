@@ -1,9 +1,9 @@
-﻿namespace OzyParkAdmin.Domain.Cajas;
+﻿namespace OzyParkAdmin.Domain.Ventas;
 
 /// <summary>
 /// El detalle de una venta.
 /// </summary>
-public class DetalleVenta
+public abstract class DetalleVenta
 {
     /// <summary>
     /// La línea de la venta.

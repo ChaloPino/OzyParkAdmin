@@ -91,6 +91,11 @@ public sealed class Servicio
     public int PlantillaDigitalId { get; private set; }
 
     /// <summary>
+    /// El id del centro de costo.
+    /// </summary>
+    public int CentroCostoId { get; private set; }
+
+    /// <summary>
     /// El centro de costo.
     /// </summary>
     public CentroCosto CentroCosto { get; private set; } = default!;
@@ -133,7 +138,12 @@ public sealed class Servicio
     /// <summary>
     /// Las políticas que tiene el servicio.
     /// </summary>
-    public string? Politicas => _servicioPolitica?.Politicas;
+    public string? PoliticasTexto => _servicioPolitica?.Politicas;
+
+    /// <summary>
+    /// Las políticas del servicio.
+    /// </summary>
+    public ServicioPolitica? Politicas => _servicioPolitica;
 
     /// <summary>
     /// Los tramos asociados al servicio.
@@ -211,7 +221,7 @@ public sealed class Servicio
             EsParaBuses = Bus is not null,
             IdaVuelta = Bus?.IdaVuelta,
             HolguraEntrada = HolguraEntrada,
-            Politicas = Politicas,
+            Politicas = PoliticasTexto,
             ControlParental = ControlParental,
             ServicioResponsableId = _servicioControlParental?.ServicioResponsableId,
             Tramos = _tramosServicio.ToInfo(),
@@ -301,6 +311,7 @@ public sealed class Servicio
         Servicio servicio = new()
         {
             Id = id,
+            CentroCostoId = centroCosto.Id,
             CentroCosto = centroCosto,
             FranquiciaId = franquiciaId,
             Aka = aka,
@@ -715,6 +726,23 @@ public sealed class Servicio
     internal void Activar() =>
         EsActivo = true;
 
-    internal void Desactivar() => 
+    internal void Desactivar() =>
         EsActivo = false;
+
+    /// <summary>
+    /// Consigue el nombre dado el tramo.
+    /// </summary>
+    /// <param name="tramoId">El id del tramo para buscar el nombre.</param>
+    /// <param name="centroCostoId">El id del centro de costo para buscar el nombre</param>
+    /// <returns>El nombre del servicio asociado al tramo, o si no existe el nombre del servicio.</returns>
+    public string NombrePorTramo(int tramoId, int centroCostoId) =>
+        _tramosServicio.Find(x => x.Tramo.Id == tramoId && x.CentroCosto.Id == centroCostoId)?.Nombre ?? Nombre;
+
+    /// <summary>
+    /// Consigue el nombre dado el tramo.
+    /// </summary>
+    /// <param name="tramoId">El id del tramo para buscar el nombre.</param>
+    /// <returns>El nombre del servicio asociado al tramo, o si no existe el nombre del servicio.</returns>
+    public string NombrePorTramo(int tramoId) =>
+        NombrePorTramo(tramoId, CentroCostoId);
 }

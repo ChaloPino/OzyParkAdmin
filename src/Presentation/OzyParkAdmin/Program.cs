@@ -3,11 +3,14 @@ using FluentValidation;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using MudBlazor;
+using MudBlazor.Extensions;
 using MudBlazor.Services;
 using MudBlazor.Translations;
 using OzyParkAdmin.Components;
 using OzyParkAdmin.Components.Account;
 using OzyParkAdmin.Infrastructure.Layout;
+using OzyParkAdmin.Infrastructure.Middlewares;
+using OzyParkAdmin.Infrastructure.Plantillas;
 using OzyParkAdmin.Shared;
 using Serilog;
 
@@ -39,8 +42,11 @@ builder.Services.AddSingleton(new DialogOptions
 });
 
 builder.Services.AddMudServices();
+builder.Services.AddMudExtensions();
 builder.Services.AddMudTranslations();
 builder.Services.AddBlazoredLocalStorage();
+
+builder.Services.Configure<TemplateOptions>(options => options.TemplatePath = builder.Environment.WebRootPath);
 
 builder.Services.AddAuthentication(options =>
     {
@@ -66,6 +72,10 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseClientIp();
+
+app.UseMudExtensions();
 
 app.UseHttpsRedirection();
 

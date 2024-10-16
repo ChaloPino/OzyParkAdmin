@@ -3,6 +3,7 @@
 @using System.Xml.Linq
 @using OzyParkAdmin.Domain.Reportes.Filters;
 @using OzyParkAdmin.Components.Admin.Reportes.Controls.Filters
+@using System.Security.Claims
 @inject ISnackbar Snackbar
 <IfThen Condition="FilterViewModel is not null">
     <Then>
@@ -15,7 +16,7 @@
                 </IfThen>
                 <CascadingValue IsFixed="true" Value="this">
                     <MudForm @ref="form" Model="FilterViewModel" ValidationDelay="0">
-                        <ForIn Items="FilterViewModel!.Filters.GroupBy(x => x.Row)">
+                        <ForIn Items="FilterViewModel!.GroupingFilters(User)">
                             <MudGrid Spacing="2">
                                 <ForIn Items="context" Context="filter">
                                     @Render(filter)
@@ -34,10 +35,10 @@
                 <IfThen Condition="Report?.Actions.Any(x => x.Type != ActionType.Html) == true">
                     <Then>
                         <MudMenu Class="ml-2" Color="Color.Primary" Label="Exportar" Variant="Variant.Filled" 
-                                 StartIcon="@Icons.Material.Filled.ImportExport" 
-                                 EndIcon="@Icons.Material.Filled.ArrowDropDown"
-                                 FullWidth="true"
-                                 AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                        StartIcon="@Icons.Material.Filled.ImportExport" 
+                        EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                        FullWidth="true"
+                        AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
                             <ForIn Items="Report?.Actions.Where(x => x.Type != ActionType.Html)">
                                 <MudMenuItem OnClick="() => GenerateOtherFormatAsync(context.Type)">@context.Type</MudMenuItem>
                             </ForIn>
@@ -72,6 +73,8 @@
     [Parameter]
     public FilterViewModel? FilterViewModel { get; set; }
 
+    [Parameter]
+    public ClaimsPrincipal User { get; set; } = default!;
 
     private async Task GenerateHtmlAsync()
     {

@@ -24,7 +24,13 @@
     <Else>
         <PageTitle>@report!.Title</PageTitle>
         <MudText Typo="Typo.h4">@report!.Title</MudText>
-        <FilterLayout Report="@report" FilterViewModel="filterViewModel" LoadFilterData="LoadFilterDataAsync" GenerateHtml="GenerateHtmlReportAsync" GenerateOtherFormat="GenerateOtherFormatAsync" />
+        <FilterLayout 
+            Report="@report" 
+            FilterViewModel="filterViewModel" 
+            User="user!"
+            LoadFilterData="LoadFilterDataAsync" 
+            GenerateHtml="GenerateHtmlReportAsync" 
+            GenerateOtherFormat="GenerateOtherFormatAsync" />
         <ReportVisualizer Report="@report" ReportGenerated="reportGenerated" />
     </Else>
 </IfThenElse>

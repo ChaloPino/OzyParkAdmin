@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Components.Admin.Reportes.Models;
+﻿using OzyParkAdmin.Domain.Reportes.Filters;
+
+namespace OzyParkAdmin.Components.Admin.Reportes.Models;
 
 /// <summary>
 /// El modelo del filtro.
@@ -60,4 +62,9 @@ public interface IFilterModel
     /// </summary>
     /// <returns></returns>
     string?[] GetParentValues();
+
+    /// <summary>
+    /// El filtro asociado al modelo.
+    /// </summary>
+    Filter Filter { get; }
 }

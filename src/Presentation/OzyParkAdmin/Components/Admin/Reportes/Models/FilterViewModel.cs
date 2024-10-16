@@ -1,6 +1,8 @@
 ﻿using MudBlazor;
+using OzyParkAdmin.Application.Reportes;
 using OzyParkAdmin.Domain.Reportes.DataSources;
 using OzyParkAdmin.Domain.Reportes.Filters;
+using System.Security.Claims;
 using System.Xml.Linq;
 
 namespace OzyParkAdmin.Components.Admin.Reportes.Models;
@@ -60,6 +62,10 @@ public sealed class FilterViewModel
     /// </summary>
     public List<IFilterModel> Filters { get; private set; } = [];
 
+    internal IEnumerable<IGrouping<int, IFilterModel>> GroupingFilters(ClaimsPrincipal user) => Filters.Where(filter => CanShowFilter(filter, user)).GroupBy(x => x.Row);
+
+    private static bool CanShowFilter(IFilterModel filter, ClaimsPrincipal user) =>
+        filter.Filter.IsAccessibleByUser(user);
 
     private IFilterModel? CreateFilterModel(Filter filter, Dictionary<Filter, (SizeLayout Size, int Row)> layouts)
     {

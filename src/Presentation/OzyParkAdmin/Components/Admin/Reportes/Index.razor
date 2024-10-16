@@ -1,0 +1,133 @@
+﻿@page "/Reportes/{Aka}"
+@using OzyParkAdmin.Application.Reportes.Filters
+@using OzyParkAdmin.Application.Reportes.Find
+@using System.Security.Claims
+@using OzyParkAdmin.Application.Reportes.Generate
+@using OzyParkAdmin.Domain.Reportes
+@using OzyParkAdmin.Domain.Reportes.Filters
+@using OzyParkAdmin.Domain.Shared
+@inject ISnackbar Snackbar
+@inject IMediator Mediator
+@inject NavigationManager NavigationManager
+<IfThenElse Condition="report is null">
+    <Then>
+        <PageTitle>Cargando reporte...</PageTitle>
+        <MudGrid Spacing="3" Justify="Justify.Center">
+            <MudItem>
+                <MudProgressCircular Indeterminate="true" Color="Color.Primary" Class="mb-3"/>
+            </MudItem>
+            <MudItem>
+                <MudText Typo="Typo.body1" Class="mt-4">Cargando reporte...</MudText>
+            </MudItem>
+        </MudGrid>
+    </Then>
+    <Else>
+        <PageTitle>@report!.Title</PageTitle>
+        <MudText Typo="Typo.h4">@report!.Title</MudText>
+        <FilterLayout Report="@report" FilterViewModel="filterViewModel" LoadFilterData="LoadFilterDataAsync" GenerateHtml="GenerateHtmlReportAsync" GenerateOtherFormat="GenerateOtherFormatAsync" />
+        <ReportVisualizer Report="@report" ReportGenerated="reportGenerated" />
+    </Else>
+</IfThenElse>
+
+@code {
+    private ClaimsPrincipal? user;
+    private Report? report;
+    private FilterViewModel? filterViewModel;
+    private ReportGeneratedModel reportGenerated = new();
+
+    [Parameter]
+    public string? Aka { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        user = (await AuthenticationState).User;
+        reportGenerated = new();
+
+        if (Aka is not null)
+        {
+            var result = await Mediator.SendRequest(new FindReporte(user, Aka!));
+
+            result.Switch(
+                onSuccess: SetReport,
+                onFailure: SetFailure);
+        }
+    }
+
+    private async Task GenerateHtmlReportAsync(FilterViewModel filterViewModel)
+    {
+        reportGenerated.Loading = LoadingState.Loading;
+        StateHasChanged();
+
+        GenerateHtmlReport generateHtmlReport = filterViewModel.ToGenerateHtml(user!);
+        var result = await Mediator.SendRequest(generateHtmlReport);
+        result.Switch(
+            onReportGenerated: SetReportGenerated,
+            onFailure: failure => AddFailure(failure)
+        );
+    }
+
+    private async Task GenerateOtherFormatAsync(FilterViewModel filterViewModel, ActionType actionType)
+    {
+        GenerateOtherFormat generateOtherFormat = filterViewModel.ToGenerateOtherFormat(actionType, user!);
+        var result = await Mediator.SendRequest(generateOtherFormat);
+        result.Switch(
+            onReportGenerated: SetReportGenerated,
+            onFailure: failure => AddFailure(failure)
+        );
+    }
+
+    private void SetReportGenerated(ReportGenerated generated)
+    {
+        reportGenerated = ReportGeneratedModel.Create(generated);
+        StateHasChanged();
+    }
+
+    private async Task<List<ItemOption>> LoadFilterDataAsync(IFilterModel filterModel)
+    {
+        try
+        {
+            var result = await Mediator.SendRequest(new LoadFilter(filterModel.ReportId, filterModel.Id, BuildParameters(filterModel)));
+            return [.. result.Items];
+        }
+        catch (Exception exception)
+        {
+            Snackbar.AddFailure($"Error al cargar filtro {filterModel.Name}", exception);
+            return [];
+        }
+    }
+
+    private string?[] BuildParameters(IFilterModel filterModel)
+    {
+        if (!filterModel.ParentFilters.Any())
+        {
+            return [];
+        }
+
+        return filterModel.GetParentValues();
+    }
+
+    private void SetReport(Report reporte)
+    {
+        report = reporte;
+        filterViewModel = new(report.Aka, report.Filters, report.FilterLayout);
+    }
+
+    private void AddFailure(Failure failure)
+    {
+        Snackbar.AddFailure(failure, $"generar el reporte {report!.Title}");
+    }
+
+    private void SetFailure(Failure failure)
+    {
+        if (failure.IsUnauthorized(out _))
+        {
+            NavigationManager.NavigateTo("Account/AccessDenied");
+            return;
+        }
+
+        Snackbar.AddFailure(failure, $"cargando reporte {Aka}");
+    }
+}

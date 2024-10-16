@@ -1,0 +1,16 @@
+﻿@inherits FilterEdit
+<MudNumericField @bind-Value="Filter!.Number"
+                 Variant="Variant.Outlined"
+                 Margin="Margin.Dense"
+                 Label="@Filter?.Label"
+                 Placeholder="@Filter?.Placeholder"
+                 Immediate="true"
+                 Validation="Filter?.Validation"
+                 Disabled="Loading" />
+
+@code {
+    [Parameter]
+    public NumberFilterModel? Filter { get; set; }
+
+    internal override IFilterModel? FilterModel => Filter;
+}

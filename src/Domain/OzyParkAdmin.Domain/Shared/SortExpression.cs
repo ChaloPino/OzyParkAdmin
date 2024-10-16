@@ -11,6 +11,9 @@ namespace OzyParkAdmin.Domain.Shared;
 public sealed class SortExpression<T, TProperty> : ISortExpression<T>
     where T : class
 {
+    private bool _compiled;
+    private Func<T, TProperty?>? _compiledKeySelector;
+
     /// <summary>
     /// Crea una nueva instancia de <see cref="SortExpression{T, TProperty}"/>.
     /// </summary>
@@ -44,8 +47,37 @@ public sealed class SortExpression<T, TProperty> : ISortExpression<T>
             : query.OrderByDescending(KeySelector);
 
     /// <inheritdoc/>
+    public IOrderedEnumerable<T> Sort(IEnumerable<T> source)
+    {
+        Func<T, TProperty?> keySelector = Compile();
+        return !Descending
+            ? source.OrderBy(keySelector)
+            : source.OrderByDescending(keySelector);
+    }
+
+    /// <inheritdoc/>
     public IOrderedQueryable<T> ThenSort(IOrderedQueryable<T> query) =>
         !Descending
             ? query.ThenBy(KeySelector)
             : query.ThenByDescending(KeySelector);
+
+    /// <inheritdoc/>
+    public IOrderedEnumerable<T> ThenSort(IOrderedEnumerable<T> source)
+    {
+        Func<T, TProperty?> keySelector = Compile();
+        return !Descending
+            ? source.ThenBy(keySelector)
+            : source.ThenByDescending(keySelector);
+    }
+
+    private Func<T, TProperty?> Compile()
+    {
+        if (!_compiled)
+        {
+            _compiledKeySelector = KeySelector.Compile();
+            _compiled = true;
+        }
+
+        return _compiledKeySelector!;
+    }
 }

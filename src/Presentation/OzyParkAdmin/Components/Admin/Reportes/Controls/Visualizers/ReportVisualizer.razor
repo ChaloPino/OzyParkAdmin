@@ -1,0 +1,74 @@
+﻿@using OzyParkAdmin.Application.Reportes
+@using OzyParkAdmin.Application.Reportes.Generate
+@using OzyParkAdmin.Domain.Reportes
+@using OzyParkAdmin.Domain.Reportes.Charts
+@using OzyParkAdmin.Domain.Reportes.Listed
+@using OzyParkAdmin.Domain.Reportes.MasterDetails
+@using OzyParkAdmin.Domain.Reportes.Pivoted
+
+<IfThen Condition="Report is not null">
+    <Then>
+        <CascadingValue IsFixed="true" Value="this">
+            <div class="mt-4">
+                @Render(Report!, ReportGenerated)
+            </div>
+        </CascadingValue>
+    </Then>
+</IfThen>
+
+@code {
+    [Parameter]
+    public Report? Report { get; set; }
+
+    [Parameter]
+    public ReportGeneratedModel ReportGenerated { get; set; } = new();
+
+    [Parameter]
+    public Func<GridState<DataInfo>, Task<GridData<DataInfo>>> ReloadReport { get; set; } = (_) => Task.FromResult(new GridData<DataInfo>());
+
+    internal async Task<GridData<DataInfo>> OnReloadReportAsync(GridState<DataInfo> state)
+    {
+        return await ReloadReport(state);
+    }
+
+    private RenderFragment? Render(Report report, ReportGeneratedModel reportGenerated)
+    {
+        return report switch
+        {
+            ListedReport listed => RenderListedReport(listed, reportGenerated),
+            PaginatedReport paginated => RenderPaginatedReport(paginated, reportGenerated),
+            MasterDetailReport masterDetail => RenderMasterDetailReport(masterDetail, reportGenerated),
+            PivotedReport pivoted => RenderPivotedReport(pivoted, reportGenerated),
+            ChartReport dashboard => RenderDashboardReport(dashboard, reportGenerated),
+            _ => null,
+        };
+    }
+
+
+
+    private RenderFragment RenderListedReport(ListedReport report, ReportGeneratedModel reportGenerated) =>
+        @<text>
+        <ListedReportVisualizer Report="report" Columns="reportGenerated.Columns" Data="reportGenerated.Data" Reload="false" Loading="reportGenerated.Loading" />
+        </text>;
+
+    private RenderFragment RenderPaginatedReport(PaginatedReport report, ReportGeneratedModel reportGenerated) =>
+    @<text>
+        <PaginatedReportVisualizer Report="report" Columns="reportGenerated.Columns" Data="reportGenerated.Data" TotalRecords="reportGenerated.TotalRecords" Reload="false" Loading="reportGenerated.Loading" />
+    </text>;
+
+    private RenderFragment RenderMasterDetailReport(MasterDetailReport report, ReportGeneratedModel reportGenerated) =>
+    @<text>
+        <MasterDetailReportVisualizer Report="report" MasterTable="reportGenerated.MasterTable" Details="reportGenerated.Details" Loading="reportGenerated.Loading" />
+    </text>;
+
+    private RenderFragment RenderPivotedReport(PivotedReport report, ReportGeneratedModel reportGenerated) =>
+    @<text>
+        <PivotedReportVisualizer Report="report" PivotTable="reportGenerated.PivotTable" TotalsColumn="reportGenerated.TotalsColum" TotalsRow="reportGenerated.TotalsRow" GrandTotal="reportGenerated.GrandTotal"
+                                 SubtotalColumns="reportGenerated.SubtotalColumns" SubtotalRows="reportGenerated.SubtotalRows" SubtotalDimensions="reportGenerated.SubtotalDimensions" Loading="reportGenerated.Loading" />
+    </text>;
+
+    private RenderFragment RenderDashboardReport(ChartReport report, ReportGeneratedModel reportGenerated) =>
+    @<text>
+        <DashboardReportVisualizer Report="report" Charts="reportGenerated.Charts" Loading="reportGenerated.Loading" />
+    </text>;
+}

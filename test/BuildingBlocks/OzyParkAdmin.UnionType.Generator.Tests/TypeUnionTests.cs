@@ -23,14 +23,19 @@ public readonly struct Unauthorized;
 public readonly struct Validation;
 
 
-[TypeUnion<Unknown, NotFound, Conflict, Forbid, Unauthorized, Validation>]
-public readonly partial struct Failure
-{
-}
+//[TypeUnion<Unknown, NotFound, Conflict, Forbid, Unauthorized, Validation>]
+//public readonly partial struct Failure
+//{
+//}
 
-[TypeUnion<Failure>]
-[ReplaceParameter("Value", ForName="Success")]
-public partial class ResultOf<TValue>
+//[TypeUnion<Failure>]
+//[ReplaceParameter("Value", ForName="Success")]
+//public partial class ResultOf<TValue> where TValue : struct
+//{
+//}
+
+[TypeUnion<bool, Unknown>(Name0 = "BoolValue")]
+public partial class ChartParsing
 {
 }
 

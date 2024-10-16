@@ -1,0 +1,263 @@
+﻿@using MudBlazor.Utilities
+@using OzyParkAdmin.Application.Reportes.Charts
+@using OzyParkAdmin.Components.Admin.Reportes.Controls.Visualizers.Charts
+@using OzyParkAdmin.Domain.Reportes.Charts
+@using System.Xml.Linq
+@inherits ReportVisualizerBase
+
+<IfThen Condition="Report is not null">
+    <Then>
+        <SwitchCase T="LoadingState" Value="Loading">
+            <CaseWhen T="LoadingState" Condition="loading => loading == LoadingState.Loading">
+                <IfThenElse Condition="HasLayout">
+                    <Then>
+                        @RenderLayout()
+                    </Then>
+                    <Else>
+                        <MudGrid Spacing="2">
+                            <ForIn Items="Charts" Context="chart">
+                                <MudItem xs="12" md="MdSize">
+                                    <MudPaper Elevation="2" Style="@GetLayoutFromChartInfo(chart)">
+                                        @RenderChartSkeleton()
+                                    </MudPaper>
+                                </MudItem>
+                            </ForIn>
+                        </MudGrid>
+                    </Else>
+                </IfThenElse>
+            </CaseWhen>
+            <CaseWhen T="LoadingState" Condition="loading => loading == LoadingState.Loaded">
+                <IfThenElse Condition="HasLayout">
+                    <Then>
+                        @RenderLayout()
+                    </Then>
+                    <Else>
+                        <MudGrid Spacing="2">
+                            <ForIn Items="Charts" Context="chart">
+                                <MudItem xs="12" md="MdSize">
+                                    <MudPaper Elevation="2" Style="@GetLayoutFromChartInfo(chart)">
+                                        <ChartVisualizer ChartMetaInfo="chart" />
+                                    </MudPaper>
+                                </MudItem>
+                            </ForIn>
+                        </MudGrid>
+                    </Else>
+                </IfThenElse>
+            </CaseWhen>
+        </SwitchCase>
+    </Then>
+</IfThen>
+
+@code {
+    [Parameter]
+    public ChartReport? Report { get; set; }
+
+    private bool HasLayout => Report!.Layout is not null;
+
+    private int MdSize => 12 / (Report!.ChartsPerRow ?? 1);
+
+    [Parameter]
+    public IEnumerable<ChartMetaInfo> Charts { get; set; } = [];
+
+
+    private string GetLayoutFromChartInfo(ChartMetaInfo chartInfo)
+    {
+        StyleBuilder styleBuilder = new StyleBuilder()
+        .AddStyle("width", chartInfo.Width, chartInfo.Width is not null)
+        .AddStyle("height", chartInfo.Heigth, chartInfo.Heigth is not null)
+        .AddStyle("height", "300px", chartInfo.Heigth is null);
+        return styleBuilder.Build();
+    }
+
+    private RenderFragment? RenderLayout()
+    {
+        string layout = Report!.Layout!;
+
+        XDocument document = XDocument.Parse($"<div>{layout}</div>");
+
+        return RenderElement(document.Root!);
+    }
+
+    private RenderFragment? RenderElement(XElement element)
+    {
+        string? className = element.Attribute("class")?.Value;
+
+        if (className is not null)
+        {
+            if (className.Contains("row "))
+            {
+                return RenderMudGrid(className, element);
+            }
+
+            if (className.Contains("col "))
+            {
+                return RenderContent(element);
+            }
+        }
+        return
+        @<text>
+        @foreach (XElement childElement in element.Elements())
+        {
+            @RenderElement(childElement)
+        }
+        </text>;
+    }
+
+    private RenderFragment RenderMudGrid(string className, XElement element) =>
+    @<text>
+    @{
+        string[] classes = className.Split(' ');
+        (SizeLayout size, Justify justify) = ParseSize(classes);
+        <MudGrid Justify="justify" Spacing="3" Class="mt-3">
+        @foreach (var childElement in element.Elements())
+        {
+            <MudItem xs="size.xs" sm="size.sm" md="size.md" lg="size.md" xl="size.xl" xxl="size.xxl">
+                @RenderElement(childElement)
+            </MudItem>
+        }
+        </MudGrid>
+    }
+    </text>
+    ;
+
+    private RenderFragment RenderContent(XElement element)
+    {
+        string[]? classes = element.Attribute("class")?.Value.Split(' ');
+
+        if (classes is null)
+        {
+            return RenderContentPaper(element);
+        }
+
+        return RenderContentByClass(classes, element);
+    }
+
+    private RenderFragment RenderContentPaper(XElement element) =>
+    @<text>
+    <MudPaper Elevation="2">
+        <IfThenElse Condition="Loading == LoadingState.Loading">
+            <Then>
+                @RenderChartSkeleton()
+            </Then>
+            <Else>
+                @RenderChart(element.Value)
+            </Else>
+        </IfThenElse>
+    </MudPaper>
+    </text>
+    ;
+
+    private RenderFragment RenderContentByClass(string[] classes, XElement element) =>
+    @<text>
+    @{
+        bool isCard = classes.Any(x => x.StartsWith("card"));
+    }
+    <IfThenElse Condition="isCard">
+        <Then>
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <IfThenElse Condition="Loading == LoadingState.Loading">
+                        <Then>
+                            @RenderChartSkeleton()
+                        </Then>
+                        <Else>
+                            @RenderChart(element.Value)
+                        </Else>
+                    </IfThenElse>
+                </MudCardContent>
+            </MudCard>
+        </Then>
+        <Else>
+            @RenderContentPaper(element)
+        </Else>
+    </IfThenElse>
+    </text>
+    ;
+
+    private RenderFragment RenderChart(string name) =>
+    @<text>
+    @{
+        string chartName = name.Trim().Trim('@');
+        var chart = Charts.First(x => string.Equals(chartName, x.Name));
+    }
+    <ChartVisualizer ChartMetaInfo="chart" />
+    </text>
+    ;
+
+    private RenderFragment RenderChartSkeleton() =>
+    @<text>
+        <MudStack Row="true" Spacing="4" AlignItems="AlignItems.End" Justify="Justify.Center" Style="height: 200px;">
+            <MudSkeleton Animation="Animation.Pulse" Class="py-1 px-3"  />
+            <MudSkeleton Animation="Animation.Pulse" Class="py-3 px-3" />
+            <MudSkeleton Animation="Animation.Pulse" Class="py-5 px-3" />
+            <MudSkeleton Animation="Animation.Pulse" Class="py-3 px-3" />
+            <MudSkeleton Animation="Animation.Pulse" Class="py-1 px-3" />
+        </MudStack>
+    </text>;
+
+
+    private (SizeLayout size, Justify justify) ParseSize(string[] classes)
+    {
+        int xs = 0, sm = 0, md = 0, lg = 0, xl = 0, xxl = 0;
+        Justify justify = Justify.FlexStart;
+
+        for (int i = 0; i < classes.Length; i++)
+        {
+            if (classes[i].StartsWith("row-cols-"))
+            {
+                string[] parts = classes[i].Split('-');
+
+                if (parts.Length == 3)
+                {
+                    xs = 12 / int.Parse(parts[2]);
+                    continue;
+                }
+
+                if (parts.Length == 4)
+                {
+                    switch (parts[2])
+                    {
+                        case "xs":
+                            xs = 12 / int.Parse(parts[3]);
+                            break;
+                        case "sm":
+                            sm = 12 / int.Parse(parts[3]);
+                            break;
+                        case "md":
+                            md = 12 / int.Parse(parts[3]);
+                            break;
+                        case "lg":
+                            lg = 12 / int.Parse(parts[3]);
+                            break;
+                        case "xl":
+                            xl = 12 / int.Parse(parts[3]);
+                            break;
+                        case "xxl":
+                            xxl = 12 / int.Parse(parts[3]);
+                            break;
+                    }
+                }
+
+                continue;
+            }
+
+            if (classes[i].StartsWith("justify-content-"))
+            {
+                string[] parts = classes[i].Split('-');
+
+                justify = parts[2] switch
+                {
+                    "center" => Justify.Center,
+                    "start" => Justify.FlexStart,
+                    "end" => Justify.FlexEnd,
+                    "between" => Justify.SpaceBetween,
+                    "around" => Justify.SpaceAround,
+                    "evenly" => Justify.SpaceEvenly,
+                    _ => Justify.FlexStart,
+                };
+            }
+        }
+
+        return (new SizeLayout(xs, sm, md, lg, xl, xxl), justify);
+    }
+}

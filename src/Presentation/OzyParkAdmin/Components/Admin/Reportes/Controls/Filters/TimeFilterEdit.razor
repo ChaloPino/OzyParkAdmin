@@ -1,0 +1,18 @@
+﻿@inherits FilterEdit
+<MudTimePicker 
+    @bind-Time="Filter!.Time" 
+    Margin="Margin.Dense" 
+    Variant="Variant.Outlined" 
+    Label="@Filter?.Label" 
+    Placeholder="@Filter?.Placeholder" 
+    ImmediateText="true"
+    MinuteSelectionStep="Filter?.MinuteStep ?? 0" 
+    Validation="Filter?.Validation"
+    Disabled="Loading"/>
+
+@code {
+    [Parameter]
+    public TimeFilterModel? Filter { get; set; }
+
+    internal override IFilterModel? FilterModel => Filter; 
+}

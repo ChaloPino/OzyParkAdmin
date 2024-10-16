@@ -1,0 +1,19 @@
+﻿@inherits FilterEdit
+<MudDatePicker 
+    @bind-Date="Filter!.Date" 
+    Variant="Variant.Outlined"
+    Margin="Margin.Dense" 
+    Label="@Filter?.Label" 
+    Placeholder="@Filter?.Placeholder" 
+    ImmediateText="true"
+    MinDate="Filter?.MinDate" 
+    MaxDate="Filter?.MaxDate" 
+    Validation="Filter?.Validation" 
+    Disabled="Loading" />
+
+@code {
+    [Parameter]
+    public DateFilterModel? Filter { get; set; }
+
+    internal override IFilterModel? FilterModel => Filter; 
+}

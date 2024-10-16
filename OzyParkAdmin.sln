@@ -38,6 +38,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.UnionType.Generator.Tests", "test\BuildingBlocks\OzyParkAdmin.UnionType.Generator.Tests\OzyParkAdmin.UnionType.Generator.Tests.csproj", "{B5315748-D702-4142-AC9C-377B7B08D0D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.ChartJs", "src\BuildingBlocks\OzyParkAdmin.ChartJs\OzyParkAdmin.ChartJs.csproj", "{875C297F-7E4E-4AA5-B37B-A66B36BFF235}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,10 @@ Global
 		{B5315748-D702-4142-AC9C-377B7B08D0D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5315748-D702-4142-AC9C-377B7B08D0D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5315748-D702-4142-AC9C-377B7B08D0D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{875C297F-7E4E-4AA5-B37B-A66B36BFF235}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{875C297F-7E4E-4AA5-B37B-A66B36BFF235}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{875C297F-7E4E-4AA5-B37B-A66B36BFF235}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{875C297F-7E4E-4AA5-B37B-A66B36BFF235}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,6 +91,7 @@ Global
 		{8128BB81-A0B2-42BF-8DBB-10B9A4456062} = {6BC2EB95-2AA6-4FF8-B90D-763B596FD950}
 		{C0D5BC8F-D05D-42C3-BF0F-C04EEA02CDB9} = {5BEA5D19-8F12-40B9-8538-54F4FC429945}
 		{B5315748-D702-4142-AC9C-377B7B08D0D1} = {C0D5BC8F-D05D-42C3-BF0F-C04EEA02CDB9}
+		{875C297F-7E4E-4AA5-B37B-A66B36BFF235} = {6BC2EB95-2AA6-4FF8-B90D-763B596FD950}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0DF334DA-2037-438E-AA38-1A8FC52EF07D}

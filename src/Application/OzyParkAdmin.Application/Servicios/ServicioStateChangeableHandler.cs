@@ -17,7 +17,7 @@ public abstract class ServicioStateChangeableHandler<TState> : MediatorRequestHa
     /// Crea una nueva instancia de <see cref="ServicioStateChangeableHandler{TState}"/>.
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
-    /// <param name="stateAction">La acción de cambio de estado que maneja este manejador.</param>
+    /// <param name="stateAction">La acción de cambio de estado que maneja este manejador. Por defecto es <see cref="StateAction.Update"/></param>
     protected ServicioStateChangeableHandler(IOzyParkAdminContext context, StateAction stateAction = StateAction.Update)
     {
         ArgumentNullException.ThrowIfNull(context);

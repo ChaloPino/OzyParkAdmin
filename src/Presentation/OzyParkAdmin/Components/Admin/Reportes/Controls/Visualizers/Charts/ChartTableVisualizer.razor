@@ -1,0 +1,22 @@
+﻿@using OzyParkAdmin.Application.Reportes
+@inherits ReportVisualizerBase
+<MudTable T="DataInfo" Items="Data" Dense="true" Striped="true" Bordered="true" Hover="true">
+    <HeaderContent>
+        <ForIn Items="Columns" Context="column">
+            <MudTh>@column.Header</MudTh>
+        </ForIn>
+    </HeaderContent>
+    <RowTemplate>
+        <ForIn Items="Columns" Context="column">
+            <MudTd Class="@(GetCellClass(column, context))" Style="@(GetCellStyle(column, context))">@Format(column, context[column])</MudTd>
+        </ForIn>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    [Parameter]
+    public IEnumerable<ColumnInfo> Columns { get; set; } = [];
+
+    [Parameter]
+    public IEnumerable<DataInfo> Data { get; set; } = [];
+}

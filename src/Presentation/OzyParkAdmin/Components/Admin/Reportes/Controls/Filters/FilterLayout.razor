@@ -1,0 +1,181 @@
+﻿@using MudBlazor.Extensions.Components.ObjectEdit.Options
+@using OzyParkAdmin.Domain.Reportes
+@using System.Xml.Linq
+@using OzyParkAdmin.Domain.Reportes.Filters;
+@using OzyParkAdmin.Components.Admin.Reportes.Controls.Filters
+@inject ISnackbar Snackbar
+<IfThen Condition="FilterViewModel is not null">
+    <Then>
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <IfThen Condition="loading">
+                    <Then>
+                        <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+                    </Then>
+                </IfThen>
+                <CascadingValue IsFixed="true" Value="this">
+                    <MudForm @ref="form" Model="FilterViewModel" ValidationDelay="0">
+                        <ForIn Items="FilterViewModel!.Filters.GroupBy(x => x.Row)">
+                            <MudGrid Spacing="2">
+                                <ForIn Items="context" Context="filter">
+                                    @Render(filter)
+                                </ForIn>
+                            </MudGrid>
+                        </ForIn>
+                    </MudForm>
+                </CascadingValue>
+            </MudCardContent>
+            <MudCardActions>
+                <IfThen Condition="Report?.Actions.Any(x => x.Type == ActionType.Html) == true">
+                    <Then>
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="GenerateHtmlAsync">Generar</MudButton>
+                    </Then>
+                </IfThen>
+                <IfThen Condition="Report?.Actions.Any(x => x.Type != ActionType.Html) == true">
+                    <Then>
+                        <MudMenu Class="ml-2" Color="Color.Primary" Label="Exportar" Variant="Variant.Filled" 
+                                 StartIcon="@Icons.Material.Filled.ImportExport" 
+                                 EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                                 FullWidth="true"
+                                 AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                            <ForIn Items="Report?.Actions.Where(x => x.Type != ActionType.Html)">
+                                <MudMenuItem OnClick="() => GenerateOtherFormatAsync(context.Type)">@context.Type</MudMenuItem>
+                            </ForIn>
+                        </MudMenu>
+                    </Then>
+                </IfThen>
+            </MudCardActions>
+        </MudCard>
+    </Then>
+</IfThen>
+@code {
+    private static readonly Func<IFilterModel, Task<List<ItemOption>>> defaultLoadFilterData = (_) => Task.FromResult(new List<ItemOption>());
+    private static readonly Func<FilterViewModel, Task> defaultGenerateHtml = (_) => Task.CompletedTask;
+    private static readonly Func<FilterViewModel, ActionType, Task> defaultGenerateOtherFormat = (_, _) => Task.CompletedTask;
+
+    private bool loading;
+    private List<FilterEdit> filterEdits = [];
+    private MudForm form = default!;
+
+    [Parameter]
+    public Report? Report { get; set; }
+
+    [Parameter]
+    public Func<IFilterModel, Task<List<ItemOption>>> LoadFilterData { get; set; } = defaultLoadFilterData;
+
+    [Parameter]
+    public Func<FilterViewModel, Task> GenerateHtml { get; set; } = defaultGenerateHtml;
+
+    [Parameter]
+    public Func<FilterViewModel, ActionType, Task> GenerateOtherFormat { get; set; } = defaultGenerateOtherFormat;
+
+    [Parameter]
+    public FilterViewModel? FilterViewModel { get; set; }
+
+
+    private async Task GenerateHtmlAsync()
+    {
+        if (FilterViewModel is not null)
+        {
+            await form.Validate();
+
+            if (form.IsValid)
+            {
+                loading = true;
+                await GenerateHtml(FilterViewModel);
+                loading = false;
+            }
+        }
+    }
+
+    private async Task GenerateOtherFormatAsync(ActionType action)
+    {
+        if (FilterViewModel is not null)
+        {
+            await form.Validate();
+
+            if (form.IsValid)
+            {
+                loading = true;
+                await GenerateOtherFormat(FilterViewModel, action);
+                loading = false;
+            }
+        }
+    }
+
+    internal void AddFilterEdit(FilterEdit filterEdit)
+    {
+        filterEdits.Add(filterEdit);
+    }
+
+    internal void RemoveFilterEdit(FilterEdit filterEdit)
+    {
+        filterEdits.Remove(filterEdit);
+    }
+
+    public async Task NotifyChangesAsync(FilterEdit filterEdit)
+    {
+        if (FilterViewModel is not null && filterEdit.FilterModel is not null)
+        {
+            IEnumerable<IFilterModel> dependantFilters = FilterViewModel.FindDependantFilters(filterEdit.FilterModel);
+
+            Task[] tasks = filterEdits.Where(x => dependantFilters.Contains(x.FilterModel)).Select(filter => filter.ExecuteFilerAsync()).ToArray();
+            await Task.WhenAll(tasks);
+        }
+    }
+
+    private RenderFragment Render(IFilterModel filter) =>
+    @<text>
+        <MudItem xs="filter.SizeLayout.xs" sm="filter.SizeLayout.sm" md="filter.SizeLayout.md" lg="filter.SizeLayout.lg" xl="filter.SizeLayout.xl" xxl="filter.SizeLayout.xxl">
+            @RenderFilter(filter)
+        </MudItem>
+    </text>;
+
+
+    private RenderFragment? RenderFilter(IFilterModel filter)
+    {
+        return filter switch
+        {
+            CheckFilterModel checkFilter => RenderSwitch(checkFilter),
+            DateFilterModel dateFilter => RenderDate(dateFilter),
+            ListFilterModel listFilter => RenderList(listFilter),
+            MultiListFilterModel multiListFilter => RenderMultiList(multiListFilter),
+            _ => null,
+        };
+    }
+
+    private RenderFragment RenderSwitch(CheckFilterModel filter) =>
+    @<text>
+        <CheckFilterEdit Filter="filter" @bind-Loading="loading" />
+    </text>;
+
+    private RenderFragment RenderDate(DateFilterModel filter) =>
+    @<text>
+        <DateFilterEdit Filter="filter" @bind-Loading="loading" />
+    </text>;
+
+    private RenderFragment RenderList(ListFilterModel filter) =>
+    @<text>
+        <ListFilterEdit Filter="filter" @bind-Loading="loading" />
+    </text>;
+
+    private RenderFragment RenderMultiList(MultiListFilterModel filter) =>
+    @<text>
+        <MultiListFilterEdit Filter="filter" @bind-Loading="loading" />
+    </text>;
+
+    private RenderFragment RenderMonth(MonthFilterModel filter) =>
+    @<text>
+        <MonthFilterEdit Filter="filter" @bind-Loading="loading" />
+    </text>;
+
+    private RenderFragment RenderText(TextFilterModel filter) =>
+    @<text>
+        <TextFilterEdit Filter="filter" @bind-Loading="loading" />
+    </text>;
+
+    private RenderFragment RenderTime(TimeFilterModel filter) =>
+    @<text>
+        <TimeFilterEdit Filter="filter" Loading="loading" />
+    </text>;
+}

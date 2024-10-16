@@ -92,4 +92,28 @@ public class SortExpressionCollection<T>
 
         return orderedQuery;
     }
+
+    /// <summary>
+    /// Aplica el ordenamiento a la consulta.
+    /// </summary>
+    /// <param name="source">La fuente a ser ordenada.</param>
+    /// <returns>La consulta ordenada.</returns>
+    public IEnumerable<T> Sort(IEnumerable<T> source)
+    {
+        if (_expressions.Count == 0)
+        {
+            return source;
+        }
+
+        List<ISortExpression<T>> sortExpressions = [.. _expressions.Values];
+
+        IOrderedEnumerable<T> orderedSource = sortExpressions[0].Sort(source);
+
+        for (int i = 1; i < sortExpressions.Count; i++)
+        {
+            orderedSource = sortExpressions[i].ThenSort(orderedSource);
+        }
+
+        return orderedSource;
+    }
 }

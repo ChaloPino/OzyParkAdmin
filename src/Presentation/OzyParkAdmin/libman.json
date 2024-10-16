@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "Chart.js@4.4.1",
+      "destination": "wwwroot/lib/Chart.js/"
+    },
+    {
+      "library": "chartjs-adapter-luxon@1.3.1",
+      "destination": "wwwroot/lib/chartjs-adapter-luxon/"
+    },
+    {
+      "library": "chartjs-plugin-datalabels@2.2.0",
+      "destination": "wwwroot/lib/chartjs-plugin-datalabels/"
+    },
+    {
+      "library": "color-js@1.0.1",
+      "destination": "wwwroot/lib/color-js/"
+    },
+    {
+      "library": "luxon@3.5.0",
+      "destination": "wwwroot/lib/luxon/"
+    },
+    {
+      "library": "patternomaly@1.3.2",
+      "destination": "wwwroot/lib/patternomaly/"
+    }
+  ]
+}

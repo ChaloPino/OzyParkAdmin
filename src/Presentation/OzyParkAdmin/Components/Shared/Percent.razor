@@ -1,0 +1,15 @@
+﻿<IfThen Condition="Value is not null">
+    <Then>
+        @Value!.Value.ToString(Format)
+    </Then>
+</IfThen>
+
+@code {
+    [Parameter]
+    public decimal? Value { get; set; }
+
+    [Parameter]
+    public int Decimals { get; set; } = 0;
+
+    private string Format => $"P{Decimals}";
+}

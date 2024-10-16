@@ -1,0 +1,1064 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+@using NReco.PivotData
+@using OzyParkAdmin.Application.Reportes
+@using OzyParkAdmin.Domain.Reportes.Pivoted
+@using System.Globalization
+@using OzyParkAdmin.Domain.Reportes;
+@inherits ReportVisualizerBase
+
+<IfThen Condition="Loading == LoadingState.Loaded">
+    <Then>
+        <IfThen Condition="PivotTable is not null">
+            <Then>
+                <MudSimpleTable Dense="true" Striped="true" Bordered="true" FixedHeader="true" Style="max-height: 600px;">
+                    <thead>
+                        @{
+                            int rowIndex;
+
+                            for (int i = 0; i < PivotTable!.Columns.Length; i++)
+                            {
+                                <tr>
+                                    @RenderRowHeader(i, PivotTable.Columns[i])
+
+                                    @for (int j = 0; j < columns[i].Count; j++)
+                                    {
+                                        PivotMetadata item = columns[i][j];
+                                        Dictionary<string, object> attributes = [];
+
+                                        if (item.Length != 0 && !item.Viewed)
+                                        {
+                                            int length = 0;
+
+                                            if (item.IsSubtotal)
+                                            {
+                                                length = PivotTable.Columns.Length - item.Index - 1;
+                                            }
+
+                                            if (aggregatorsCount <= 1 && i + length == PivotTable.Columns.Length - 1 && item.IsValue && item.DimKeysCount >= 0)
+                                            {
+                                                attributes["data-sort-index"] = item.DimKeysCount;
+                                            }
+
+                                            if (item.IsDimension)
+                                            {
+                                                rowIndex = i + length;
+                                                attributes["data-key-index"] = $"{item.DimKeysCount}:{rowIndex}";
+                                            }
+
+                                            int cols = item.Length * aggregatorsCount;
+                                            attributes["colspan"] = cols;
+
+                                            if (length > 0)
+                                            {
+                                                rowIndex = length + 1;
+                                                attributes["rowspan"] = rowIndex;
+                                            }
+
+                                            KeyCellContext keyCellContext = new(item)
+                                    {
+                                        Dimension = PivotTable.Columns[i],
+                                        HasChildren = item.Length > 1,
+                                        CssClass = "pvtColumn",
+                                    };
+
+                                            ResolveKeyCell(keyCellContext, attributes);
+
+                                            <th @attributes="attributes">
+                                                @keyCellContext.FormattedKey
+                                            </th>
+                                        }
+                                    }
+
+                                    @if (i == 0 && (TotalsColumn || GrandTotal))
+                                    {
+                                        @RenderRowHeaderTotals(aggregatorsCount)
+                                    }
+                                </tr>
+                            }
+
+                            if (PivotTable.Columns.Length == 0 && (TotalsColumn || GrandTotal || columnsCount > 0))
+                            {
+                                <tr>
+                                    @RenderRowHeader(0, null)
+
+                                    @if (TotalsColumn || GrandTotal)
+                                    {
+                                        @RenderRowHeaderTotals(aggregatorsCount)
+                                    }
+                                </tr>
+                            }
+
+                            if (aggregatorsCount > 1)
+                            {
+                                <tr>
+                                    @RenderRowHeader(columnsCount - 1, null)
+
+                                    @if (columns.Length != 0)
+                                    {
+                                        @RenderColumnHeader(columns[0], aggregatorsCount)
+                                    }
+
+                                    @if (TotalsColumn || GrandTotal)
+                                    {
+                                        @RenderColumnHeaderTotals(new PivotMetadata(-1, null, -1, -1), "totals", true, aggregatorsCount)
+                                    }
+                                </tr>
+                            }
+                        }
+                    </thead>
+                    <tbody>
+                        @if (rows.Length != 0)
+                        {
+                            @RenderRows(rows[0], true)
+                        }
+
+                        @RenderTotals()
+                    </tbody>
+                </MudSimpleTable>
+            </Then>
+        </IfThen>
+    </Then>
+</IfThen>
+
+
+@code {
+    private IAggregatorFactory[] aggregatorFactories = [];
+    private List<PivotedMember> valuePivotedMembers = [];
+    private List<PivotMetadata>[] columns = [];
+    private List<PivotMetadata>[] rows = [];
+    private int aggregatorsCount;
+    private int columnsCount;
+    private int rowsCount;
+    private bool hasRows;
+    private bool hasColumns;
+    private Func<bool, ValueCellContext, RenderFragment> renderValueCell = default!;
+
+    [Parameter]
+    public PivotedReport? Report { get; set; }
+
+    [Parameter]
+    public IPivotTable? PivotTable { get; set; }
+
+    [Parameter]
+    public bool TotalsColumn { get; set; }
+    [Parameter]
+    public bool TotalsRow { get; set; }
+    [Parameter]
+    public bool GrandTotal { get; set; }
+    [Parameter]
+    public bool SubtotalColumns { get; set; }
+    [Parameter]
+    public bool SubtotalRows { get; set; }
+    [Parameter]
+    public string[] SubtotalDimensions { get; set; } = [];
+
+    protected override void OnParametersSet()
+    {
+        if (Report is not null && PivotTable is not null)
+        {
+            aggregatorFactories = PivotTable.PivotData.AggregatorFactory is CompositeAggregatorFactory factory ? factory.Factories : [];
+            renderValueCell = PivotTable.PivotData.AggregatorFactory is CompositeAggregatorFactory ? RenderComplexValueCell : RenderSimpleValueCell;
+            valuePivotedMembers = Report.PivotedMembers.Where(pm => pm.PivotType == PivotType.Value).ToList() ?? [];
+            columns = PivotMetadata.Create(PivotTable.Columns, PivotTable.ColumnKeys, false, SubtotalColumns ? SubtotalDimensions ?? PivotTable.Columns : []);
+            rows = PivotMetadata.Create(PivotTable.Rows, PivotTable.RowKeys, false, SubtotalRows ? SubtotalDimensions ?? PivotTable.Rows : []);
+            aggregatorsCount = GetAggregatorsCount(PivotTable);
+            columnsCount = Math.Max(PivotTable.Columns.Length, 1) + (aggregatorsCount > 1 ? 1 : 0);
+            rowsCount = Math.Max(PivotTable.Rows.Length, 1) + 1;
+            hasRows = PivotTable.Rows.Length != 0;
+            hasColumns = PivotTable.Columns.Length != 0;
+        }
+    }
+
+    private string? FormatKey(object? key, string? dim)
+    {
+        PivotedMember? member = Report?.PivotedMembers.FirstOrDefault(pm => pm.GetFullName() == dim);
+
+        return member is not null && !string.IsNullOrEmpty(member.Format)
+            ? string.Format(CultureInfo.CurrentCulture, $"{{0:{member.Format}}}", key)
+            : Convert.ToString(key, CultureInfo.CurrentCulture);
+    }
+
+    private string? FormatValue(IAggregator? aggregator, int index)
+    {
+        PivotedMember valuePivotedMember = valuePivotedMembers[index];
+
+        if (aggregator is not null && !string.IsNullOrEmpty(valuePivotedMember.Format))
+        {
+            string format = $"{{0:{valuePivotedMember.Format}}}";
+            object[] values = aggregator.Value is Array array ? [.. array] : [aggregator.Value];
+            string value = string.Format(CultureInfo.CurrentCulture, format, values);
+            return value;
+        }
+
+        return aggregator is not null ? Convert.ToString(aggregator.Value, CultureInfo.CurrentCulture) : null;
+    }
+
+    private string? FormatMeasureHeader(IAggregatorFactory aggregator, int index) =>
+    aggregator.FormatAggregator(valuePivotedMembers, index);
+
+    private static int GetAggregatorsCount(IPivotTable pivotTable)
+    {
+        return pivotTable.PivotData.AggregatorFactory is not CompositeAggregatorFactory aggregator ? 1 : aggregator.Factories.Length;
+    }
+
+
+    private RenderFragment RenderRowHeader(int index, string? value) =>
+    @<text>
+        @if (index == 0)
+    {
+    int rowspan = columnsCount - (hasRows ? 1 : 0);
+    int columnspan = rowsCount - (hasColumns ? 1 : 0);
+
+    if (rowspan > 0 && columnspan > 0)
+    {
+        <th rowspan="@rowspan" colspan="@columnspan"></th>
+    }
+    }
+
+        @if (index == columnsCount - 1 & hasRows)
+    {
+    for (int i = 0; i < PivotTable!.Rows.Length; i++)
+    {
+    Dictionary<string, object> attributes = [];
+
+    if (i == PivotTable!.Rows.Length - 1 && !hasColumns)
+    {
+    attributes["colspan"] = 2;
+    }
+        <th class="pvtRowLabel" dim-sort-index="@i" @attributes="attributes">
+            @PivotTable!.Rows[i]
+        </th>
+    }
+    }
+
+        @if (hasColumns)
+    {
+    Dictionary<string, object> attributes = [];
+
+    if (value is not null)
+    {
+    attributes["class"] = "pvtColumnLabel";
+    attributes["colspan"] = 1;
+    attributes["dim-sort-index"] = index;
+    }
+
+        <th @attributes="attributes">
+            @(value ?? string.Empty)
+        </th>
+    }
+    </text>;
+
+    private RenderFragment RenderRowHeaderTotals(int aggregatorsCount) =>
+    @<text>
+        @{
+    Dictionary<string, object> attributes = [];
+
+    if (PivotTable!.Columns.Length != 0)
+    {
+    attributes["rowspan"] = PivotTable!.Columns.Length;
+    }
+
+    if (aggregatorsCount > 0)
+    {
+    attributes["colspan"] = aggregatorsCount;
+    }
+
+    if (TotalsColumn || GrandTotal)
+    {
+    attributes["class"] = "totals pvtColumn";
+
+    if (TotalsColumn && aggregatorsCount <= 1)
+    {
+    attributes["data-sort-index"] = string.Empty;
+    }
+    }
+        }
+
+        <th @attributes="attributes">
+            Total
+        </th>
+    </text>
+    ;
+
+    private RenderFragment RenderColumnHeader(IList<PivotMetadata> list, int aggregatorsCount) =>
+    @<text>
+        @{
+    foreach (PivotMetadata item in list)
+    {
+    if (item.Length == 0)
+    {
+    continue;
+    }
+
+    if (item.Children is null)
+    {
+    string? cssClass = item.IsSubtotal ? "subtotals" : null;
+            @RenderColumnHeaderTotals(item, cssClass, item.IsValue, aggregatorsCount)
+    }
+    else
+    {
+            @RenderColumnHeader(item.Children, aggregatorsCount)
+    }
+    }
+        }
+    </text>;
+
+    private RenderFragment RenderColumnHeaderTotals(PivotMetadata pivotMetadata, string? cssClass, bool isValueDimension, int aggregatorsCount) =>
+    @<text>
+        @{
+    for (int i = 0; i < aggregatorsCount; i++)
+    {
+    Dictionary<string, object> attributes = [];
+    attributes["class"] = $"pvtColumn dt-body-right pvtMeasure {i} {cssClass}";
+
+    if (isValueDimension)
+    {
+    attributes["data-sort-index"] = pivotMetadata.DimKeysCount < 0 || pivotMetadata.DimKeysCount >= PivotTable!.ColumnKeys.Length ? string.Empty : pivotMetadata.DimKeysCount;
+    attributes["data-sort-measure"] = i;
+    }
+            <th @attributes="attributes">
+                @FormatMeasureHeader(aggregatorFactories[i], i);
+            </th>
+    }
+        }
+    </text>;
+
+    private RenderFragment RenderRows(List<PivotMetadata>? rows, bool writeRow) =>
+    @<text>
+        @{
+    if (rows is not null)
+    {
+    foreach (PivotMetadata item in rows)
+    {
+    if (item.Length == 0)
+    {
+    continue;
+    }
+
+    bool hasChildren = item.Children is not null;
+
+    if (writeRow)
+    {
+            <tr>
+                @RenderRow(item, hasChildren)
+            </tr>
+    continue;
+    }
+
+            @RenderRow(item, hasChildren)
+    }
+    }
+        }
+    </text>;
+
+    private RenderFragment RenderRow(PivotMetadata row, bool hasChildren) =>
+    @<text>
+        @if (!row.Viewed)
+    {
+    int length = 0;
+
+    if (row.IsSubtotal)
+    {
+    length = PivotTable!.Rows.Length - row.Index - 1;
+    }
+
+    bool flag = row.Index + length == PivotTable!.Rows.Length - 1;
+
+    Dictionary<string, object> attributes = [];
+
+    if (!hasChildren | flag && row.IsValue && row.DimKeysCount >= 0)
+    {
+    attributes["data-sort-index"] = row.DimKeysCount;
+    }
+
+    if (row.IsDimension)
+    {
+    int num = row.Index + length;
+    attributes["data-key-index"]  =$"{row.DimKeysCount}:{num}";
+    }
+
+    if (hasChildren)
+    {
+    int rowspan = row.Length;
+    attributes["rowspan"] = rowspan;
+    }
+
+    int colspan = length + (flag ? 2 : 1);
+
+    if (colspan > 1)
+    {
+    attributes["colspan"] = colspan;
+    }
+
+    KeyCellContext keyCellContext = new(row)
+    {
+    Dimension = PivotTable.Rows[row.Index],
+    CssClass = "pvtRow",
+    HasChildren = hasChildren,
+    };
+
+    ResolveKeyCell(keyCellContext, attributes);
+
+        <th @attributes="attributes">
+            @keyCellContext.FormattedKey
+        </th>
+
+        @if (!hasChildren)
+    {
+    if (columns.Length != 0)
+    {
+        @RenderTotalsValue(row, columns[0], null)
+    }
+
+        @RenderSubtotal(row)
+    }
+    else
+    {
+        @RenderRows(row.Children, false)
+;
+    }
+    }
+    </text>
+        ;
+
+    private RenderFragment RenderSubtotal(PivotMetadata item) =>
+    @<text>
+        @if (TotalsColumn || GrandTotal)
+    {
+    if(TotalsColumn)
+    {
+    ValueCellContext valueCellContext = new()
+    {
+    Aggregator = PivotTable!.GetValue(item.ValueKey, null),
+    RowKey = item.ValueKey,
+    RowDimensionCount = item.ValueKeyIndex,
+    RowIndex = item.Index,
+    IsSubTotal = true,
+    CssClass = $"totalValue {(item.IsSubtotal ? "subtotalValue" : string.Empty)}",
+    };
+
+        @renderValueCell(true, valueCellContext)
+    return;
+    }
+
+        <td colspan="@aggregatorsCount">
+        </td>
+    }
+    </text>;
+
+    private RenderFragment RenderTotalsValue(PivotMetadata pivotMetadata, List<PivotMetadata> cols, string? cssClass) =>
+    @<text>
+        @foreach (PivotMetadata item in cols)
+    {
+    if (item.Length == 0)
+    {
+    continue;
+    }
+
+    if (item.Children is null)
+    {
+    ValueCellContext valueCellContext = new()
+    {
+    Aggregator = PivotTable!.GetValue(pivotMetadata.ValueKey, item.ValueKey),
+    CssClass = cssClass,
+    };
+
+    if (pivotMetadata.IsSubtotal || item.IsSubtotal)
+    {
+    valueCellContext.AddCssClass("subtotalValue");
+    valueCellContext.IsSubTotal = true;
+    valueCellContext.ColumnIndex = item.Index;
+    valueCellContext.RowIndex = pivotMetadata.Index;
+
+    if (item.IsSubtotal)
+    {
+    valueCellContext.AddCssClass("column-subtotal");
+    }
+
+    if (pivotMetadata.IsSubtotal)
+    {
+    valueCellContext.AddCssClass("row-subtotal");
+    }
+    }
+
+    valueCellContext.RowKey = pivotMetadata.ValueKey;
+    valueCellContext.ColumnKey = item.ValueKey;
+    valueCellContext.RowDimensionCount = pivotMetadata.DimKeysCount;
+    valueCellContext.ColumnDimensionCount = item.DimKeysCount;
+        @renderValueCell(valueCellContext.IsSubTotal, valueCellContext)
+    continue;
+    }
+
+        @RenderTotalsValue(pivotMetadata, item.Children!, cssClass)
+    }
+    </text>
+        ;
+
+    private RenderFragment RenderSimpleValueCell(bool isHeader, ValueCellContext context) =>
+    @<text>
+        @{
+    context.AggregatorIndex = 0;
+            @RenderValueCellContext(isHeader, context)
+        }
+    </text>
+        ;
+
+    private RenderFragment RenderComplexValueCell(bool isHeader, ValueCellContext context) =>
+    @<text>
+        @{
+    if (context.Aggregator is CompositeAggregator aggregator)
+    {
+    for (int i = 0; i < aggregator.Aggregators.Length; i++)
+    {
+    ValueCellContext aggregators = context.Clone();
+    aggregators.Aggregator = aggregator.Aggregators[i];
+    aggregators.AggregatorIndex = i;
+    aggregators.AddCssClass($"dt-body-right pvtMeasure {i}");
+            @RenderValueCellContext(isHeader, context)
+    }
+    return;
+    }
+
+            @RenderSimpleValueCell(isHeader, context)
+        }
+    </text>
+        ;
+
+    private RenderFragment RenderValueCellContext(bool isHeader, ValueCellContext context) =>
+    @<text>
+        @{
+    string columnValue = string.Empty;
+    string rowValue = string.Empty;
+    string? value = null;
+
+    if (context.ColumnDimensionCount is not null && context.ColumnDimensionCount.Value >= 0)
+    {
+    columnValue = context.ColumnDimensionCount.Value.ToString();
+    }
+
+    if (context.RowDimensionCount is not null && context.RowDimensionCount.Value >= 0)
+    {
+    rowValue = context.RowDimensionCount.Value.ToString();
+    }
+
+    if (columnValue != string.Empty || rowValue != string.Empty)
+    {
+    value = $"{rowValue}:{columnValue}";
+
+    if (context.IsSubTotal)
+    {
+    value = $"{value}:{GetNumberIndex(context.RowIndex, string.Empty)}:{GetNumberIndex(context.ColumnIndex, string.Empty)}";
+    }
+    }
+
+    context.FormattedValue = FormatValue(context.Aggregator, context.AggregatorIndex);
+
+    Dictionary<string, object> attributes = [];
+
+    if (value is not null)
+    {
+    attributes["data-value-index"] = value;
+    }
+
+    ApplyValueCellStyle(context);
+
+    if (context.CssClass is not null)
+    {
+    attributes["class"] = context.CssClass;
+    }
+
+    if (context.CssStyle is not null)
+    {
+    attributes["style"] = context.CssStyle;
+    }
+
+            @if (isHeader)
+    {
+            <th @attributes="attributes">
+                @context.FormattedValue
+            </th>
+    }
+    else
+    {
+            <td @attributes="attributes">
+                @context.FormattedValue
+            </td>
+    }
+        }
+    </text>
+        ;
+
+    private RenderFragment RenderTotals() =>
+    @<text>
+        @if (TotalsRow || GrandTotal)
+    {
+    Dictionary<string, object> attributes = [];
+
+    if (TotalsRow)
+    {
+    attributes["data-sort-index"] = string.Empty;
+    }
+
+        <tr>
+            <th class="totals pvtRow" colspan="@rowsCount" @attributes="attributes">
+                Total
+            </th>
+
+            @if (TotalsRow)
+        {
+            @RenderTotalsValue(new PivotMetadata(-1, null, -1, -1) { IsSubtotal = true }, columns[0], "totalValue")
+        }
+        else if (PivotTable!.ColumnKeys.Length != 0)
+        {
+            <td colspan="@(rowsCount + PivotTable!.ColumnKeys.Length * aggregatorsCount)">
+            </td>
+        }
+
+            @RenderGrandTotal()
+        </tr>
+    }
+    </text>
+        ;
+
+    private RenderFragment RenderGrandTotal() =>
+    @<text>
+        @if (GrandTotal || TotalsColumn)
+    {
+    if (GrandTotal)
+    {
+    ValueCellContext valueCellContext = new()
+    {
+    Aggregator = PivotTable!.GetValue(null, null),
+    IsSubTotal = true,
+    CssClass = "totalValue",
+    };
+
+        @renderValueCell(true, valueCellContext)
+    return;
+    }
+
+        <td colspan="@aggregatorsCount"></td>
+    }
+    </text>
+    ;
+
+    private void ApplyValueCellStyle(ValueCellContext context)
+    {
+        if (!context.IsSubTotal && context.Aggregator is not null)
+        {
+            PivotedMember valuePivotedMember = valuePivotedMembers[context.AggregatorIndex];
+
+            if (valuePivotedMember.Column.IsNumericType())
+            {
+                context.AddCssClass("number");
+            }
+
+            if (valuePivotedMember.HasConditionalStyle)
+            {
+                if (valuePivotedMember.SuccessStyle is not null && valuePivotedMember.EvaluateSuccessCondition(valuePivotedMember.Column.Type, context.Aggregator.Value))
+                {
+                    if (valuePivotedMember.TryGenerateSuccessCssStyle(out ConditionalStyleModel? successStyle))
+                    {
+                        if (successStyle.IsStyle)
+                        {
+                            context.AddCssStyle(successStyle.Value);
+                        }
+                        else
+                        {
+                            context.AddCssClass(successStyle.Value);
+                        }
+                    }
+
+                    return;
+                }
+
+                if (valuePivotedMember.WarningStyle is not null && valuePivotedMember.EvaluateWarningCondition(valuePivotedMember.Column.Type, context.Aggregator.Value))
+                {
+                    if (valuePivotedMember.TryGenerateWarningCssStyle(out ConditionalStyleModel? warningClass))
+                    {
+                        if (warningClass.IsStyle)
+                        {
+                            context.AddCssStyle(warningClass.Value);
+                        }
+                        else
+                        {
+                            context.AddCssClass(warningClass.Value);
+                        }
+                    }
+
+                    return;
+                }
+
+                if (valuePivotedMember.ErrorStyle is not null && valuePivotedMember.TryGenerateErrorCssStyle(out ConditionalStyleModel? errorClass))
+                {
+                    if (errorClass.IsStyle)
+                    {
+                        context.AddCssStyle(errorClass.Value);
+                    }
+                    else
+                    {
+                        context.AddCssClass(errorClass.Value);
+                    }
+                }
+            }
+        }
+        else
+        {
+            context.AddCssClass("number");
+        }
+    }
+
+    private void ResolveKeyCell(KeyCellContext keyCellContext, Dictionary<string, object> attributes)
+    {
+        keyCellContext.FormattedKey = FormatKey(keyCellContext.DimensionKey, keyCellContext.Dimension);
+
+        if (keyCellContext.IsSubtotal)
+        {
+            keyCellContext.AddCssClass("subtotals");
+            keyCellContext.FormattedKey = $"{keyCellContext.FormattedKey} Total {keyCellContext.PivotMetadata.GetDimensions()}";
+        }
+
+        if (keyCellContext.CssClass is not null)
+        {
+            attributes["class"] = keyCellContext.CssClass;
+        }
+
+        if (keyCellContext.CssStyle is not null)
+        {
+            attributes["style"] = keyCellContext.CssStyle;
+        }
+    }
+
+    private static string GetNumberIndex(int number, string defaultValue) =>
+        number < 0 ? defaultValue : number.ToString();
+
+    private sealed class PivotMetadata
+    {
+        internal ValueKey? ValueKey;
+        internal int Index;
+        internal int Length;
+        internal List<PivotMetadata>? Children;
+        internal int Dimensions;
+        internal PivotMetadata? Parent;
+        internal int ValueKeyIndex = -1;
+        internal int DimKeysCount = -1;
+        internal int Count = -1;
+        internal bool IsValue;
+        internal bool IsDimension;
+        internal bool IsSubtotal;
+        internal bool Viewed;
+        internal PivotMetadata? PrevPivot;
+
+        internal PivotMetadata(int index, ValueKey? valueKey, int valueKeyIndex, int dimKeysCount)
+        {
+            Length = 1;
+            Index = index;
+            ValueKey = valueKey;
+            ValueKeyIndex = valueKeyIndex;
+            DimKeysCount = dimKeysCount;
+            IsValue = true;
+            IsDimension = true;
+            IsSubtotal = false;
+
+            if (ValueKey != null && ValueKey.DimKeys.Length != 0)
+            {
+                object dimKeys = ValueKey.DimKeys[index];
+            }
+        }
+
+        internal void AddChild(PivotMetadata pivotMetadata)
+        {
+            Children ??= new List<PivotMetadata>();
+            Children.Add(pivotMetadata);
+
+            if (pivotMetadata.IsDimension)
+            {
+                Dimensions++;
+            }
+        }
+
+        internal int GetDimensions()
+        {
+            return !IsSubtotal || PrevPivot == null ? Dimensions : PrevPivot.Dimensions;
+        }
+
+        internal string GetValue()
+        {
+            if (Count < 0)
+            {
+                return string.Empty;
+            }
+            string str = Count.ToString();
+            if (Parent != null)
+            {
+                str = string.Concat(Parent.GetValue(), ":", str);
+            }
+            return str;
+        }
+
+        internal int[] AllCounts()
+        {
+            int[] numArray = new int[Index + 1];
+            var a = this;
+
+            for (int i = numArray.Length - 1; i >= 0 && a != null; i--)
+            {
+                numArray[i] = a.Count;
+                a = a.Parent;
+            }
+
+            return numArray;
+        }
+
+        internal static List<PivotMetadata>[] Create(string[] values, ValueKey[] valueKeys, bool repeatKeysInGroups, string[]? subtotalDimensions)
+        {
+            ValueKey? valueKey;
+            List<PivotMetadata>[] bs = new List<PivotMetadata>[values.Length];
+            bool[] flagArray = new bool[values.Length];
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                bs[i] = new List<PivotMetadata>();
+                flagArray[i] = subtotalDimensions != null && !repeatKeysInGroups && i < values.Length - 1 && Array.IndexOf(subtotalDimensions, values[i]) >= 0;
+            }
+
+            int[] numArray = new int[values.Length];
+            PivotMetadata[] bArray = new PivotMetadata[values.Length];
+            int length = values.Length - 1;
+
+            for (int j = 0; j < valueKeys.Length; j++)
+            {
+                ValueKey valueKey1 = valueKeys[j];
+
+                valueKey = j > 0 ? valueKeys[j - 1] : null;
+
+                ValueKey? valueKey2 = valueKey;
+                PivotMetadata? b = null;
+
+                for (int k = 0; k < values.Length; k++)
+                {
+                    if (repeatKeysInGroups || valueKey2 == null || !AreEquals(valueKey2, valueKey1, k))
+                    {
+                        bool flag1 = k < length && Key.IsEmpty(valueKey1.DimKeys[k + 1]);
+                        PivotMetadata b1 = new(k, GetOrCreateValueKey(valueKey1, k), j, numArray[length]);
+
+                        if (flag1)
+                        {
+                            b1.IsSubtotal = true;
+                            b1.IsValue = false;
+                        }
+
+                        numArray[k]++;
+
+                        bs[k].Add(b1);
+
+                        if (b == null)
+                        {
+                            b1.Count = CountList(bs[k]) + 1;
+                        }
+                        else
+                        {
+                            b1.Parent = b;
+                            b.AddChild(b1);
+                            b1.Count = CountList(b.Children!) + 1;
+                        }
+
+                        if (flagArray[k] && b1.IsDimension && !flag1)
+                        {
+                            PivotMetadata a = new(b1.Index, b1.ValueKey!, b1.ValueKeyIndex, b1.DimKeysCount)
+                                {
+                                    IsValue = false,
+                                    IsDimension = false,
+                                    IsSubtotal = true,
+                                    Parent = b1.Parent,
+                                    PrevPivot = b1
+                                };
+
+                            var b2 = a;
+                            bs[k].Add(b2);
+
+                            if (b != null)
+                            {
+                                b.AddChild(b2);
+                                Increment(b);
+                            }
+                        }
+
+                        bArray[k] = b1;
+                        b = b1;
+
+                        if (flag1)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        bArray[k].Length++;
+                        b = bArray[k];
+                    }
+                }
+            }
+            return bs;
+        }
+
+        internal static void Increment(PivotMetadata pivotMetadata)
+        {
+            while (pivotMetadata != null)
+            {
+                pivotMetadata.Length++;
+                pivotMetadata = pivotMetadata.Parent!;
+            }
+        }
+
+        private static int CountList(List<PivotMetadata> list)
+        {
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                if (list[i].Count >= 0)
+                {
+                    return list[i].Count;
+                }
+            }
+            return -1;
+        }
+
+        private static bool AreEquals(ValueKey firstValueKey, ValueKey valueKey, int index)
+        {
+            for (int i = index; i >= 0; i--)
+            {
+                if (!firstValueKey.DimKeys[i].Equals(valueKey.DimKeys[i]))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static ValueKey GetOrCreateValueKey(ValueKey valueKey, int index)
+        {
+            if (index >= valueKey.DimKeys.Length - 1)
+            {
+                return valueKey;
+            }
+            object[] dimKeys = new object[valueKey.DimKeys.Length];
+            for (int i = 0; i < dimKeys.Length; i++)
+            {
+                dimKeys[i] = i <= index ? valueKey.DimKeys[i] : Key.Empty;
+            }
+            return new ValueKey(dimKeys);
+        }
+
+        internal static IEnumerable<PivotMetadata> Project(IList<PivotMetadata> list)
+        {
+            foreach (PivotMetadata item in list)
+            {
+                if (item.Children == null)
+                {
+                    yield return item;
+                }
+                else
+                {
+                    foreach (PivotMetadata child in Project(item.Children))
+                    {
+                        yield return child;
+                    }
+                }
+            }
+        }
+    }
+
+    private sealed class ValueCellContext
+    {
+        internal ValueKey? RowKey;
+        internal ValueKey? ColumnKey;
+        internal IAggregator? Aggregator;
+        internal int AggregatorIndex;
+        internal string? CssClass;
+        internal string? CssStyle;
+        internal string? FormattedValue;
+        internal bool AllowHtml;
+        internal int? RowDimensionCount;
+        internal int? ColumnDimensionCount;
+        internal bool IsSubTotal;
+        internal int RowIndex = -1;
+        internal int ColumnIndex = -1;
+
+        public void AddCssClass(string cssClass)
+        {
+            if (CssClass is null)
+            {
+                CssClass = cssClass;
+                return;
+            }
+
+            CssClass = $"{CssClass} {cssClass}";
+        }
+
+        public void AddCssStyle(string cssStyle)
+        {
+            if (string.IsNullOrWhiteSpace(CssStyle))
+            {
+                CssStyle = cssStyle;
+                return;
+            }
+            CssStyle = $"{CssStyle};{cssStyle}";
+        }
+
+        internal ValueCellContext Clone() =>
+            new()
+                {
+                    RowKey = RowKey,
+                    ColumnKey = ColumnKey,
+                    Aggregator = Aggregator,
+                    AggregatorIndex = AggregatorIndex,
+                    CssClass = CssClass,
+                    FormattedValue = FormattedValue,
+                    IsSubTotal = IsSubTotal,
+                    RowDimensionCount = RowDimensionCount,
+                    ColumnDimensionCount = ColumnDimensionCount,
+                    RowIndex = RowIndex,
+                    ColumnIndex = ColumnIndex
+                };
+    }
+
+    private sealed class KeyCellContext
+    {
+        internal string? Dimension;
+        internal string? FormattedKey;
+        internal string? CssClass;
+        internal string? CssStyle;
+        internal bool IsSubtotal;
+        internal bool HasChildren;
+        internal PivotMetadata PivotMetadata;
+
+        internal KeyCellContext(PivotMetadata pivotMetadata)
+        {
+            PivotMetadata = pivotMetadata;
+            IsSubtotal = pivotMetadata.IsSubtotal;
+        }
+
+        public int DimensionAxisIndex => PivotMetadata.Index;
+        public object? DimensionKey => PivotMetadata.ValueKey?.DimKeys[PivotMetadata.Index];
+
+        public void AddCssClass(string cssClass)
+        {
+            if (CssClass == null)
+            {
+                CssClass = cssClass;
+                return;
+            }
+            CssClass = $"{CssClass} {cssClass}";
+        }
+
+        public void AddCssStyle(string cssStyle)
+        {
+            if (string.IsNullOrWhiteSpace(CssStyle))
+            {
+                CssStyle = cssStyle;
+                return;
+            }
+            CssStyle = $"{CssStyle};{cssStyle}";
+        }
+    }
+}

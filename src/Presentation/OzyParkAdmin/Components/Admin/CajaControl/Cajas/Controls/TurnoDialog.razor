@@ -57,7 +57,9 @@
                         <MudTd DataLabel="Movimiento">@context.Movimiento</MudTd>
                         <MudTd DataLabel="Tipo">@context.Tipo</MudTd>
                         <MudTd DataLabel="Cantidad">@context.Cantidad</MudTd>
-                        <MudTd DataLabel="Monto">@context.Monto</MudTd>
+                        <MudTd DataLabel="Monto">
+                            <Currency Value="context.Monto" />
+                        </MudTd>
                     </RowTemplate>
                     <ChildRowContent>
                         <IfThen Condition="context.ShowDetail">
@@ -88,35 +90,51 @@
                                 </MudTr>
                                 <MudTr>
                                     <MudTh>Monto inicio</MudTh>
-                                    <MudTd>@Turno?.MontoInicio</MudTd>
+                                    <MudTd>
+                                        <Currency Value="Turno?.MontoInicio" />
+                                    </MudTd>
                                 </MudTr>
                                 <MudTr>
                                     <MudTh>Efectivo en cierre</MudTh>
-                                    <MudTd>@Turno?.EfectivoCierre</MudTd>
+                                    <MudTd>
+                                        <Currency Value="Turno?.EfectivoCierre" />
+                                    </MudTd>
                                 </MudTr>
                                 <MudTr>
                                     <MudTh>Monto Transbank en cierre</MudTh>
-                                    <MudTd>@Turno?.MontoTransbank</MudTd>
+                                    <MudTd>
+                                        <Currency Value="Turno?.MontoTransbank" />
+                                    </MudTd>
                                 </MudTr>
                                 <MudTr>
                                     <MudTh>Monto Voucher en cierre</MudTh>
-                                    <MudTd>@Turno?.MontoVoucher</MudTd>
+                                    <MudTd>
+                                        <Currency Value="Turno?.MontoVoucher" />
+                                    </MudTd>
                                 </MudTr>
                                 <MudTr>
                                     <MudTh>Diferencia en efectivo</MudTh>
-                                    <MudTd>@Turno?.DiferenciaEfectivo</MudTd>
+                                    <MudTd>
+                                        <Currency Value="Turno?.DiferenciaEfectivo" />
+                                    </MudTd>
                                 </MudTr>
                                 <MudTr>
                                     <MudTh>Diferencia en monto Transbank</MudTh>
-                                    <MudTd>@Turno?.DiferenciaMontoTransbank</MudTd>
+                                    <MudTd>
+                                        <Currency Value="Turno?.DiferenciaMontoTransbank" />
+                                    </MudTd>
                                 </MudTr>
                                 <MudTr>
-                                    <MudTh>Sugerido sistema</MudTh>
-                                    <MudTd>@Turno?.EfectivoSistema</MudTd>
+                                    <MudTh>Sugerido efectivo</MudTh>
+                                    <MudTd>
+                                        <Currency Value="Turno?.EfectivoSistema" />
+                                    </MudTd>
                                 </MudTr>
                                 <MudTr>
                                     <MudTh>Sugerido Transbank</MudTh>
-                                    <MudTd>@Turno?.TransbankSistema</MudTd>
+                                    <MudTd>
+                                        <Currency Value="Turno?.TransbankSistema" />
+                                    </MudTd>
                                 </MudTr>
                                 <IfThen Condition="Turno.ShowRegularizacion">
                                     <Then>

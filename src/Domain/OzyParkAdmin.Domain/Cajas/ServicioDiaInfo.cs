@@ -18,7 +18,7 @@ public sealed record ServicioDiaInfo
     /// <summary>
     /// La fecha de la venta.
     /// </summary>
-    public DateOnly Fecha { get; set; }
+    public DateTime Fecha { get; set; }
 
     /// <summary>
     /// La hora de la venta.

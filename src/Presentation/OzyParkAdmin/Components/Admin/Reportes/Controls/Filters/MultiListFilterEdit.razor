@@ -1,0 +1,63 @@
+﻿@using OzyParkAdmin.Application.Reportes.Filters
+@using OzyParkAdmin.Domain.Reportes.Filters;
+@using OzyParkAdmin.Components.Admin.Reportes.Controls.Filters
+@inherits FilterEdit
+
+<MudSelect T="ItemOption"
+           SelectedValues="Filter!.SelectedItems"
+           SelectedValuesChanged="SelectOptionsAsync"
+           MultiSelection="true"
+           Dense="true"
+           Margin="Margin.Dense"
+           Variant="Variant.Outlined"
+           Label="@Filter?.Label"
+           ToStringFunc="(x) => x?.Display ?? Filter?.OptionalValue"
+           MultiSelectionTextFunc="@(x => string.Join(", ", x))"
+           Validation="Filter?.Validation"
+           Disabled="Loading">
+    <IfThen Condition="Filter?.OptionalValue is not null">
+        <Then>
+            <MudExSelectItem T="ItemOption" />
+        </Then>
+    </IfThen>
+    <ForIn Items="list">
+        <MudExSelectItem T="ItemOption" Value="context" />
+    </ForIn>
+</MudSelect>
+
+@code {
+    private List<ItemOption> list = [];
+
+    [Parameter]
+    public MultiListFilterModel? Filter { get; set; }
+
+    internal override IFilterModel? FilterModel => Filter;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ExecuteFilerAsync();
+    }
+
+    public override async Task ExecuteFilerAsync()
+    {
+        if (Filter is not null)
+        {
+            list = Filter.IsRemote
+                ? await LoadDataAsync()
+                : Filter.List;
+        }
+    }
+
+    private async Task SelectOptionsAsync(IEnumerable<ItemOption> options)
+    {
+        if (Filter is not null)
+        {
+            Filter.SelectedItems = options;
+
+            if (FilterLayout is not null)
+            {
+                await FilterLayout.NotifyChangesAsync(this);
+            }
+        }
+    }
+}

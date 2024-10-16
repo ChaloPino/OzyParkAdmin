@@ -343,7 +343,7 @@ internal sealed class TypeUnionContext
     }
 
     public string Coalesce(string defaultValue) =>
-        Symbol.TypeArguments.Any(x => !x.IsValueType) ? $" ?? {defaultValue}" : string.Empty;
+        Parameters.Any(x => !x.IsValueType) ? $" ?? {defaultValue}" : string.Empty;
 
     private static string GetActionArgument(ParameterContext parameter) =>
         $"Action<{parameter.GetRealType(false)}> {parameter.GetProperty("on")}";

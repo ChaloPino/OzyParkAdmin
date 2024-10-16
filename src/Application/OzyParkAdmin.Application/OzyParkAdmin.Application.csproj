@@ -8,10 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="MassTransit.Abstractions" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="NReco.PivotData" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\OzyParkAdmin.Domain\OzyParkAdmin.Domain.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\OzyParkAdmin.UnionType.Generator\OzyParkAdmin.UnionType.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

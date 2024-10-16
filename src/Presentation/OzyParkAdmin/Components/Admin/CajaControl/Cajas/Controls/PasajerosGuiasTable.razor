@@ -5,14 +5,20 @@
         <PropertyColumn Property="x => x.Ejecutivo" Title="Ejecutivo" />
         <PropertyColumn Property="x => x.Fecha" Title="Fecha" />
         <PropertyColumn Property="x => x.Hora" Title="Hora" />
-        <PropertyColumn Property="x => x.Monto" Title="Monto" />
+        <PropertyColumn Property="x => x.Monto" Title="Monto">
+            <CellTemplate>
+                <Currency Value="context.Item.Monto" />
+            </CellTemplate>
+        </PropertyColumn>
         <PropertyColumn Property="x => x.Servicio" Title="Servicio" />
         <PropertyColumn Property="x => x.Cantidad" Title="Pasajeros pagados" AggregateDefinition="PasajerosAggregateDefinition" />
         <PropertyColumn Property="x => x.Guias" Title="Guiás" AggregateDefinition="GuiasAggregateDefinition" />
     </Columns>
     <PagerContent>
         <IfThen Condition="Paginate">
-            <MudDataGridPager />
+            <Then>
+                <MudDataGridPager />
+            </Then>
         </IfThen>
     </PagerContent>
 </MudDataGrid>
@@ -41,12 +47,12 @@
 
     private string Summarize(IEnumerable<ServicioDiaInfo> servicios, Func<ServicioDiaInfo, int> selector)
     {
-        int total = servicios.Sum(selector);
+        int total = Servicios.Sum(selector);
 
 
         if (Paginate)
         {
-            decimal totalPaginado = servicios.Skip(dataGrid.CurrentPage * dataGrid.RowsPerPage).Take(dataGrid.RowsPerPage).Sum(selector);
+            decimal totalPaginado = servicios.Sum(selector);
 
             if (totalPaginado != total)
             {

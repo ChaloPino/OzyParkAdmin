@@ -1,0 +1,124 @@
+﻿@using OzyParkAdmin.Application.Reportes
+@using OzyParkAdmin.Application.Reportes.MasterDetails
+@using OzyParkAdmin.Domain.Reportes
+@using OzyParkAdmin.Domain.Reportes.MasterDetails
+@inherits ReportVisualizerBase
+
+<IfThenElse Condition="Loading == LoadingState.Loaded">
+    <Then>
+        <IfThen Condition="MasterTable is not null">
+            <Then>
+                <MudCard Elevation="2">
+                    <IfThen Condition="MasterTable!.Title is not null">
+                        <Then>
+                            <MudCardHeader>
+                                <MudText Typo="Typo.h4">@MasterTable!.Title</MudText>
+                                <MudDivider DividerType="DividerType.FullWidth" />
+                            </MudCardHeader>
+                        </Then>
+                    </IfThen>
+                    <MudCardContent>
+                        <IfThenElse Condition="MasterTable!.IsTabular">
+                            <Then>
+                                <MudSimpleTable Dense="true" Striped="true" Bordered="true">
+                                    <ForIn Items="MasterTable!.Columns">
+                                        <MudTr>
+                                            <MudTh>@context.Header</MudTh>
+                                            <MudTd Class="@(GetCellClass(context, MasterTable!.Data[0]))" Style="@(GetCellStyle(context, MasterTable!.Data[0]))">@Format(context, MasterTable!.Data[0][context])</MudTd>
+                                        </MudTr>
+                                    </ForIn>
+                                </MudSimpleTable>
+                            </Then>
+                            <Else>
+                                <MudTable Dense="true" Items="MasterTable!.Data" Striped="true" Bordered="true" FixedHeader="true">
+                                    <HeaderContent>
+                                        <ForIn Items="MasterTable!.Columns">
+                                            <MudTh>@context.Header</MudTh>
+                                        </ForIn>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <ForIn Items="MasterTable!.Columns" Context="column">
+                                            <MudTd Class="@(GetCellClass(column, context))" Style="@(GetCellStyle(column, context))">@Format(column, context[column])</MudTd>
+                                        </ForIn>
+                                    </RowTemplate>
+                                    <FooterContent>
+                                        <ForIn Items="MasterTable!.Columns">
+                                            <MudTh Class="@(GetFooterClass(context))">
+                                                @RenderFooter(context, MasterTable)
+                                            </MudTh>
+                                        </ForIn>
+                                    </FooterContent>
+                                </MudTable>
+                            </Else>
+                        </IfThenElse>
+                    </MudCardContent>
+                </MudCard>
+            </Then>
+        </IfThen>
+
+        <ForIn Items="Details" Context="detail">
+            <MudCard Elevation="2" Class="mt-4">
+                <IfThen Condition="detail.Title is not null">
+                    <Then>
+                        <MudCardHeader>
+                            <MudText Typo="Typo.h4">@detail.Title</MudText>
+                            <MudDivider DividerType="DividerType.FullWidth" />
+                        </MudCardHeader>
+                    </Then>
+                </IfThen>
+                <MudCardContent>
+                    <IfThenElse Condition="detail.IsTabular">
+                        <Then>
+                            <MudSimpleTable Dense="true" Striped="true" Bordered="true">
+                                <ForIn Items="detail.Columns">
+                                    <MudTr>
+                                        <MudTh>@context.Header</MudTh>
+                                        <MudTd Class="@(GetCellClass(context, detail.Data[0]))" Style="@(GetCellStyle(context, detail.Data[0]))">@Format(context, detail.Data[0][context])</MudTd>
+                                    </MudTr>
+                                </ForIn>
+                            </MudSimpleTable>
+                        </Then>
+                        <Else>
+                            <MudTable Dense="true" Items="detail.Data" Striped="true" Bordered="true">
+                                <HeaderContent>
+                                    <ForIn Items="detail.Columns">
+                                        <MudTh>@context.Header</MudTh>
+                                    </ForIn>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <ForIn Items="detail.Columns" Context="column">
+                                        <MudTd Class="@(GetCellClass(column, context))" Style="@(GetCellStyle(column, context))">@Format(column, context[column])</MudTd>
+                                    </ForIn>
+                                </RowTemplate>
+                                <FooterContent>
+                                    <ForIn Items="detail.Columns">
+                                        <MudTh Class="@(GetFooterClass(context))">
+                                            @RenderFooter(context, detail)
+                                        </MudTh>
+                                    </ForIn>
+                                </FooterContent>
+                            </MudTable>
+                        </Else>
+                    </IfThenElse>
+                </MudCardContent>
+            </MudCard>
+        </ForIn>
+    </Then>
+</IfThenElse>
+
+@code {
+    [Parameter]
+    public MasterDetailReport? Report { get; set; }
+
+    [Parameter]
+    public MasterTable? MasterTable { get; set; }
+
+    [Parameter]
+    public IEnumerable<DetailTable> Details { get; set; } = [];
+
+
+    private RenderFragment RenderFooter(ColumnInfo column, IAggregatable aggregatable) =>
+    @<text>
+    @Format(column, aggregatable.Aggregate(column))
+    </text>;
+}

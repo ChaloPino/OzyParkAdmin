@@ -1,0 +1,77 @@
+﻿@using OzyParkAdmin.Application.Reportes
+@using OzyParkAdmin.Domain.Reportes
+@using OzyParkAdmin.Domain.Reportes.Listed
+@inherits ReportVisualizerBase
+
+<IfThen Condition="Loading == LoadingState.Loaded">
+    <Then>
+        <MudDataGrid T="DataInfo" ServerData="ServerData!" Items="Items" SortMode="SortMode" ReadOnly="true" Filterable="false" Groupable="false" RowsPerPage="RowsPerPage"
+                     Dense="true" Striped="true" Bordered="true" FixedHeader="true" Height="600px">
+            <Columns>
+                <ForIn Items="Columns" Context="column">
+                    <TemplateColumn Title="@column.Header" Sortable="column.CanSort" AggregateDefinition="GetAggregateDefinition(column)"
+                                    CellClassFunc="(item) => GetCellClass(column, item)" CellStyleFunc="(item) => GetCellStyle(column, item)"
+                                    FooterClassFunc="(_) => GetFooterClass(column)">
+                        <CellTemplate>
+                            @Format(column, context.Item[column])
+                        </CellTemplate>
+                    </TemplateColumn>
+                </ForIn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager PageSizeOptions="PageSizeOptions" />
+            </PagerContent>
+        </MudDataGrid>
+    </Then>
+</IfThen>
+
+@code {
+    [Parameter]
+    public PaginatedReport? Report { get; set; }
+
+    [Parameter]
+    public IEnumerable<ColumnInfo> Columns { get; set; } = [];
+
+    [Parameter]
+    public IEnumerable<DataInfo> Data { get; set; } = [];
+
+    [Parameter]
+    public long TotalRecords { get; set; }
+
+    [Parameter]
+    public bool Reload { get; set; }
+
+    [CascadingParameter]
+    public ReportVisualizer? ReportVisualizer { get; set; }
+
+    private SortMode SortMode => Report?.CanSort == true ? SortMode.Multiple : SortMode.None;
+
+    private int[] PageSizeOptions => Report?.Pages ?? PaginatedReport.DefaultPages;
+
+    private int RowsPerPage => Report?.PageSize ?? 50;
+
+    private Func<GridState<DataInfo>, Task<GridData<DataInfo>>>? ServerData => Report?.ServerSide == true ? LoadReportAsync : null;
+
+    private IEnumerable<DataInfo>? Items => Report?.ServerSide == false ? Data : null;
+
+    private async Task<GridData<DataInfo>> LoadReportAsync(GridState<DataInfo> state)
+    {
+        if (!Reload)
+        {
+            Reload = false;
+
+            return new GridData<DataInfo>
+                {
+                    TotalItems = (int)TotalRecords,
+                    Items = Data,
+                };
+        }
+
+        if (ReportVisualizer is not null)
+        {
+            return await ReportVisualizer.OnReloadReportAsync(state);
+        }
+
+        return new GridData<DataInfo>();
+    }
+}

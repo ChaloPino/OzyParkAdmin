@@ -1,0 +1,132 @@
+﻿@using Microsoft.JSInterop
+@implements IDisposable
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<canvas @ref="@Element" id="@Id" style="@Style" @attributes="@AdditionalAttributes"></canvas>
+
+@code {
+    private bool isDisposed;
+    private bool isAsyncDisposed;
+
+    private ElementReference Element { get; set; }
+    private bool IsRenderComplete { get; set; }
+
+    private string Style => GetChartSizeAsStyle();
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AdditionalAttributes { get; set; } = default!;
+
+    [Parameter]
+    public string? Id { get; set; }
+
+    [Parameter]
+    public string? Type { get; set; }
+
+    [Parameter]
+    public string? Width { get; set; }
+
+    [Parameter]
+    public string? Height { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        Id ??= IdUtility.GetNextId();
+        base.OnInitialized();
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        IsRenderComplete = true;
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+    public async Task InitializeAsync(IDictionary<string, object?> chartData, IDictionary<string, object?> options, string[]? plugins = null)
+    {
+        await JSRuntime.InvokeVoidAsync("window.ozyparkadmin.chartjs.initialize", Id, Type, chartData, options, plugins);
+    }
+
+    public async Task UpdateAsync(IDictionary<string, object> chartData, IDictionary<string, object> options)
+    {
+        await JSRuntime.InvokeVoidAsync("window.ozyparkadmin.chartjs.update", Id, chartData, options);
+    }
+
+    public async Task ResizeAsync(string width, string height)
+    {
+        await JSRuntime.InvokeVoidAsync("window.ozyparkadmin.chartjs.resize", Id, width, height);
+    }
+
+    public async Task DestroyAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("window.ozyparkadmin.chartjs.destroy", Id);
+    }
+
+    private string GetChartSizeAsStyle()
+    {
+        var style = "";
+
+        if (Width is not null)
+        {
+            style += $"width:{Width};";
+        }
+
+        if (Height is not null)
+        {
+            style += $"height:{Height};";
+        }
+
+        return style;
+    }
+
+
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await DisposeAsyncCore(true).ConfigureAwait(false);
+
+        Dispose(false);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!isDisposed)
+        {
+            if (disposing)
+            {
+                // cleanup
+            }
+
+            isDisposed = true;
+        }
+    }
+
+    protected virtual ValueTask DisposeAsyncCore(bool disposing)
+    {
+        if (!isAsyncDisposed)
+        {
+            if (disposing)
+            {
+                // cleanup
+            }
+
+            isAsyncDisposed = true;
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
+    ~Chart()
+    {
+        Dispose(false);
+    }
+}

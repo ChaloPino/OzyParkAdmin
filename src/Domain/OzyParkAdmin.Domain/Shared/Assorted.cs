@@ -42,8 +42,9 @@ public readonly record struct Validation(ImmutableArray<ValidationError> Errors)
 /// <summary>
 /// Representa un listado de errores desconocidos.
 /// </summary>
+/// <param name="Ticket">El ticket asociado para revisar el log.</param>
 /// <param name="Errors">El listado de errores desconocidos.</param>
-public readonly record struct Unknown(ImmutableArray<string> Errors);
+public readonly record struct Unknown(Guid Ticket, ImmutableArray<string> Errors);
 
 /// <summary>
 /// Representa un éxito.

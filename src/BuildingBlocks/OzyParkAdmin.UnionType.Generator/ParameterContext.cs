@@ -49,6 +49,8 @@ internal sealed class ParameterContext
 
     public bool IsTypeUnion { get; }
 
+    public bool IsValueType => Type.IsValueType;
+
     public string GetRealType(bool useNullable = true) =>
             Type.GetType(OriginalType, useNullable);
 

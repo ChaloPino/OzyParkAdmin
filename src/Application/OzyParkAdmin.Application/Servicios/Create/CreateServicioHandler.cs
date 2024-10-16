@@ -29,6 +29,7 @@ public sealed class CreateServicioHandler : ServicioStateChangeableHandler<Creat
 
         Context.AttachRange(request.TipoControl, request.TipoDistribucion, request.TipoVigencia);
 
+        // Aplicar lógica de negocios.
         return await _servicioManager.CreateAsync(
             request.CentroCosto,
             request.FranquiciaId,

@@ -17,7 +17,7 @@ public sealed partial class ResultOf<TValue>
     /// <returns>
     /// A new instance of <see cref="ResultOf{TValue}" /> casted from <see cref="ValidationError" />.
     /// </returns>
-    public static implicit operator ResultOf<TValue>(ValidationError _) => _;
+    public static implicit operator ResultOf<TValue>(ValidationError _) => new Validation([_]);
 
     /// <summary>
     /// Implicitly casts a list of <see cref="ValidationError" /> to <see cref="Failure" />.
@@ -26,5 +26,5 @@ public sealed partial class ResultOf<TValue>
     /// <returns>
     /// A new instance of <see cref="ResultOf{TValue}" /> casted from a list of <see cref="ValidationError" />.
     /// </returns>
-    public static implicit operator ResultOf<TValue>(List<ValidationError> _) => _;
+    public static implicit operator ResultOf<TValue>(List<ValidationError> _) => new Validation([.._]);
 }

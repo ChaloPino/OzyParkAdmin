@@ -34,9 +34,12 @@ using OzyParkAdmin.Infrastructure.Plantillas;
 using OzyParkAdmin.Domain.Plantillas;
 using RazorEngineCore;
 using OzyParkAdmin.Domain.Franquicias;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Infrastructure.Middlewares;
+using OzyParkAdmin.Application.Reportes.Generate;
+using OzyParkAdmin.Infrastructure.Reportes.Generate;
+using OzyParkAdmin.Infrastructure.Reportes.Generate.Internals;
+using System.Data.Common;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -53,6 +56,8 @@ public static class OzyParkAdminHostApplicationExtensions
     /// <exception cref="InvalidOperationException">Si no existe la cadena de conexión.</exception>
     public static IHostApplicationBuilder AddOzyParkAdmin(this IHostApplicationBuilder builder)
     {
+        DbProviderFactories.RegisterFactory("System.Data.SqlClient", Data.SqlClient.SqlClientFactory.Instance);
+
         string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
         builder.Services.AddDbContextPool<IOzyParkAdminContext, OzyParkAdminContext>(options =>
             options.UseSqlServer(connectionString));
@@ -104,6 +109,8 @@ public static class OzyParkAdminHostApplicationExtensions
         services.AddSingleton(_ => new AssemblyProvider().AddAssemblies(typeof(OzyParkAdminHostApplicationExtensions).Assembly).AddAssemblies(typeof(Franquicia).Assembly));
         services.AddSingleton<HtmlGenerator>();
         services.AddScoped<TicketManager>();
+        services.AddScoped<IReportGenerator, ReportGenerator>();
+        services.AddSingleton<IFormatReportGeneratorProvider, FormatReportGeneratorProvider>();
 
         services.AddHttpContextAccessor();
         services.AddSingleton<IClientIpService, ClientIpService>();

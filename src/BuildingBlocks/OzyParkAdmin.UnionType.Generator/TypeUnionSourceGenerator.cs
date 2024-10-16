@@ -222,6 +222,7 @@ namespace {context.NameSpace};
         }
 
         @source.Append("""
+
             _ => string.Empty,
         };
 """);

@@ -1,0 +1,71 @@
+﻿@using MudBlazor.Services
+@using OzyParkAdmin.Application.Reportes
+@using OzyParkAdmin.Application.Reportes.Charts
+@implements IBrowserViewportObserver
+@implements IAsyncDisposable
+@inject IBrowserViewportService BrowserViewportService
+<IfThen Condition="ChartMetaInfo is not null">
+    <Then>
+        <IfThenElse Condition="ChartMetaInfo!.Type is null || ChartMetaInfo!.Type != Domain.Reportes.Charts.ChartType.Table">
+            <Then>
+                <Chart Id="@ChartMetaInfo!.Name" Type="@ChartMetaInfo!.Type?.ToDescription()" Width="@ChartMetaInfo!.Width" Height="@ChartMetaInfo!.Heigth" @ref="chart" />
+            </Then>
+            <Else>
+                <ChartTableVisualizer Columns="Columns" Data="Data" />
+            </Else>
+        </IfThenElse>
+    </Then>
+</IfThen>
+
+
+@code {
+    private Chart chart = default!;
+
+    [Parameter]
+    public ChartMetaInfo? ChartMetaInfo { get; set; }
+
+    public IEnumerable<ColumnInfo> Columns => ((ChartTableInfo)ChartMetaInfo!.Data["table"]!).Colummns;
+
+    public IEnumerable<DataInfo> Data => ((ChartTableInfo)ChartMetaInfo!.Data["table"]!).Data;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await BrowserViewportService.SubscribeAsync(this, fireImmediately: true);
+        }
+        if (ChartMetaInfo is not null && chart is not null && ChartMetaInfo.Type != Domain.Reportes.Charts.ChartType.Table)
+        {
+            await chart.InitializeAsync(ChartMetaInfo.Data, ChartMetaInfo.Options);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (ChartMetaInfo is not null && chart is not null)
+        {
+            await chart.DestroyAsync();
+        }
+
+        await BrowserViewportService.UnsubscribeAsync(this);
+    }
+
+    Guid IBrowserViewportObserver.Id { get; } = Guid.NewGuid();
+
+    ResizeOptions IBrowserViewportObserver.ResizeOptions { get; } = new()
+        {
+            ReportRate = 250,
+            NotifyOnBreakpointOnly = true,
+        };
+
+    async Task IBrowserViewportObserver.NotifyBrowserViewportChangeAsync(MudBlazor.BrowserViewportEventArgs browserViewportEventArgs)
+    {
+        if (chart is not null)
+        {
+            await chart.DestroyAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

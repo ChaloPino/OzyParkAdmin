@@ -30,7 +30,22 @@ public interface ISortExpression<T>
     /// <summary>
     /// Ejecuta el ordenamiento definido.
     /// </summary>
+    /// <param name="source">La fuente que será ordenada.</param>
+    /// <returns>Una nueva consulta ordenada.</returns>
+    IOrderedEnumerable<T> Sort(IEnumerable<T> source);
+
+
+    /// <summary>
+    /// Ejecuta el ordenamiento definido.
+    /// </summary>
     /// <param name="query">La consulta que será ordenada.</param>
     /// <returns>Una nueva consulta ordenada.</returns>
     IOrderedQueryable<T> ThenSort(IOrderedQueryable<T> query);
+
+    /// <summary>
+    /// Ejecuta el ordenamiento definido.
+    /// </summary>
+    /// <param name="source">La fuente que será ordenada.</param>
+    /// <returns>Una nueva consulta ordenada.</returns>
+    IOrderedEnumerable<T> ThenSort(IOrderedEnumerable<T> source);
 }

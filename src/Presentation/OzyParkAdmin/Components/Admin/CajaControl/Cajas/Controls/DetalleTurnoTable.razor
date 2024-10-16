@@ -12,7 +12,11 @@
                 </IfThenElse>
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Monto" Title="Monto" AggregateDefinition="MontoAggregateDefinition" />
+        <PropertyColumn Property="x => x.Monto" Title="Monto" AggregateDefinition="MontoAggregateDefinition">
+            <CellTemplate>
+                <Currency Value="context.Item.Monto" />
+            </CellTemplate>
+        </PropertyColumn>
         <PropertyColumn Property="x => x.NumeroReferencia" Title="Número Referencia" />
         <PropertyColumn Property="x => x.Usuario" Title="Usuario" />
         <PropertyColumn Property="x => x.Movimiento" Title="Movimiento" />
@@ -50,19 +54,18 @@
 
     private string Summarize(IEnumerable<DetalleTurnoInfo> detalles)
     {
-        decimal total = detalles.Sum(x => x.Monto);
-
+        decimal total = Detalle.Sum(x => x.Monto);
 
         if (Paginate)
         {
-            decimal totalPaginado = detalles.Skip(dataGrid.CurrentPage * dataGrid.RowsPerPage).Take(dataGrid.RowsPerPage).Sum(x => x.Monto);
+            decimal totalPaginado = detalles.Sum(x => x.Monto);
 
             if (totalPaginado != total)
             {
-                return $"{totalPaginado} ({total})";
+                return $"{totalPaginado:C0} ({total:C0})";
             }
         }
 
-        return $"{total}";
+        return $"{total:C0}";
     }
 }

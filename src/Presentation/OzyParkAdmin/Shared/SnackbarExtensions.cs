@@ -21,9 +21,15 @@ internal static class SnackbarExtensions
         snackbar.Add(new MarkupString(message), Severity.Error);
     }
 
+    public static void AddFailure(this ISnackbar snackbar, string title, Exception exception)
+    {
+        string message = exception.InnerException is not null ? exception.InnerException.Message : exception.Message;
+        snackbar.Add(new MarkupString($"<h3>{title}</h3><p>{message}</p>"), Severity.Error);
+    }
+
     private static string ResolveUnknown(Unknown unknown, string action)
     {
-        return $"Hubo errores al {action}: {AggregateErrors(unknown.Errors)}";
+        return $"Hubo errores al {action}: <p>Ticket asociado: {unknown.Ticket}</p> {AggregateErrors(unknown.Errors)}";
     }
 
     private static string ResolveNotFound(NotFound notFound, string action)

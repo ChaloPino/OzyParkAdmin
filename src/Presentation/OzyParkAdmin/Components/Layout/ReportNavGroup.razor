@@ -1,0 +1,36 @@
+﻿@using MassTransit
+@using MassTransit.Mediator
+@using System.Security.Claims
+@using OzyParkAdmin.Application.Reportes.List
+@using OzyParkAdmin.Domain.Reportes
+@inject IMediator Mediator
+
+<IfThen Condition="groups.Count > 0">
+    <Then>
+        <MudNavGroup Icon="@Icons.Material.Outlined.Report" Title="Reportes">
+            <ForIn Items="groups.OrderBy(x => x.Order)" Context="group">
+                <MudNavGroup Title="@group.Title">
+                    <ForIn Items="group.Reports.OrderBy(x => x.Order)" Context="report">
+                        <MudNavLink Icon="@Icons.Material.Outlined.Dashboard" Href="@($"Reportes/{report.Aka}")" ForceLoad="true" Match="NavLinkMatch.All">@report.Title</MudNavLink>
+                    </ForIn>
+                </MudNavGroup>
+            </ForIn>
+        </MudNavGroup>
+    </Then>
+</IfThen>
+
+@code {
+    private ClaimsPrincipal? user;
+    private List<ReportGroupInfo> groups = [];
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationState).User;
+        var result = await Mediator.SendRequest(new ListReportes(user));
+
+        groups = result.Items.ToList();
+    }
+}

@@ -1,0 +1,17 @@
+﻿@inherits FilterEdit
+<MudTextField 
+    @bind-Value="Filter!.Text" 
+    Variant="Variant.Outlined" 
+    Margin="Margin.Dense" 
+    Label="@Filter?.Label" 
+    Placeholder="@Filter?.Placeholder" 
+    Immediate="true"
+    Validation="Filter?.Validation"
+    Disabled="Loading"/>
+
+@code {
+    [Parameter]
+    public TextFilterModel? Filter { get; set; }
+
+    internal override IFilterModel? FilterModel => Filter;
+}

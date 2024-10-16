@@ -1,4 +1,5 @@
 ﻿using MassTransit.Mediator;
+using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 

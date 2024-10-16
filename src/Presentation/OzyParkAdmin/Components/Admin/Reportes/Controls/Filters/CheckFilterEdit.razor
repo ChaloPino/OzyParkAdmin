@@ -1,0 +1,14 @@
+﻿@inherits FilterEdit
+<MudSwitch 
+    @bind-Value="Filter!.Checked" 
+    Color="Color.Primary" 
+    Label="@Filter?.Label" 
+    Validation="Filter?.Validation"
+    Disabled="Loading" />
+
+@code {
+    [Parameter]
+    public CheckFilterModel? Filter { get; set; }
+
+    internal override IFilterModel? FilterModel => Filter;
+}

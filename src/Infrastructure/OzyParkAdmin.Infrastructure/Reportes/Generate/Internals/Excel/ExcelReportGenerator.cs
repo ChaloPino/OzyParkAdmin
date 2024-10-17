@@ -8,6 +8,7 @@ internal sealed class ExcelReportGenerator : FormatReportGenerator
 {
     protected override IFormattedReport GenerateReport(Report report, ReportFilter filter, DataSet dataSet, ClaimsPrincipal user)
     {
-        throw new NotImplementedException();
+        ITypedExcelReportGenerator generator = ExcelReportGeneratorFactory.Create(report.Type);
+        return generator.FormatToExcel(report, filter, dataSet, user);
     }
 }

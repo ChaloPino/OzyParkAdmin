@@ -1,5 +1,4 @@
 ﻿using OzyParkAdmin.Domain.Reportes.DataSources;
-using System.Text;
 
 namespace OzyParkAdmin.Domain.Reportes.Filters;
 
@@ -58,13 +57,54 @@ public sealed class ListFilter : Filter, IRemoteFilter
     /// <inheritdoc/>
     public override object? GetValue(object? value)
     {
-        if (value is Array array)
+        if (value is null)
         {
-            Dictionary<string, object?>[] dictionary = (Dictionary<string, object?>[])array;
+            return null;
+        }
+
+        if (value is IEnumerable<ItemOption> array )
+        {
+            if (!array.Any())
+            {
+                return null;
+            }
 
             return !IsMultiple
-                ? base.GetValue(dictionary[0]["value"])
-                : dictionary.Select(k => k["value"]).ToArray();
+                ? array.First().Valor
+                : array.Select(x => x.Valor).ToArray();
+        }
+
+        if (value is ItemOption option)
+        {
+            return option.Valor;
+        }
+
+        return base.GetValue(value);
+    }
+
+    /// <inheritdoc/>
+    public override object? GetText(object? value)
+    {
+        if (value is null)
+        {
+            return OptionalValue;
+        }
+
+        if (value is IEnumerable<ItemOption> array)
+        {
+            if (!array.Any())
+            {
+                return OptionalValue;
+            }
+
+            return !IsMultiple
+                ? array.First().Display
+                : string.Join(", ", array.Select(x => x.Display));
+        }
+
+        if (value is ItemOption option)
+        {
+            return option.Display;
         }
 
         return base.GetValue(value);

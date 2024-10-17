@@ -8,6 +8,7 @@ internal sealed class PdfReportGenerator : FormatReportGenerator
 {
     protected override IFormattedReport GenerateReport(Report report, ReportFilter filter, DataSet dataSet, ClaimsPrincipal user)
     {
-        throw new NotImplementedException();
+        ITypedPdfReportGenerator generator = PdfReportGeneratorFactory.Create(report.Type);
+        return generator.FormatToPdf(report, filter, dataSet, user);
     }
 }

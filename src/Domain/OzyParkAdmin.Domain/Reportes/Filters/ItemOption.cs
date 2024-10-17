@@ -14,4 +14,11 @@ public class ItemOption
     /// El texto a desplegar del elemento.
     /// </summary>
     public string Display { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Retorna el valor.
+    /// </summary>
+    /// <returns>El valor.</returns>
+    public override string ToString() =>
+        Valor;
 }

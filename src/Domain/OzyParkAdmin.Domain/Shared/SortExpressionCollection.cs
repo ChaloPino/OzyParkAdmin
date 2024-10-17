@@ -34,6 +34,11 @@ public class SortExpressionCollection<T>
     }
 
     /// <summary>
+    /// Si es que se tienen expresiones de ordenamiento.
+    /// </summary>
+    public bool HasExpressions => _expressions.Count > 0;
+
+    /// <summary>
     /// Agrega una expresión de ordenamiento.
     /// </summary>
     /// <typeparam name="TProperty">El tipo de la propiedad de ordenamiento.</typeparam>

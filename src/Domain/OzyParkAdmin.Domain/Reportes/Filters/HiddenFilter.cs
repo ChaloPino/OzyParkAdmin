@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OzyParkAdmin.Domain.Reportes.Filters;
+﻿namespace OzyParkAdmin.Domain.Reportes.Filters;
 
 /// <summary>
 /// El filtro oculto, usado para registrar valores constantes o computados en el filtrado.

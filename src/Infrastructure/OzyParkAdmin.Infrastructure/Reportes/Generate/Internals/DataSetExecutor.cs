@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Application.Reportes.Generate;
+﻿using iText.Html2pdf.Attach.Impl.Tags;
+using OzyParkAdmin.Application.Reportes.Generate;
 using OzyParkAdmin.Domain.Reportes;
 using OzyParkAdmin.Domain.Reportes.DataSources;
 using OzyParkAdmin.Domain.Reportes.Filters;
@@ -15,6 +16,18 @@ internal static class DataSetExecutor
     {
         DataSet dataSet = new();
         ExecuteDataTable(dataSource, report, filter, dataSet);
+        return dataSet;
+    }
+
+    public static DataSet ExecuteDataTable(DataSource dataSource, Report report, ReportFilter reportFilter)
+    {
+        ArgumentNullException.ThrowIfNull(dataSource);
+        ArgumentNullException.ThrowIfNull(report);
+        ArgumentNullException.ThrowIfNull(reportFilter);
+
+        DataSet dataSet = new();
+        ExecuteDataTable(dataSource, report, reportFilter, dataSet);
+
         return dataSet;
     }
 
@@ -92,9 +105,8 @@ internal static class DataSetExecutor
                         dbParameter.DbType = parameter.Type;
                     }
 
-                    FilterValue? filterValue = reportFilter.FilterValues.FirstOrDefault(x => x.FilterId == filter.Id);
-
-                    object? value = filterValue is not null ? ParameterUtils.ConvertValue(filterValue.Value, parameter.Type, filter, otherParameter) : null;
+                    object? value = reportFilter.GetFilter(filter.Id);
+                    value = ParameterUtils.ConvertValue(value, parameter.Type, filter, otherParameter);
 
                     ParameterFactory.SetParameter(parameter, dbParameter, value);
 

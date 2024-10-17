@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Domain.Reportes.Filters;
+﻿using System.Globalization;
+
+namespace OzyParkAdmin.Domain.Reportes.Filters;
 
 /// <summary>
 /// Es un filtro de tipo checked o switch.
@@ -27,4 +29,20 @@ public sealed class CheckFilter : Filter
     /// <inheritdoc/>
     public override object? GetDefaultValue() =>
         Checked;
+
+    /// <inheritdoc/>
+    public override object? GetText(object? value)
+    {
+        if (value is not null)
+        {
+            bool check = Convert.ToBoolean(value, CultureInfo.InvariantCulture);
+            return check ? "Sí" : "No";
+        }
+
+        return null;
+    }
+
+    /// <inheritdoc/>
+    public override string? GetFormattedText(object? value) =>
+        GetText(value)?.ToString();
 }

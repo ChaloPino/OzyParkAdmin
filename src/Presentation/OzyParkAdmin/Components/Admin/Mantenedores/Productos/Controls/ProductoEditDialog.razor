@@ -142,7 +142,6 @@
     private List<ProductoInfo> complementos = [];
 
     private MudForm form = default!;
-    private MudFileUpload<IBrowserFile>? fileUpload;
     private string _dragClass = DefaultDragClass;
 
     private List<ProductoInfo> _complementosSelecionados = [];
@@ -285,12 +284,6 @@
 
     private void ClearDragClass()
         => _dragClass = DefaultDragClass;
-
-    private Task OpenFilePickerAsync()
-        => fileUpload?.OpenFilePickerAsync() ?? Task.CompletedTask;
-
-    private Task ClearAsync()
-        => fileUpload?.ClearAsync() ?? Task.CompletedTask;
 
     private void SelectComplementos(IReadOnlyCollection<ProductoInfo> productos)
     {

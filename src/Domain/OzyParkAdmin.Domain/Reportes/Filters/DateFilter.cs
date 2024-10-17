@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Domain.Reportes.Filters;
+﻿using System.Globalization;
+
+namespace OzyParkAdmin.Domain.Reportes.Filters;
 
 /// <summary>
 /// El filtro tipo fecha.
@@ -78,4 +80,25 @@ public sealed class DateFilter : Filter
     /// <inheritdoc/>
     public override object? GetDefaultValue() =>
         UseToday ? DateTime.Today : null;
+
+    /// <inheritdoc/>
+    public override object? GetText(object? value)
+    {
+        if (value is not null)
+        {
+            if (value is not DateTime dateTime)
+            {
+                dateTime = DateTime.Parse(value.ToString()!, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
+            }
+
+            if (UseLastTimeOfDay)
+            {
+                dateTime = dateTime.Add(new TimeSpan(23, 59, 59));
+            }
+
+            return dateTime;
+        }
+
+        return null;
+    }
 }

@@ -6,7 +6,7 @@
 @using System.Security.Claims
 @inject ISnackbar Snackbar
 @inject IMediator Mediator
-@inject DialogOptions DialogOptions
+@inject IDialogService DialogService
 <PageTitle>Ventas por Orden</PageTitle>
 <MudText Typo="Typo.h4">Ventas por Orden</MudText>
 
@@ -30,18 +30,12 @@
     </PagerContent>
 </MudDataGrid>
 
-<CascadingValue Value="true" Name="IsNested">
-    <PdfViewerDialog File="downloadedTicket" @bind-IsOpen="openViewer" DialogOptions="DialogOptions" />
-</CascadingValue>
-
 @code {
     private SearchVentaModel search = new();
     private MudDataGrid<VentaOrdenInfo> dataGrid = default!;
-    private TicketOrdenInfo? selectedTicket;
     private ClaimsPrincipal? user;
     private bool loading;
     private DownloadedTicketModel? downloadedTicket;
-    private bool openViewer;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -81,8 +75,21 @@
     private void SetDownloadedTicket(DownloadedTicket ticket)
     {
         byte[] buffer = Convert.FromBase64String(ticket.Base64);
-        downloadedTicket = new(ticket.TicketId, new MemoryStream(buffer), "application/pdf");
-        openViewer = true;
+        DialogService.ShowFileDisplayDialog(
+            stream: new MemoryStream(buffer),
+            fileName: $"{ticket.TicketId}.pdf",
+            contentType: "application/pdf",
+            handleContentErrorFunc: HandleContentError,
+            parameters: new DialogParameters
+                    {
+                    { "AllowCopyUrl", false },
+                    { "Dense", true }
+                    });
+    }
+
+    private Task<MudExFileDisplayContentErrorResult> HandleContentError(IMudExFileDisplayInfos arg)
+    {
+        return Task.FromResult(MudExFileDisplayContentErrorResult.Unhandled);
     }
 
     private void AddFailure(Failure failure, string action) =>

@@ -1,11 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <None Remove="Reportes\Generate\Internals\Excel\ExcelTheme.xml" />
+    <None Remove="Reportes\Generate\Internals\Pdf\Fonts\calibri.ttf" />
+    <None Remove="Reportes\Generate\Internals\Pdf\Fonts\calibrib.ttf" />
+    <None Remove="Reportes\Generate\Internals\Pdf\Fonts\calibrii.ttf" />
+    <None Remove="Reportes\Generate\Internals\Pdf\Fonts\calibril.ttf" />
+    <None Remove="Reportes\Generate\Internals\Pdf\Fonts\calibrili.ttf" />
+    <None Remove="Reportes\Generate\Internals\Pdf\Fonts\calibriz.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Reportes\Generate\Internals\Excel\ExcelTheme.xml" />
+    <EmbeddedResource Include="Reportes\Generate\Internals\Pdf\Fonts\calibri.ttf" />
+    <EmbeddedResource Include="Reportes\Generate\Internals\Pdf\Fonts\calibrib.ttf" />
+    <EmbeddedResource Include="Reportes\Generate\Internals\Pdf\Fonts\calibrii.ttf" />
+    <EmbeddedResource Include="Reportes\Generate\Internals\Pdf\Fonts\calibril.ttf" />
+    <EmbeddedResource Include="Reportes\Generate\Internals\Pdf\Fonts\calibrili.ttf" />
+    <EmbeddedResource Include="Reportes\Generate\Internals\Pdf\Fonts\calibriz.ttf" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\Application\OzyParkAdmin.Application\OzyParkAdmin.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" />
     <PackageReference Include="Dapper" />
+    <PackageReference Include="DocumentFormat.OpenXml" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="itext7" />
     <PackageReference Include="itext7.bouncy-castle-adapter" />
@@ -15,6 +34,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="RazorEngineCore" />
     <PackageReference Include="SixLabors.ImageSharp" />
+    <PackageReference Include="System.IO.Packaging" />
     <PackageReference Include="System.Text.Json" />
     <PackageReference Include="ZXing.Net" />
     <PackageReference Include="ZXing.Net.Bindings.ImageSharp.V2" />

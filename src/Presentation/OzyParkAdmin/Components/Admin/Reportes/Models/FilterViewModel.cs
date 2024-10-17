@@ -149,9 +149,9 @@ public sealed class FilterViewModel
         filter is null ? null : Filters.Find(x => x.Id == filter.Id);
 
     /// <summary>
-    /// <summary>
     /// Consigue los valores de los filtros padres.
     /// </summary>
+    /// <param name="filterModel">El filtro.</param>
     /// <returns>Los valores de los filtros padres.</returns>
     public string?[] GetParentValuesForFilter(IFilterModel filterModel)
     {

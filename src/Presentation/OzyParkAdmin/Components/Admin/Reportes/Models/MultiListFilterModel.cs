@@ -46,7 +46,7 @@ public sealed class MultiListFilterModel(FilterViewModel parent, ListFilter filt
     /// <inheritdoc/>
     public override object? GetValue()
     {
-        return SelectedItems.Select(x => x.Valor);
+        return SelectedItems;
     }
 
     /// <inheritdoc/>

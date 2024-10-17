@@ -35,6 +35,21 @@ public class LayoutService
     public bool IsDarkMode { get; private set; }
 
     /// <summary>
+    /// Si el modo actual es obscuro.
+    /// </summary>
+    public bool CurrentModeIsDark => CurrentDarkLigntMode == DarkLightMode.Dark;
+
+    /// <summary>
+    /// Si el modo actual es claro.
+    /// </summary>
+    public bool CurrentModeIsLight => CurrentDarkLigntMode == DarkLightMode.Light;
+
+    /// <summary>
+    /// Si el modo actual es automático.
+    /// </summary>
+    public bool CurrentModeIsSystem => CurrentDarkLigntMode == DarkLightMode.System;
+
+    /// <summary>
     /// Establece el modo oscuro.
     /// </summary>
     /// <param name="value">El valor que indica si se establece el modo oscuro.</param>
@@ -94,12 +109,42 @@ public class LayoutService
         MajorUpdateOccurred?.Invoke(this, EventArgs.Empty);
 
     /// <summary>
+    /// Cambia el modo del tema.
+    /// </summary>
+    /// <param name="mode">El modo al cual cambiar.</param>
+    /// <returns>Una tarea asyncrona.</returns>
+    public async Task ChangeDarkLightModel(DarkLightMode mode)
+    {
+        CurrentDarkLigntMode = mode;
+        switch (mode)
+        {
+            case DarkLightMode.Light:
+                IsDarkMode = false;
+                break;
+            case DarkLightMode.Dark:
+                IsDarkMode = true;
+                break;
+            case DarkLightMode.System:
+                IsDarkMode = _systemPreferences;
+                break;
+        }
+
+        if (_userPreferences is not null)
+        {
+            _userPreferences.DarkLightMode = CurrentDarkLigntMode;
+            await _userPreferencesService.SaveUserPreferences(_userPreferences);
+        }
+
+        OnMajorUpdateOccurred();
+    }
+
+    /// <summary>
     /// Cambia el modo del tema en un ciclo.
     /// <para>De System a Light</para>
     /// <para>De Light a Dark</para>
     /// <para>De Dark a System.</para>
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Una tarea asyncrona.</returns>
     public async Task CycleDarkLightModeAsync()
     {
         switch (CurrentDarkLigntMode)

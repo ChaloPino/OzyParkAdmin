@@ -1,5 +1,7 @@
-﻿using OzyParkAdmin.Domain.Reportes.Filters;
+﻿using OzyParkAdmin.Domain.Reportes.Charts;
+using OzyParkAdmin.Domain.Reportes.Filters;
 using OzyParkAdmin.Domain.Shared;
+using System.Security.Claims;
 
 namespace OzyParkAdmin.Domain.Reportes;
 
@@ -8,6 +10,14 @@ namespace OzyParkAdmin.Domain.Reportes;
 /// </summary>
 public interface IReportRepository
 {
+    /// <summary>
+    /// Busca el único reporte de tipo dashboard que esté publicado.
+    /// </summary>
+    /// <param name="user">El usuario que realiza la consulta.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El resultado de buscar el reporte.</returns>
+    Task<ResultOf<ChartReport>> FindDashboardAsync(ClaimsPrincipal user, CancellationToken cancellationToken);
+
     /// <summary>
     /// Busca un reporte por su aka.
     /// </summary>

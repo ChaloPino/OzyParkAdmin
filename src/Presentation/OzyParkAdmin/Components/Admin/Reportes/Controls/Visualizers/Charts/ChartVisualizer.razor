@@ -8,10 +8,10 @@
     <Then>
         <IfThenElse Condition="ChartMetaInfo!.Type is null || ChartMetaInfo!.Type != Domain.Reportes.Charts.ChartType.Table">
             <Then>
-                <Chart Id="@ChartMetaInfo!.Name" Type="@ChartMetaInfo!.Type?.ToDescription()" Width="@ChartMetaInfo!.Width" Height="@ChartMetaInfo!.Heigth" @ref="chart" />
+                <Chart Id="@ChartMetaInfo!.Name" Type="@ChartMetaInfo!.Type?.ToDescription()" @ref="chart" Height="@Height" Width="@Width" />
             </Then>
             <Else>
-                <ChartTableVisualizer Columns="Columns" Data="Data" />
+                <ChartTableVisualizer Columns="Columns" Data="Data" Height="@Height" />
             </Else>
         </IfThenElse>
     </Then>
@@ -24,9 +24,15 @@
     [Parameter]
     public ChartMetaInfo? ChartMetaInfo { get; set; }
 
-    public IEnumerable<ColumnInfo> Columns => ((ChartTableInfo)ChartMetaInfo!.Data["table"]!).Colummns;
+    [Parameter]
+    public string? Height { get; set; }
 
-    public IEnumerable<DataInfo> Data => ((ChartTableInfo)ChartMetaInfo!.Data["table"]!).Data;
+    [Parameter]
+    public string? Width { get; set; }
+
+    private IEnumerable<ColumnInfo> Columns => ((ChartTableInfo)ChartMetaInfo!.Data["table"]!).Colummns;
+
+    private IEnumerable<DataInfo> Data => ((ChartTableInfo)ChartMetaInfo!.Data["table"]!).Data;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

@@ -49,6 +49,7 @@
             </CellTemplate>
             <EditTemplate>
                 <MudSelect @bind-SelectedValues="context.Item.Roles" MultiSelection="true"
+                           SelectAll="true" SelectAllText="Seleccionar todos"
                            Label="Roles" Required="false" ToStringFunc="(x) => x.Nombre" Class="mt-4">
                     <ForIn Items="roles" Context="rol">
                         <MudSelectItem T="UsuarioRolModel" Value="rol"></MudSelectItem>
@@ -62,6 +63,7 @@
             </CellTemplate>
             <EditTemplate>
                 <MudSelect @bind-SelectedValues="context.Item.CentrosCosto" MultiSelection="true"
+                           SelectAll="true" SelectAllText="Seleccionar todos"
                            Label="Centros de costo" Required="false" ToStringFunc="(x) => x.Nombre" Class="mt-4">
                     <ForIn Items="centrosCosto" Context="centroCosto">
                         <MudSelectItem T="CentroCostoModel" Value="centroCosto"></MudSelectItem>

@@ -46,6 +46,18 @@ public sealed class CupoFechaRepository(OzyParkAdminContext context) : Repositor
     }
 
     /// <inheritdoc/>
+    public async Task<IEnumerable<CupoFecha>> FindByUniqueKeyAsync(DateOnly fecha, EscenarioCupoInfo escenarioCupo, CanalVenta canalVenta, DiaSemana diaSemana, CancellationToken cancellationToken)
+    {
+        return await EntitySet.AsSingleQuery().Where(x =>
+            x.Fecha == fecha &&
+            x.EscenarioCupo.Id == escenarioCupo.Id &&
+            x.CanalVenta.Id == canalVenta.Id &&
+            x.DiaSemana.Id == diaSemana.Id)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<IEnumerable<CupoFecha>> FindByUniqueKeysAsync((DateOnly Fecha, EscenarioCupo EscenarioCupo, CanalVenta CanalVenta, DiaSemana DiaSemana, TimeSpan HoraInicio)[] uniqueKey, CancellationToken cancellationToken)
     {
         DateOnly[] fechas = uniqueKey.Select(x => x.Fecha).ToArray();
@@ -54,7 +66,7 @@ public sealed class CupoFechaRepository(OzyParkAdminContext context) : Repositor
         int[] diasSemanaId = uniqueKey.Select(x => x.DiaSemana.Id).ToArray();
         TimeSpan[] horasInicio = uniqueKey.Select(x => x.HoraInicio).ToArray();
 
-        return await EntitySet.AsNoTracking().AsSingleQuery().Where(x =>
+        return await EntitySet.AsSingleQuery().Where(x =>
             fechas.Contains(x.Fecha) &&
             escenariosCuposId.Contains(x.EscenarioCupo.Id) &&
             canalesVentaId.Contains(x.CanalVenta.Id) &&

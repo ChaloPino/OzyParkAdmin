@@ -103,6 +103,16 @@ internal static class CupoFechaMappers
             model.SobreCupo,
             model.TopeEnCupo);
 
+    public static UpdateCuposFecha ToUpdate(this CuposFechaEditModel model) =>
+        new(
+            model.Fecha,
+            model.EscenarioCupo,
+            model.CanalVenta,
+            model.DiaSemana,
+            model.Total,
+            model.SobreCupo,
+            model.TopeEnCupo);
+
     public static UpdateCupoFecha ToUpdate(this CupoFechaViewModel model) =>
         new(
             model.Id,

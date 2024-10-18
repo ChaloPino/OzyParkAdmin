@@ -41,6 +41,22 @@ public interface ICupoFechaRepository
     Task<CupoFecha?> FindByUniqueKeyAsync(DateOnly fecha, EscenarioCupo escenarioCupo, CanalVenta canalVenta, DiaSemana diaSemana, TimeSpan horaInicio, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Busca varios cupos por fecha dado parte de la clave única.
+    /// </summary>
+    /// <param name="fecha">La fecha del cupo por fecha..</param>
+    /// <param name="escenarioCupo">El escenario cupo.</param>
+    /// <param name="canalVenta">El canal de venta del cupo por fecha.</param>
+    /// <param name="diaSemana">El día de semana del cupo por fecha.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>Los cupos por fecha si es que existe.</returns>
+    Task<IEnumerable<CupoFecha>> FindByUniqueKeyAsync(
+        DateOnly fecha,
+        EscenarioCupoInfo escenarioCupo,
+        CanalVenta canalVenta,
+        DiaSemana diaSemana,
+        CancellationToken cancellationToken);
+
+    /// <summary>
     /// Busca varios cupos por fecha dado sus claves únicas.
     /// </summary>
     /// <param name="uniqueKey">Las clave únicas a  buscar</param>

@@ -1,33 +1,34 @@
 ﻿@using OzyParkAdmin.Domain.CanalesVenta
 @using OzyParkAdmin.Domain.Entidades
 @using OzyParkAdmin.Domain.EscenariosCupo
+@using System.Diagnostics.CodeAnalysis
 @inject CupoFechaViewModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
-        <IfThen Condition="Cupo.Loading">
+        <IfThen Condition="CupoFecha.Loading">
             <Then>
                 <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
             </Then>
         </IfThen>
-        <MudForm @ref="form" Model="Cupo" Validation="Validator.ValidateValue" ValidationDelay="0">
+        <MudForm @ref="form" Model="CupoFecha" Validation="Validator.ValidateValue" ValidationDelay="0">
             <MudGrid Spacing="3" Class="mt-4">
                 <MudItem xs="4">
-                    <MudDatePicker @bind-Date="Cupo.FechaDate"
-                                   Label="Fecha efectiva"
-                                   Variant="Variant.Outlined"
-                                   Margin="Margin.Dense"
-                                   For="() => Cupo.FechaDate"
-                                   Editable="true"
-                                   ImmediateText="true" />
+                    <MudDatePicker @bind-Date="CupoFecha.FechaDate"
+                    Label="Fecha efectiva"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    For="() => CupoFecha.FechaDate"
+                    Editable="true"
+                    ImmediateText="true" />
                 </MudItem>
                 <MudItem xs="8">
-                    <MudSelect @bind-Value="Cupo.EscenarioCupo"
-                               Label="Escenario"
-                               Variant="Variant.Outlined"
-                               Margin="Margin.Dense"
-                               Dense="true"
-                               ToStringFunc="x => x?.Nombre"
-                               For="() => Cupo.EscenarioCupo">
+                    <MudSelect @bind-Value="CupoFecha.EscenarioCupo"
+                    Label="Escenario"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    Dense="true"
+                    ToStringFunc="x => x?.Nombre"
+                    For="() => CupoFecha.EscenarioCupo">
                         <ForIn Items="EscenariosCupo" Context="escenario">
                             <MudSelectItem T="EscenarioCupoInfo" Value="escenario" />
                         </ForIn>
@@ -36,55 +37,55 @@
             </MudGrid>
             <MudGrid Spacing="3" Class="mt-4">
                 <MudItem xs="3">
-                    <MudNumericField @bind-Value="Cupo.Total"
-                                     Label="Cupo"
-                                     Min="0" Max="int.MaxValue"
-                                     Variant="Variant.Outlined"
-                                     Margin="Margin.Dense"
-                                     For="() => Cupo.Total"
-                                     Immediate="true" />
+                    <MudNumericField @bind-Value="CupoFecha.Total"
+                    Label="Cupo"
+                    Min="0" Max="int.MaxValue"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    For="() => CupoFecha.Total"
+                    Immediate="true" />
                 </MudItem>
                 <MudItem xs="3">
-                    <MudNumericField @bind-Value="Cupo.SobreCupo"
-                                     Label="SobreCupo"
-                                     Min="0" Max="int.MaxValue"
-                                     Variant="Variant.Outlined"
-                                     Margin="Margin.Dense"
-                                     For="() => Cupo.SobreCupo"
-                                     Immediate="true" />
+                    <MudNumericField @bind-Value="CupoFecha.SobreCupo"
+                    Label="SobreCupo"
+                    Min="0" Max="int.MaxValue"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    For="() => CupoFecha.SobreCupo"
+                    Immediate="true" />
                 </MudItem>
                 <MudItem xs="3">
-                    <MudNumericField @bind-Value="Cupo.TopeEnCupo"
-                                     Label="Tope en cupo"
-                                     Min="0" Max="int.MaxValue"
-                                     Variant="Variant.Outlined"
-                                     Margin="Margin.Dense"
-                                     For="() => Cupo.TopeEnCupo"
-                                     Immediate="true" />
+                    <MudNumericField @bind-Value="CupoFecha.TopeEnCupo"
+                    Label="Tope en cupo"
+                    Min="0" Max="int.MaxValue"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    For="() => CupoFecha.TopeEnCupo"
+                    Immediate="true" />
                 </MudItem>
             </MudGrid>
             <MudGrid Spacing="3" Class="mt-4">
                 <MudItem xs="6">
-                    <MudSelect @bind-Values="Cupo.CanalVenta"
-                               Label="Canal de venta"
-                               Variant="Variant.Outlined"
-                               Margin="Margin.Dense"
-                               Dense="true"
-                               ToStringFunc="x => x?.Nombre"
-                               For="() => Cupo.CanalVenta">
+                    <MudSelect @bind-Value="CupoFecha.CanalVenta"
+                    Label="Canal de venta"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    Dense="true"
+                    ToStringFunc="x => x?.Nombre"
+                    For="() => CupoFecha.CanalVenta">
                         <ForIn Items="CanalesVenta" Context="canalVenta">
                             <MudSelectItem T="CanalVenta" Value="canalVenta" />
                         </ForIn>
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="6">
-                    <MudSelect @bind-Value="Cupo.DiaSemana"
-                               Label="Dia de semana"
-                               Variant="Variant.Outlined"
-                               Margin="Margin.Dense"
-                               Dense="true"
-                               ToStringFunc="x => x?.Aka"
-                               For="() => Cupo.DiaSemana">
+                    <MudSelect @bind-Value="CupoFecha.DiaSemana"
+                    Label="Dia de semana"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    Dense="true"
+                    ToStringFunc="x => x?.Aka"
+                    For="() => CupoFecha.DiaSemana">
                         <ForIn Items="DiasSemana" Context="diaSemana">
                             <MudSelectItem T="DiaSemana" Value="diaSemana" />
                         </ForIn>
@@ -93,29 +94,29 @@
             </MudGrid>
             <MudGrid Spacing="3" Class="mt-4">
                 <MudItem xs="4">
-                    <MudTimePicker @bind-Time="Cupo.HoraInicioTime"
-                                   Label="Hora de inicio"
-                                   Variant="Variant.Outlined"
-                                   Margin="Margin.Dense"
-                                   Editable="true"
-                                   ImmediateText="true"
-                                   For="() => Cupo.HoraInicioTime" />
+                    <MudTimePicker @bind-Time="CupoFecha.HoraInicioTime"
+                    Label="Hora de inicio"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    Editable="true"
+                    ImmediateText="true"
+                    For="() => CupoFecha.HoraInicioTime" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTimePicker @bind-Time="Cupo.HoraFinTime"
-                                   Label="Hora de fin"
-                                   Variant="Variant.Outlined"
-                                   Margin="Margin.Dense"
-                                   Editable="true"
-                                   ImmediateText="true"
-                                   For="() => Cupo.HoraFinTime" />
+                    <MudTimePicker @bind-Time="CupoFecha.HoraFinTime"
+                    Label="Hora de fin"
+                    Variant="Variant.Outlined"
+                    Margin="Margin.Dense"
+                    Editable="true"
+                    ImmediateText="true"
+                    For="() => CupoFecha.HoraFinTime" />
                 </MudItem>
             </MudGrid>
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Disabled="Cupo.Loading" Class="px-10">Cancelar</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="Cupo.Loading" Class="px-10">Guardar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Disabled="CupoFecha.Loading" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="CupoFecha.Loading" Class="px-10">Guardar</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -129,7 +130,7 @@
     public EventCallback<bool> IsOpenChanged { get; set; }
 
     [Parameter]
-    public CupoFechaViewModel Cupo { get; set; } = new();
+    public CupoFechaViewModel CupoFecha { get; set; } = new();
 
     [Parameter]
     public Func<CupoFechaViewModel, Task<bool>>? CommitChanges { get; set; }
@@ -149,27 +150,27 @@
     private async Task ChangeIsOpen(bool isOpen)
     {
         IsOpen = isOpen;
-        Cupo = new();
+        CupoFecha = new();
         await IsOpenChanged.InvokeAsync(isOpen);
     }
 
     private async Task CommitItemChangesAsync()
     {
-        if (Cupo is not null && CommitChanges is not null)
+        if (CupoFecha is not null && CommitChanges is not null)
         {
             await form.Validate();
 
             if (form.IsValid)
             {
-                Cupo.Loading = true;
-                bool result = await CommitChanges(Cupo);
+                CupoFecha.Loading = true;
+                bool result = await CommitChanges(CupoFecha);
 
                 if (result)
                 {
                     await ChangeIsOpen(false);
                 }
 
-                Cupo.Loading = false;
+                CupoFecha.Loading = false;
             }
         }
     }

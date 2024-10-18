@@ -274,4 +274,15 @@ public interface IOzyParkAdminContext
     Task BulkDeleteAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
         where TEntity : class;
 
+    /// <summary>
+    /// Bulk update data.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity type to bulk update.</typeparam>
+    /// <param name="entities">The list of entities to bulk update.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
+    /// <returns>
+    /// A task that represents the asynchronous save operation.
+    /// </returns>
+    Task BulkUpdateAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken)
+        where TEntity : class;
 }

@@ -139,6 +139,43 @@ public sealed class CupoFechaManager : IBusinessLogic
             cancellationToken);
     }
 
+    /// <summary>
+    /// Actualiza varios cupos por fecha.
+    /// </summary>
+    /// <param name="fecha">La fecha de todos los cupos por fecha a actualizar.</param>
+    /// <param name="escenarioCupo">El escenario de cupo de todos los cupos por fecha.</param>
+    /// <param name="canalVenta">El canal de venta de todos los cupos por fecha.</param>
+    /// <param name="diaSemana">El día de semana de todos los cupos por fecha.</param>
+    /// <param name="total">El total del cupo por fecha a actualizar.</param>
+    /// <param name="sobrecupo">El sobrecupo a actualizar.</param>
+    /// <param name="topeEnTramo">El tope en el cupo por fecha a actualizar.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El resultado de actualizar varios cupos por fecha.</returns>
+    public async Task<ResultOf<IEnumerable<CupoFecha>>> UpdateCuposFechaAsync(
+        DateOnly fecha,
+        EscenarioCupoInfo escenarioCupo,
+        CanalVenta canalVenta,
+        DiaSemana diaSemana,
+        int total,
+        int sobrecupo,
+        int topeEnTramo,
+        CancellationToken cancellationToken)
+    {
+        IEnumerable<CupoFecha> cuposFecha = await _repository.FindByUniqueKeyAsync(fecha, escenarioCupo, canalVenta, diaSemana, cancellationToken);
+
+        foreach (CupoFecha cupoFecha in cuposFecha)
+        {
+            var result = cupoFecha.UpdateCupos(total, sobrecupo, topeEnTramo);
+
+            if (result.IsFailure(out Failure failure))
+            {
+                return failure;
+            }
+        }
+
+        return cuposFecha.ToList();
+    }
+
     private async Task<ResultOf<IEnumerable<CupoFecha>>> CreateManyAsync(
         int seedId,
         DateOnly fechaDesde,

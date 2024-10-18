@@ -131,4 +131,13 @@ public sealed class CupoFecha
 
         return this;
     }
+
+    internal ResultOf<CupoFecha> UpdateCupos(int total, int sobrecupo, int topeEnTramo)
+    {
+        Total = total;
+        SobreCupo = sobrecupo;
+        TopeEnCupo = topeEnTramo;
+
+        return this;
+    }
 }

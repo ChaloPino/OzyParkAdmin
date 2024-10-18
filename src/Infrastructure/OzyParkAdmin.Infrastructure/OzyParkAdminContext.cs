@@ -20,10 +20,18 @@ public sealed class OzyParkAdminContext(DbContextOptions<OzyParkAdminContext> op
         await this.BulkInsertAsync(entities, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     async Task IOzyParkAdminContext.BulkDeleteAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken)
         where TEntity : class
     {
         await this.BulkDeleteAsync(entities, cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    async Task IOzyParkAdminContext.BulkUpdateAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken)
+        where TEntity : class
+    {
+        await this.BulkUpdateAsync(entities, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

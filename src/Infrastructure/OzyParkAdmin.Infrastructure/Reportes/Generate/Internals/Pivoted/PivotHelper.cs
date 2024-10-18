@@ -125,14 +125,6 @@ internal static class PivotHelper
 
         NewExpression newOrderResultExpression = Expression.New(ctor, valueExpression, orderValueExpression);
 
-        //MemberBinding[] bindings =
-        //[
-        //    Expression.Bind(orderResultType.GetProperty(nameof(OrderResult<object, object>.Value))!, valueExpression),
-        //    Expression.Bind(orderResultType.GetProperty(nameof(OrderResult<object, object>.OrderedValue))!, orderValueExpression)
-        //];
-
-        //MemberInitExpression orderResultExpression = Expression.MemberInit(newOrderResultExpression, bindings);
-
         LambdaExpression orderResultLambda = Expression.Lambda(newOrderResultExpression, dataRowExpression);
 
         ParameterExpression rowsExpression = Expression.Parameter(typeof(EnumerableRowCollection<DataRow>), "rows");

@@ -5,6 +5,7 @@
 @inject CuposFechaEditModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
+        <MudText Typo="Typo.h4" GutterBottom="true">Editar cupos por fecha</MudText>
         <IfThen Condition="CupoFecha.Loading">
             <Then>
                 <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />

@@ -25,15 +25,15 @@
 <MudText Typo="Typo.h4">Cupos por fecha</MudText>
 
 <MudDataGrid @ref="dataGrid" T="CupoFechaViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
-    ServerData="LoadCuposAsync" SortMode="SortMode.Multiple"
-    Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
-    Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+             ServerData="LoadCuposAsync" SortMode="SortMode.Multiple"
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
         <MudSpacer />
         <SearchControl @bind-SearchText="searchText" />
         <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCupoFechaAsync">Nuevos cupos por fecha</MudButton>
-        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.EditCalendar" Variant="Variant.Filled" Class="ml-3" OnClick="DeleteCuposFechaAsync">Cambiar cupos por fecha</MudButton>
-        <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Filled" Class="ml-3" OnClick="EditCuposFechaAsync">Eliminar cupos por fecha</MudButton>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.EditCalendar" Variant="Variant.Filled" Class="ml-3" OnClick="EditCuposFechaAsync">Cambiar cupos por fecha</MudButton>
+        <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Filled" Class="ml-3" OnClick="DeleteCuposFechaAsync">Eliminar cupos por fecha</MudButton>
         <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.CalendarMonth" Variant="Variant.Filled" Class="ml-3" OnClick="ShowCalendarioAsync">Calendario</MudButton>
     </ToolBarContent>
     <Columns>
@@ -117,38 +117,34 @@
 </MudDataGrid>
 
 <CascadingValue Value="true" Name="IsNested">
-    <CreateCuposFechaDialog 
-    @bind-IsOpen="openCreating" 
-    EscenariosCupo="escenariosCupo" 
-    DiasSemana="diasSemana" 
-    CanalesVenta="canalesVenta"
-    CommitChanges="SaveCuposFechaAsync" 
-    DialogOptions="DialogOptions" />
+    <CreateCuposFechaDialog @bind-IsOpen="openCreating"
+                            EscenariosCupo="escenariosCupo"
+                            DiasSemana="diasSemana"
+                            CanalesVenta="canalesVenta"
+                            CommitChanges="SaveCuposFechaAsync"
+                            DialogOptions="DialogOptions" />
 
-    <EditCuposFechaDialog 
-    @bind-IsOpen="openBatchEditing"
-    EscenariosCupo="escenariosCupo"
-    DiasSemana="diasSemana"
-    CanalesVenta="canalesVenta"
-    CommitChanges="SaveEditCuposFechaAsync"
-    DialogOptions="DialogOptions" />
+    <EditCuposFechaDialog @bind-IsOpen="openBatchEditing"
+                          EscenariosCupo="escenariosCupo"
+                          DiasSemana="diasSemana"
+                          CanalesVenta="canalesVenta"
+                          CommitChanges="SaveEditCuposFechaAsync"
+                          DialogOptions="DialogOptions" />
 
-    <DeleteCuposFechaDialog 
-    @bind-IsOpen="openDeleting"
-    EscenariosCupo="escenariosCupo"
-    DiasSemana="diasSemana"
-    CanalesVenta="canalesVenta"
-    CommitChanges="DeleteCuposFechaAsync"
-    DialogOptions="DialogOptions" />
+    <DeleteCuposFechaDialog @bind-IsOpen="openDeleting"
+                            EscenariosCupo="escenariosCupo"
+                            DiasSemana="diasSemana"
+                            CanalesVenta="canalesVenta"
+                            CommitChanges="DeleteCuposFechaAsync"
+                            DialogOptions="DialogOptions" />
 
-    <CupoFechaEditorDialog 
-    @bind-IsOpen="openEditing"
-    EscenariosCupo="escenariosCupo"
-    DiasSemana="diasSemana"
-    CanalesVenta="canalesVenta"
-    CupoFecha="currentCupoFecha"
-    CommitChanges="SaveCupoFechaAsync"
-    DialogOptions="DialogOptions" />
+    <CupoFechaEditorDialog @bind-IsOpen="openEditing"
+                           EscenariosCupo="escenariosCupo"
+                           DiasSemana="diasSemana"
+                           CanalesVenta="canalesVenta"
+                           CupoFecha="currentCupoFecha"
+                           CommitChanges="SaveCupoFechaAsync"
+                           DialogOptions="DialogOptions" />
 
     <CalendarDialog @ref="calendario" @bind-IsOpen="openCalendario" DialogOptions="DialogOptions" />
 </CascadingValue>

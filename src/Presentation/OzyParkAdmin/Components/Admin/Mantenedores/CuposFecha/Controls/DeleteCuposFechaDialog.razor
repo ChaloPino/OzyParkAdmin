@@ -5,6 +5,7 @@
 
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
+        <MudText Typo="Typo.h4" GutterBottom="true">Eliminar cupos por fecha</MudText>
         <IfThen Condition="cuposFecha.Loading">
             <Then>
                 <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
@@ -74,21 +75,22 @@
             </MudGrid>
             <MudGrid Spacing="3" Class="mt-4">
                 <MudItem xs="4">
-                    <MudTimePicker @bind-Time="cuposFecha.HoraInicio"
+                    <MudTextField @bind-Value="cuposFecha.HoraInicio"
                                    Label="Hora de inicio"
                                    Variant="Variant.Outlined"
                                    Margin="Margin.Dense"
-                                   Editable="true"
-                                   ImmediateText="true"
+                                   Immediate="true"
+                                   InputType="InputType.Time"
                                    For="() => cuposFecha.HoraInicio" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTimePicker @bind-Time="cuposFecha.HoraTermino"
+                    <MudTextField @bind-Value="cuposFecha.HoraTermino"
                                    Label="Hora de término"
                                    Variant="Variant.Outlined"
                                    Margin="Margin.Dense"
-                                   Editable="true"
-                                   ImmediateText="true"
+                                   Immediate="true"
+                                   InputType="InputType.Time"
+                                   step="1"
                                    For="() => cuposFecha.HoraTermino" />
                 </MudItem>
                 <MudItem xs="3">

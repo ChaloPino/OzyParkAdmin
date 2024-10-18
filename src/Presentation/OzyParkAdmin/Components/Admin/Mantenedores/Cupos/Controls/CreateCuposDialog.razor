@@ -101,21 +101,22 @@
             </MudGrid>
             <MudGrid Spacing="3" Class="mt-4">
                 <MudItem xs="4">
-                    <MudTimePicker @bind-Time="cupos.HoraInicio"
+                    <MudTextField @bind-Value="cupos.HoraInicio"
                                    Label="Hora de inicio"
                                    Variant="Variant.Outlined"
                                    Margin="Margin.Dense"
-                                   Editable="true"
-                                   ImmediateText="true"
+                                   InputType="InputType.Time"
+                                   Immediate="true"
                                    For="() => cupos.HoraInicio" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTimePicker @bind-Time="cupos.HoraTermino"
+                    <MudTextField @bind-Value="cupos.HoraTermino"
                                    Label="Hora de término"
                                    Variant="Variant.Outlined"
                                    Margin="Margin.Dense"
-                                   Editable="true"
-                                   ImmediateText="true"
+                                   Immediate="true"
+                                   InputType="InputType.Time"
+                                   step="1"
                                    For="() => cupos.HoraTermino" />
                 </MudItem>
                 <MudItem xs="3">

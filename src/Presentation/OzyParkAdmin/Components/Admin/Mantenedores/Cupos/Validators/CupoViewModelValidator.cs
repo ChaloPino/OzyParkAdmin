@@ -35,12 +35,12 @@ public class CupoViewModelValidator : BaseValidator<CupoViewModel>
         RuleFor(x => x.DiaSemana)
             .NotNull();
 
-        RuleFor(x => x.HoraInicioTime)
+        RuleFor(x => x.HoraInicio)
             .NotNull()
-            .LessThanOrEqualTo(x => x.HoraFinTime);
+            .LessThanOrEqualTo(x => x.HoraFin);
 
-        RuleFor(x => x.HoraFinTime)
+        RuleFor(x => x.HoraFin)
             .NotNull()
-            .GreaterThanOrEqualTo(x => x.HoraInicioTime);
+            .GreaterThanOrEqualTo(x => x.HoraInicio);
     }
 }

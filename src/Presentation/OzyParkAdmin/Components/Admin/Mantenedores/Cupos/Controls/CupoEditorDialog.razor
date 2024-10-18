@@ -93,22 +93,23 @@
             </MudGrid>
             <MudGrid Spacing="3" Class="mt-4">
                 <MudItem xs="4">
-                    <MudTimePicker @bind-Time="Cupo.HoraInicioTime"
+                    <MudTextField @bind-Value="Cupo.HoraInicio"
                                    Label="Hora de inicio"
                                    Variant="Variant.Outlined"
                                    Margin="Margin.Dense"
-                                   Editable="true"
-                                   ImmediateText="true"
-                                   For="() => Cupo.HoraInicioTime" />
+                                   InputType="InputType.Time"
+                                   Immediate="true"
+                                   For="() => Cupo.HoraInicio" />
                 </MudItem>
                 <MudItem xs="4">
-                    <MudTimePicker @bind-Time="Cupo.HoraFinTime"
+                    <MudTextField @bind-Value="Cupo.HoraFin"
                                    Label="Hora de fin"
                                    Variant="Variant.Outlined"
                                    Margin="Margin.Dense"
-                                   Editable="true"
-                                   ImmediateText="true"
-                                   For="() => Cupo.HoraFinTime" />
+                                   InputType="InputType.Time"
+                                   Immediate="true"
+                                   step="1"
+                                   For="() => Cupo.HoraFin" />
                 </MudItem>
             </MudGrid>
         </MudForm>

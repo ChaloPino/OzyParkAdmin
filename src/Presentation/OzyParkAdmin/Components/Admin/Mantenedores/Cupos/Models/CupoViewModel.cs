@@ -77,30 +77,6 @@ public sealed record CupoViewModel
         }
     }
 
-    internal TimeSpan? HoraInicioTime
-    {
-        get => HoraInicio;
-        set
-        {
-            if (value is not null)
-            {
-                HoraInicio = value.Value;
-            }
-        }
-    }
-
-    internal TimeSpan? HoraFinTime
-    {
-        get => HoraFin;
-        set
-        {
-            if (value is not null)
-            {
-                HoraFin = value.Value;
-            }
-        }
-    }
-
     /// <summary>
     /// Si se está cargando el cupo.
     /// </summary>

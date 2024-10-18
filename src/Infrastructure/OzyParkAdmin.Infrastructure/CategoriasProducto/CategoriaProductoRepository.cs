@@ -21,7 +21,7 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
     /// <inheritdoc/>
     public async Task<List<CategoriaProductoInfo>> ListByFranquiciaIdAsync(int franquiciaId, TipoCategoria tipoCategoria, CancellationToken cancellationToken)
     {
-        IQueryable<CategoriaProducto> query = EntitySet.AsNoTracking().AsSplitQuery().Where(x => x.FranquiciaId == franquiciaId);
+        IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery().Where(x => x.FranquiciaId == franquiciaId);
 
         query = tipoCategoria switch
         {

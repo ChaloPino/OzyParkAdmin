@@ -1,4 +1,4 @@
-﻿using OzyParkAdmin.Components.Admin.Shared;
+﻿using OzyParkAdmin.Domain.CentrosCosto;
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
 
@@ -10,7 +10,7 @@ public sealed record CentroCostoServicioModel
     /// <summary>
     /// El centro de costo asociado.
     /// </summary>
-    public CentroCostoModel CentroCosto { get; set; } = default!;
+    public CentroCostoInfo CentroCosto { get; set; } = default!;
 
     /// <summary>
     /// El nombre que reemplaza.

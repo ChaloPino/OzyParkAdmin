@@ -7,7 +7,7 @@ namespace OzyParkAdmin.Application.Franquicias.List;
 /// <summary>
 /// El manejador de <see cref="ListFranquicias"/>.
 /// </summary>
-public sealed class ListFranquiciasHandler : MediatorRequestHandler<ListFranquicias, ResultListOf<Franquicia>>
+public sealed class ListFranquiciasHandler : MediatorRequestHandler<ListFranquicias, ResultListOf<FranquiciaInfo>>
 {
     private readonly IFranquiciaRepository _repository;
 
@@ -22,11 +22,12 @@ public sealed class ListFranquiciasHandler : MediatorRequestHandler<ListFranquic
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<Franquicia>> Handle(ListFranquicias request, CancellationToken cancellationToken)
+    protected override async Task<ResultListOf<FranquiciaInfo>> Handle(ListFranquicias request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
         int[]? franquiciaIds = request.User.GetFranquicias();
-        return await _repository.ListFranquiciasAsync(franquiciaIds, cancellationToken);
+        List<Franquicia> franquicias = await _repository.ListFranquiciasAsync(franquiciaIds, cancellationToken);
+        return franquicias.Select(x => new FranquiciaInfo { Id = x.Id, Nombre = x.Nombre, EsActivo = x.EsActivo }).ToList();
     }
 }

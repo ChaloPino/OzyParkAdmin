@@ -8,4 +8,4 @@ namespace OzyParkAdmin.Application.Franquicias.List;
 /// Lista todas las franquicias activas.
 /// </summary>
 /// <param name="User">El usuario que realiza la consulta para restringir el listado.</param>
-public sealed record ListFranquicias(ClaimsPrincipal User) : Request<ResultListOf<Franquicia>>;
+public sealed record ListFranquicias(ClaimsPrincipal User) : Request<ResultListOf<FranquiciaInfo>>;

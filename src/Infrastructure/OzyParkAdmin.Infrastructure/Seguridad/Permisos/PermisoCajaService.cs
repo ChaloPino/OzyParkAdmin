@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OzyParkAdmin.Application.Identity;
-using OzyParkAdmin.Domain.Shared;
+using OzyParkAdmin.Infrastructure.Shared;
 using System.Security.Claims;
 
 namespace OzyParkAdmin.Infrastructure.Seguridad.Permisos;
@@ -8,7 +8,7 @@ namespace OzyParkAdmin.Infrastructure.Seguridad.Permisos;
 /// <summary>
 /// Servicio que consulta los permisos de la caja dependiendo del rol.
 /// </summary>
-public sealed class PermisoCajaService : IBusinessLogic
+public sealed class PermisoCajaService : IInfrastructure
 {
     private readonly OzyParkAdminContext _context;
 

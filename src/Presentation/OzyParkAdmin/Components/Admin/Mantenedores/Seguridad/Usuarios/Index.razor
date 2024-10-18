@@ -8,7 +8,6 @@
 @using OzyParkAdmin.Application.Seguridad.Usuarios.Search
 @using OzyParkAdmin.Application.Seguridad.Usuarios.Unlock
 @using OzyParkAdmin.Application.Seguridad.Usuarios
-@using OzyParkAdmin.Components.Admin.Shared
 @using OzyParkAdmin.Domain.CentrosCosto
 @using OzyParkAdmin.Domain.Entidades
 @using OzyParkAdmin.Domain.Franquicias
@@ -59,14 +58,14 @@
         </PropertyColumn>
         <PropertyColumn Property="x => x.CentrosCosto" Filterable="false" Title="Centros de costo">
             <CellTemplate>
-                <JoinView Items="context.Item.CentrosCosto" Selector="x => x.Nombre" />
+                <JoinView Items="context.Item.CentrosCosto" Selector="x => x.Descripcion" />
             </CellTemplate>
             <EditTemplate>
                 <MudSelect @bind-SelectedValues="context.Item.CentrosCosto" MultiSelection="true"
                            SelectAll="true" SelectAllText="Seleccionar todos"
-                           Label="Centros de costo" Required="false" ToStringFunc="(x) => x.Nombre" Class="mt-4">
+                           Label="Centros de costo" Required="false" ToStringFunc="(x) => x.Descripcion" Class="mt-4">
                     <ForIn Items="centrosCosto" Context="centroCosto">
-                        <MudSelectItem T="CentroCostoModel" Value="centroCosto"></MudSelectItem>
+                        <MudSelectItem T="CentroCostoInfo" Value="centroCosto"></MudSelectItem>
                     </ForIn>
                 </MudSelect>
             </EditTemplate>
@@ -76,7 +75,7 @@
                 <MudSelect @bind-SelectedValues="context.Item.Franquicias" MultiSelection="true"
                            Label="Franquicias" Required="false" ToStringFunc="(x) => x.Nombre" Class="mt-4">
                     <ForIn Items="franquicias" Context="franquicia">
-                        <MudSelectItem T="FranquiciaModel" Value="franquicia"></MudSelectItem>
+                        <MudSelectItem T="FranquiciaInfo" Value="franquicia"></MudSelectItem>
                     </ForIn>
                 </MudSelect>
             </EditTemplate>
@@ -114,8 +113,8 @@
     private ClaimsPrincipal? user;
     private MudDataGrid<UsuarioViewModel> dataGrid = default!;
     private string? searchText;
-    private List<FranquiciaModel> franquicias = [];
-    private List<CentroCostoModel> centrosCosto = [];
+    private List<FranquiciaInfo> franquicias = [];
+    private List<CentroCostoInfo> centrosCosto = [];
     private List<UsuarioRolModel> roles = [];
     private ObservableGridData<UsuarioViewModel>? currentUsers;
 
@@ -143,13 +142,13 @@
     private async Task LoadCentrosCostoAsync()
     {
         ResultListOf<CentroCostoInfo> result = await Mediator.SendRequest(new ListCentrosCosto(user!));
-        centrosCosto = result.Items.ToModel();
+        centrosCosto = result.Items.ToList();
     }
 
     private async Task LoadFranquiciasAsync()
     {
-        ResultListOf<Franquicia> result = await Mediator.SendRequest(new ListFranquicias(user!));
-        franquicias = result.Items.ToModel();
+        ResultListOf<FranquiciaInfo> result = await Mediator.SendRequest(new ListFranquicias(user!));
+        franquicias = result.Items.ToList();
     }
 
     private async Task<GridData<UsuarioViewModel>> LoadUsuariosAsync(GridState<UsuarioViewModel> state)
@@ -218,7 +217,7 @@
         currentUser.Email = usuario.Email;
         currentUser.IsLockedout = usuario.IsLockedout;
         currentUser.Roles = usuario.Roles.ToModel();
-        currentUser.CentrosCosto = usuario.CentrosCosto.ToModel();
-        currentUser.Franquicias = usuario.Franquicias.ToModel();
+        currentUser.CentrosCosto = usuario.CentrosCosto;
+        currentUser.Franquicias = usuario.Franquicias;
     }
 }

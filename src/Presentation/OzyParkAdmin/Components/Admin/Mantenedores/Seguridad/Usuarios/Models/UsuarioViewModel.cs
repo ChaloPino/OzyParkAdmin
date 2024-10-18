@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Components.Admin.Shared;
+﻿using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.Franquicias;
 using System.Diagnostics.CodeAnalysis;
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.Seguridad.Usuarios.Models;
@@ -61,12 +62,12 @@ public sealed record UsuarioViewModel
     /// <summary>
     /// La lista de centros de costo.
     /// </summary>
-    public IEnumerable<CentroCostoModel> CentrosCosto { get; set; } = [];
+    public IEnumerable<CentroCostoInfo> CentrosCosto { get; set; } = [];
 
     /// <summary>
     /// La lista de franquicias.
     /// </summary>
-    public IEnumerable<FranquiciaModel> Franquicias { get; set; } = [];
+    public IEnumerable<FranquiciaInfo> Franquicias { get; set; } = [];
 
     /// <summary>
     /// Si el usuario está bloqueado.

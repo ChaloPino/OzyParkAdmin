@@ -78,7 +78,7 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
         usuario.ToFullInfo(
             roles.Where(x => ContieneRol(usuario, x)).ToList(),
             centrosCosto.Where(x => ContieneCentroCosto(usuario, x)).ToList(),
-            franquicias.Where(x => ContieneFranquicia(usuario, x)).ToList());
+            franquicias.Where(x => ContieneFranquicia(usuario, x)).ToInfo());
 
     private static bool ContieneRol(Usuario usuario, Rol rol) =>
         usuario.Roles.Any(x => x.RoleId == rol.Id);

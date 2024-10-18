@@ -1,5 +1,5 @@
-﻿@using OzyParkAdmin.Components.Admin.Shared
-@using System.Collections.ObjectModel
+﻿@using System.Collections.ObjectModel
+@using OzyParkAdmin.Domain.CentrosCosto
 @inject ServicioViewModelValidator ServicioValidator
 @inject CentroCostoServicioModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
@@ -17,15 +17,15 @@
                                 <MudSelect @bind-Value="context.Item.CentroCosto" Margin="Margin.Dense"
                                            Variant="Variant.Text" Style="margin-top:0"
                                            For="() => context.Item.CentroCosto"
-                                           ToStringFunc="x => x?.Nombre">
+                                           ToStringFunc="x => x?.Descripcion">
                                     <ForIn Items="CentrosCosto" Context="centroCosto">
-                                        <MudSelectItem T="CentroCostoModel" Value="centroCosto" />
+                                        <MudSelectItem T="CentroCostoInfo" Value="centroCosto" />
                                     </ForIn>
                                 </MudSelect>
                             </MudForm>
                         </EditTemplate>
                         <CellTemplate>
-                            @context.Item.CentroCosto?.Nombre
+                            @context.Item.CentroCosto?.Descripcion
                         </CellTemplate>
                     </PropertyColumn>
                     <PropertyColumn Property="x => x.Nombre" Title="Nombre del servicio">
@@ -71,7 +71,7 @@
     public ServicioViewModel? Servicio { get; set; }
 
     [Parameter]
-    public IEnumerable<CentroCostoModel> CentrosCosto { get; set; } = [];
+    public IEnumerable<CentroCostoInfo> CentrosCosto { get; set; } = [];
 
     [Parameter]
     public Func<ServicioViewModel, Task<bool>>? CommitChanges { get; set; }

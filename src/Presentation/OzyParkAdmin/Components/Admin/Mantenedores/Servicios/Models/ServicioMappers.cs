@@ -5,7 +5,6 @@ using OzyParkAdmin.Application.Servicios.Create;
 using OzyParkAdmin.Application.Servicios.Search;
 using OzyParkAdmin.Application.Servicios.Update;
 using OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
-using OzyParkAdmin.Components.Admin.Shared;
 using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.Servicios;
@@ -97,7 +96,7 @@ internal static class ServicioMappers
             Aka = servicio.Aka,
             Nombre = servicio.Nombre,
             FranquiciaId = servicio.FranquiciaId,
-            CentroCosto = servicio.CentroCosto.ToModel(),
+            CentroCosto = servicio.CentroCosto,
             TipoControl = servicio.TipoControl.ToModel(),
             TipoDistribucion = servicio.TipoDistribucion.ToModel(),
             TipoServicio = servicio.TipoServicio,
@@ -152,7 +151,7 @@ internal static class ServicioMappers
         source.Select(ToModel).ToList();
 
     private static TramoServicioModel ToModel(TramoServicioInfo tramoServicio) =>
-        new() { CentroCosto = tramoServicio.CentroCosto.ToModel(), Tramo = tramoServicio.Tramo.ToModel(), Nombre = tramoServicio.Nombre, CantidadPersmisos = tramoServicio.CantidadPermisos };
+        new() { CentroCosto = tramoServicio.CentroCosto, Tramo = tramoServicio.Tramo.ToModel(), Nombre = tramoServicio.Nombre, CantidadPersmisos = tramoServicio.CantidadPermisos };
 
     public static List<TramoModel> ToModel(this IEnumerable<TramoInfo> source) =>
         source.Select(ToModel).ToList();
@@ -164,7 +163,7 @@ internal static class ServicioMappers
         source.Select(ToModel).ToList();
 
     public static CentroCostoServicioModel ToModel(this CentroCostoServicioInfo centroCostoServicio) =>
-        new() { CentroCosto = centroCostoServicio.CentroCosto.ToModel(), Nombre = centroCostoServicio.Nombre };
+        new() { CentroCosto = centroCostoServicio.CentroCosto, Nombre = centroCostoServicio.Nombre };
 
     public static List<GrupoEtarioModel> ToModel(this IEnumerable<GrupoEtarioInfo> source) =>
         source.Select(ToModel).ToList();
@@ -200,7 +199,7 @@ internal static class ServicioMappers
         source.Select(ToModel).ToList();
 
     private static PermisoServicioModel ToModel(PermisoServicioInfo permisoServicio) =>
-        new() { Tramo = permisoServicio.Tramo.ToModel(), CentroCosto = permisoServicio.CentroCosto.ToModel() };
+        new() { Tramo = permisoServicio.Tramo.ToModel(), CentroCosto = permisoServicio.CentroCosto };
 
     public static List<ServicioModel> ToModel(this IEnumerable<ServicioInfo> source) =>
         source.Select(ToModel).ToList();
@@ -210,7 +209,7 @@ internal static class ServicioMappers
 
     public static CreateServicio ToCreate(this ServicioViewModel servicio) =>
         new(
-            servicio.CentroCosto.ToInfo(),
+            servicio.CentroCosto,
             servicio.FranquiciaId,
             servicio.Aka,
             servicio.Nombre,
@@ -242,7 +241,7 @@ internal static class ServicioMappers
     public static UpdateServicio ToUpdate(this ServicioViewModel servicio) =>
         new(
             servicio.Id,
-            servicio.CentroCosto.ToInfo(),
+            servicio.CentroCosto,
             servicio.FranquiciaId,
             servicio.Aka,
             servicio.Nombre,
@@ -302,13 +301,13 @@ internal static class ServicioMappers
         [.. source.Select(ToInfo)];
 
     private static CentroCostoServicioInfo ToInfo(CentroCostoServicioModel centroCostoServicio) =>
-        new() { CentroCosto = centroCostoServicio.CentroCosto.ToInfo(), Nombre = centroCostoServicio.Nombre };
+        new() { CentroCosto = centroCostoServicio.CentroCosto, Nombre = centroCostoServicio.Nombre };
 
     private static ImmutableArray<TramoServicioInfo> ToInfo(this IEnumerable<TramoServicioModel> source) =>
         [.. source.Select(ToInfo)];
 
     private static TramoServicioInfo ToInfo(TramoServicioModel tramoServicio) =>
-        new() { CentroCosto = tramoServicio.CentroCosto.ToInfo(), Tramo = tramoServicio.Tramo.ToInfo(), Nombre = tramoServicio.Nombre, CantidadPermisos = tramoServicio.CantidadPersmisos };
+        new() { CentroCosto = tramoServicio.CentroCosto, Tramo = tramoServicio.Tramo.ToInfo(), Nombre = tramoServicio.Nombre, CantidadPermisos = tramoServicio.CantidadPersmisos };
 
     private static TramoInfo ToInfo(this TramoModel tramo) =>
         new() { Id = tramo.Id, Aka = tramo.Aka, Descripcion = tramo.Nombre };
@@ -317,7 +316,7 @@ internal static class ServicioMappers
         [.. source.Select(ToInfo)];
 
     private static PermisoServicioInfo ToInfo(PermisoServicioModel permiso) =>
-        new() {  Tramo = permiso.Tramo.ToInfo(), CentroCosto = permiso.CentroCosto.ToInfo() };
+        new() {  Tramo = permiso.Tramo.ToInfo(), CentroCosto = permiso.CentroCosto };
 
     private static ImmutableArray<ZonaPorTramoInfo> ToInfo(this IEnumerable<ZonaTramoModel> source) =>
         [.. source.Select(ToInfo)];

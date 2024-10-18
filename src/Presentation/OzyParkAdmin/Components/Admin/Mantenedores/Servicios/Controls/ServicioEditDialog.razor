@@ -1,4 +1,5 @@
-﻿@using OzyParkAdmin.Components.Admin.Shared
+﻿@using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Franquicias
 @using OzyParkAdmin.Domain.Plantillas
 @using OzyParkAdmin.Domain.Servicios
 @inject ServicioViewModelValidator Validator
@@ -6,10 +7,10 @@
     <DialogContent>
         <MudForm Model="Servicio" @ref="form" Validation="Validator.ValidateValue" ValidationDelay="0">
             <MudSelect @bind-Value="Servicio.CentroCosto" Variant="Variant.Outlined" Margin="Margin.Dense"
-                       Label="Centro de costo" ToStringFunc="(x) => x?.Nombre" Class="mt-4"
+                       Label="Centro de costo" ToStringFunc="(x) => x?.Descripcion" Class="mt-4"
                        Disabled="!Servicio.IsNew" For="() => Servicio.CentroCosto" Immediate="true">
                 <ForIn Items="CentrosCosto" Context="centroCosto">
-                    <MudSelectItem T="CentroCostoModel" Value="centroCosto"></MudSelectItem>
+                    <MudSelectItem T="CentroCostoInfo" Value="centroCosto"></MudSelectItem>
                 </ForIn>
             </MudSelect>
 
@@ -177,10 +178,10 @@
     public ServicioViewModel Servicio { get; set; } = default!;
 
     [Parameter]
-    public List<CentroCostoModel> CentrosCosto { get; set; } = [];
+    public List<CentroCostoInfo> CentrosCosto { get; set; } = [];
 
     [Parameter]
-    public List<FranquiciaModel> Franquicias { get; set; } = [];
+    public List<FranquiciaInfo> Franquicias { get; set; } = [];
 
     [Parameter]
     public List<TipoControlModel> TiposControl { get; set; } = [];

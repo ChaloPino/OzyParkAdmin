@@ -2,10 +2,11 @@
 using OzyParkAdmin.Infrastructure.Reportes.Generate.Internals.Excel;
 using OzyParkAdmin.Infrastructure.Reportes.Generate.Internals.Html;
 using OzyParkAdmin.Infrastructure.Reportes.Generate.Internals.Pdf;
+using OzyParkAdmin.Infrastructure.Shared;
 
 namespace OzyParkAdmin.Infrastructure.Reportes.Generate.Internals;
 
-internal sealed class FormatReportGeneratorProvider : IFormatReportGeneratorProvider
+internal sealed class FormatReportGeneratorProvider : IFormatReportGeneratorProvider, IInfrastructure
 {
     private readonly Dictionary<ActionType, IFormatReportGenerator> _reportGenerators = [];
     /// <summary>

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using OzyParkAdmin.Application;
 
 namespace OzyParkAdmin.Infrastructure;
@@ -12,6 +13,19 @@ namespace OzyParkAdmin.Infrastructure;
 /// <param name="options">Las opciones a ser usadas por <see cref="OzyParkAdminContext"/>.</param>
 public sealed class OzyParkAdminContext(DbContextOptions<OzyParkAdminContext> options) : DbContext(options), IOzyParkAdminContext
 {
+    /// <inheritdoc/>
+    async Task IOzyParkAdminContext.BulkInsertAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken)
+        where TEntity : class
+    {
+        await this.BulkInsertAsync(entities, cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
+    async Task IOzyParkAdminContext.BulkDeleteAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken)
+        where TEntity : class
+    {
+        await this.BulkDeleteAsync(entities, cancellationToken: cancellationToken).ConfigureAwait(false);
+    }
+
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

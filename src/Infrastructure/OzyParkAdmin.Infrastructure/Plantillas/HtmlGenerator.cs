@@ -1,8 +1,8 @@
 ﻿using OzyParkAdmin.Domain.Plantillas;
+using OzyParkAdmin.Infrastructure.Shared;
 using RazorEngineCore;
 using System.Collections.Concurrent;
 using System.Dynamic;
-using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -12,7 +12,7 @@ namespace OzyParkAdmin.Infrastructure.Plantillas;
 /// <summary>
 /// Genera el contenido de la plantilla en html.
 /// </summary>
-public sealed class HtmlGenerator
+public sealed class HtmlGenerator : IInfrastructure
 {
     private readonly ConcurrentDictionary<int, object> TemplateCache = new();
 

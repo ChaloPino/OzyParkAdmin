@@ -16,7 +16,7 @@ namespace OzyParkAdmin.Application.Cupos.Update;
 /// <param name="CanalVenta">El canal de venta del cupo.</param>
 /// <param name="DiaSemana">El día de semana del cupo.</param>
 /// <param name="HoraInicio">La hora de inicio del cupo.</param>
-/// <param name="HorFin">La hora de fin del cupo.</param>
+/// <param name="HoraFin">La hora de fin del cupo.</param>
 /// <param name="Total">El total del cupo.</param>
 /// <param name="SobreCupo">El sobrecupo.</param>
 /// <param name="TopeEnCupo">El tope en el cupo.</param>
@@ -27,7 +27,7 @@ public sealed record UpdateCupo(
     CanalVenta CanalVenta,
     DiaSemana DiaSemana,
     TimeSpan HoraInicio,
-    TimeSpan HorFin,
+    TimeSpan HoraFin,
     int Total,
     int SobreCupo,
     int TopeEnCupo) : Request<ResultOf<CupoFullInfo>>;

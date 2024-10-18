@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Options;
 using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Domain.Plantillas;
-using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Domain.Tickets;
 using OzyParkAdmin.Domain.Ventas;
+using OzyParkAdmin.Infrastructure.Shared;
 using System.Dynamic;
 
 namespace OzyParkAdmin.Infrastructure.Plantillas;
@@ -13,7 +13,7 @@ namespace OzyParkAdmin.Infrastructure.Plantillas;
 /// <summary>
 /// La implementación del generador de documentos basados en plantillas.
 /// </summary>
-public class DocumentGenerator : IDocumentGenerator
+public class DocumentGenerator : IDocumentGenerator, IInfrastructure
 {
     private readonly OzyParkAdminContext _context;
     private readonly HtmlGenerator _htmlGenerator;

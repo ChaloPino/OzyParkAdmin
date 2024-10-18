@@ -8,7 +8,7 @@ namespace OzyParkAdmin.Domain.Cupos;
 /// <summary>
 /// Contiene las lógicas de negocio de <see cref="Cupo"/>.
 /// </summary>
-public sealed class CupoManager
+public sealed class CupoManager : IBusinessLogic
 {
     private readonly ICupoRepository _repository;
     private readonly IEscenarioCupoRepository _escenarioCupoRepository;
@@ -79,7 +79,7 @@ public sealed class CupoManager
     }
 
     /// <summary>
-    /// Crea varios cupos.
+    /// Actualiza un cupo.
     /// </summary>
     /// <param name="id">El id del cupo.</param>
     /// <param name="fechaEfectiva">La fecha efectiva del cupo.</param>
@@ -240,7 +240,7 @@ public sealed class CupoManager
         IList<ValidationError> errors,
         CancellationToken cancellationToken)
     {
-        Cupo? cupo = await _repository.FindByUniqueKey(
+        Cupo? cupo = await _repository.FindByUniqueKeyAsync(
             cupoToValidate.FechaEfectiva,
             cupoToValidate.EscenarioCupo,
             cupoToValidate.CanalVenta,

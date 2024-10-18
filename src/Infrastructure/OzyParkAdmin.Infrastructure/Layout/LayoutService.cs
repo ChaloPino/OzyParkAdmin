@@ -1,9 +1,11 @@
-﻿namespace OzyParkAdmin.Infrastructure.Layout;
+﻿using OzyParkAdmin.Infrastructure.Shared;
+
+namespace OzyParkAdmin.Infrastructure.Layout;
 
 /// <summary>
 /// Servicio que administra lo conserniente al diseño visual.
 /// </summary>
-public class LayoutService
+public class LayoutService : IInfrastructure
 {
     private readonly IUserPreferencesService _userPreferencesService;
     private UserPreferences? _userPreferences;

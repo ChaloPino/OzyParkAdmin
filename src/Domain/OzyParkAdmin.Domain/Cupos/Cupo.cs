@@ -2,7 +2,6 @@
 using OzyParkAdmin.Domain.Entidades;
 using OzyParkAdmin.Domain.EscenariosCupo;
 using OzyParkAdmin.Domain.Shared;
-using System.Runtime.CompilerServices;
 
 namespace OzyParkAdmin.Domain.Cupos;
 

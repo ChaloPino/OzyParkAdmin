@@ -25,6 +25,7 @@
     <PackageReference Include="BouncyCastle.Cryptography" />
     <PackageReference Include="Dapper" />
     <PackageReference Include="DocumentFormat.OpenXml" />
+    <PackageReference Include="EFCore.BulkExtensions" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="itext7" />
     <PackageReference Include="itext7.bouncy-castle-adapter" />

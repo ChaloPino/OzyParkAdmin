@@ -12,7 +12,7 @@ namespace OzyParkAdmin.Domain.Productos;
 /// <summary>
 /// Administra toda la lógica de negocio del <see cref="Producto"/>
 /// </summary>
-public sealed class ProductoManager
+public sealed class ProductoManager : IBusinessLogic
 {
     private readonly IProductoRepository _repository;
     private readonly ICategoriaProductoRepository _categoriaRepository;

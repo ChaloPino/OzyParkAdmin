@@ -10,7 +10,7 @@ namespace OzyParkAdmin.Domain.Servicios;
 /// <summary>
 /// El administrador de servicios.
 /// </summary>
-public sealed class ServicioManager
+public sealed class ServicioManager : IBusinessLogic
 {
     private readonly IServicioRepository _repository;
     private readonly ICentroCostoRepository _centroCostoRepository;

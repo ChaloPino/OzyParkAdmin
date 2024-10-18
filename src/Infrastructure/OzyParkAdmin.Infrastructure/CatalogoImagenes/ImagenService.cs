@@ -1,4 +1,6 @@
-﻿using SixLabors.ImageSharp;
+﻿using OzyParkAdmin.Domain.Shared;
+using OzyParkAdmin.Infrastructure.Shared;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.Formats.Gif;
@@ -16,7 +18,7 @@ namespace OzyParkAdmin.Infrastructure.CatalogoImagenes;
 /// <summary>
 /// Servicio para manipulación de imágenes.
 /// </summary>
-public sealed class ImagenService
+public sealed class ImagenService : IInfrastructure
 {
     private const string JpegMimeType = "image/jpeg";
     private const string WebpMimeType = "image/webp";

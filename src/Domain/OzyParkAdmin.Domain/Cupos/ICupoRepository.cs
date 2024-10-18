@@ -28,7 +28,7 @@ public interface ICupoRepository
     /// <param name="horaInicio">La hora de inicio a buscar.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>El cupo si es que existe.</returns>
-    Task<Cupo?> FindByUniqueKey(DateOnly fechaEfectiva, EscenarioCupo escenarioCupo, CanalVenta canalVenta, DiaSemana diaSemana, TimeSpan horaInicio, CancellationToken cancellationToken);
+    Task<Cupo?> FindByUniqueKeyAsync(DateOnly fechaEfectiva, EscenarioCupo escenarioCupo, CanalVenta canalVenta, DiaSemana diaSemana, TimeSpan horaInicio, CancellationToken cancellationToken);
 
     /// <summary>
     /// Consigue el id máximo de cupos.
@@ -40,8 +40,8 @@ public interface ICupoRepository
     /// <summary>
     /// Busca cupos que coincidan con los criterios de búsqueda.
     /// </summary>
-    /// <param name="searchText">El texto de búsqueda.</param>
     /// <param name="centroCostoIds">Los ids de centros de costo.</param>
+    /// <param name="searchText">El texto de búsqueda.</param>
     /// <param name="filterExpressions">Las expresiones de filtrado.</param>
     /// <param name="sortExpressions">Las expresiones de ordenamiento.</param>
     /// <param name="page">La página actual.</param>

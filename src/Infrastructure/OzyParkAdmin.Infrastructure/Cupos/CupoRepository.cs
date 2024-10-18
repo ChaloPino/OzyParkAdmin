@@ -23,7 +23,7 @@ public sealed class CupoRepository(OzyParkAdminContext context) : Repository<Cup
     }
 
     /// <inheritdoc/>
-    public async Task<Cupo?> FindByUniqueKey(DateOnly fechaEfectiva, EscenarioCupo escenarioCupo, CanalVenta canalVenta, DiaSemana diaSemana, TimeSpan horaInicio, CancellationToken cancellationToken)
+    public async Task<Cupo?> FindByUniqueKeyAsync(DateOnly fechaEfectiva, EscenarioCupo escenarioCupo, CanalVenta canalVenta, DiaSemana diaSemana, TimeSpan horaInicio, CancellationToken cancellationToken)
     {
         return await EntitySet.AsNoTracking().AsSingleQuery().FirstOrDefaultAsync(x =>
             x.FechaEfectiva == fechaEfectiva &&

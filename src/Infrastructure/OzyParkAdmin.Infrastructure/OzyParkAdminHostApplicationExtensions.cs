@@ -11,8 +11,6 @@ using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Seguridad.Roles;
 using OzyParkAdmin.Infrastructure.Authorization;
 using Microsoft.AspNetCore.Authorization;
-using OzyParkAdmin.Domain.Servicios;
-using OzyParkAdmin.Infrastructure.Layout;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -23,23 +21,12 @@ using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Pbm;
 using SixLabors.ImageSharp.Formats.Tiff;
 using SixLabors.ImageSharp.Formats.Webp;
-using OzyParkAdmin.Infrastructure.CatalogoImagenes;
-using OzyParkAdmin.Domain.Productos;
-using OzyParkAdmin.Domain.CatalogoImagenes;
-using OzyParkAdmin.Domain.Cupos;
-using OzyParkAdmin.Domain.Cajas;
-using OzyParkAdmin.Infrastructure.Seguridad.Permisos;
-using OzyParkAdmin.Domain.Tickets;
 using OzyParkAdmin.Infrastructure.Plantillas;
-using OzyParkAdmin.Domain.Plantillas;
 using RazorEngineCore;
 using OzyParkAdmin.Domain.Franquicias;
-using OzyParkAdmin.Application.Shared;
-using OzyParkAdmin.Infrastructure.Middlewares;
-using OzyParkAdmin.Application.Reportes.Generate;
-using OzyParkAdmin.Infrastructure.Reportes.Generate;
-using OzyParkAdmin.Infrastructure.Reportes.Generate.Internals;
 using System.Data.Common;
+using OzyParkAdmin.Infrastructure.Shared;
+using OzyParkAdmin.Domain.Shared;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -92,28 +79,12 @@ public static class OzyParkAdminHostApplicationExtensions
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
-        services.AddScoped<LayoutService>();
-        services.AddScoped<UsuarioService>();
-        services.AddScoped<ServicioManager>();
-        services.AddScoped<ServicioValidator>();
-        services.AddScoped<ProductoManager>();
-        services.AddScoped<ProductoValidator>();
-        services.AddScoped<CatalogoImagenService>();
-        services.AddScoped<CupoManager>();
+        services.AddBusinessLogic(typeof(IBusinessLogic).Assembly, typeof(IOzyParkAdminContext).Assembly);
+        services.AddInfrastructure(typeof(IInfrastructure).Assembly);
         services.AddSingleton(_ => CreateImageFormatManager());
-        services.AddScoped<ImagenService>();
-        services.AddScoped<CajaManager>();
-        services.AddScoped<PermisoCajaService>();
-        services.AddScoped<IDocumentGenerator, DocumentGenerator>();
         services.AddSingleton<IRazorEngine, RazorEngine>();
         services.AddSingleton(_ => new AssemblyProvider().AddAssemblies(typeof(OzyParkAdminHostApplicationExtensions).Assembly).AddAssemblies(typeof(Franquicia).Assembly));
-        services.AddSingleton<HtmlGenerator>();
-        services.AddScoped<TicketManager>();
-        services.AddScoped<IReportGenerator, ReportGenerator>();
-        services.AddSingleton<IFormatReportGeneratorProvider, FormatReportGeneratorProvider>();
-
         services.AddHttpContextAccessor();
-        services.AddSingleton<IClientIpService, ClientIpService>();
         return services;
     }
 

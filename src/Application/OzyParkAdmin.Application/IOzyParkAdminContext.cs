@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Application;
+﻿using OzyParkAdmin.Domain.CuposFecha;
+
+namespace OzyParkAdmin.Application;
 
 /// <summary>
 /// Representa el contexto de OzyParkAdmin.
@@ -247,4 +249,29 @@ public interface IOzyParkAdminContext
     /// number of state entries written to the database.
     /// </returns>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Bulk insert data
+    /// </summary>
+    /// <typeparam name="TEntity">The entity type to bulk insert.</typeparam>
+    /// <param name="entities">The list of entities to bulk insert.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
+    /// <returns>
+    /// A task that represents the asynchronous save operation.
+    /// </returns>
+    Task BulkInsertAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+        where TEntity : class;
+
+    /// <summary>
+    /// Bulk delete data.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity type to bulk delete.</typeparam>
+    /// <param name="entities">The list of entities to bulk delete.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
+    /// <returns>
+    /// A task that represents the asynchronous save operation.
+    /// </returns>
+    Task BulkDeleteAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+        where TEntity : class;
+
 }

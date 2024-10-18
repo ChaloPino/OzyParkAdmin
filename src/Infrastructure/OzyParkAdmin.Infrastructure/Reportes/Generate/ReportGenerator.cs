@@ -1,6 +1,7 @@
 ﻿using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Application.Reportes.Generate;
 using OzyParkAdmin.Domain.Reportes;
+using OzyParkAdmin.Infrastructure.Shared;
 using System.Security.Claims;
 
 namespace OzyParkAdmin.Infrastructure.Reportes.Generate;
@@ -8,7 +9,7 @@ namespace OzyParkAdmin.Infrastructure.Reportes.Generate;
 /// <summary>
 /// Implementación de <see cref="IReportRepository"/>.
 /// </summary>
-public sealed class ReportGenerator : IReportGenerator
+public sealed class ReportGenerator : IReportGenerator, IInfrastructure
 {
     private readonly IReportRepository _repository;
     private readonly IFormatReportGeneratorProvider _reportExecutorProvider;

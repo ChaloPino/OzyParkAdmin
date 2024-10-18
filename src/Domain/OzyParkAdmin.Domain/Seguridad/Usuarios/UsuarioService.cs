@@ -9,7 +9,7 @@ namespace OzyParkAdmin.Domain.Seguridad.Usuarios;
 /// <summary>
 /// Lógica de negocios para crear y actalizar usuarios..
 /// </summary>
-public class UsuarioService
+public class UsuarioService : IBusinessLogic
 {
     private readonly UserManager<Usuario> _userManager;
     private readonly IRolRepository _rolRepository;

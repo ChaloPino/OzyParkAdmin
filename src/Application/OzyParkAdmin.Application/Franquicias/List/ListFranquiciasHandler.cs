@@ -28,6 +28,6 @@ public sealed class ListFranquiciasHandler : MediatorRequestHandler<ListFranquic
 
         int[]? franquiciaIds = request.User.GetFranquicias();
         List<Franquicia> franquicias = await _repository.ListFranquiciasAsync(franquiciaIds, cancellationToken);
-        return franquicias.Select(x => new FranquiciaInfo { Id = x.Id, Nombre = x.Nombre, EsActivo = x.EsActivo }).ToList();
+        return franquicias.ToInfo();
     }
 }

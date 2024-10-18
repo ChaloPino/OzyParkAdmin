@@ -75,9 +75,9 @@ public sealed record CuposModel
         }
     }
 
-    internal CanalVenta? CanalVenta => CanalesVenta.FirstOrDefault();
+    internal CanalVenta? ValidationCanalVenta => CanalesVenta.FirstOrDefault();
 
-    internal DiaSemana? DiaSemana => DiasSemana.FirstOrDefault();
+    internal DiaSemana? ValidationDiaSemana => DiasSemana.FirstOrDefault();
 
     internal bool Loading { get; set; }
 }

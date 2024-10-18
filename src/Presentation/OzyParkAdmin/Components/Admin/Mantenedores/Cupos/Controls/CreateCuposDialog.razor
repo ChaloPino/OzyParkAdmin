@@ -75,7 +75,7 @@
                                Dense="true"
                                ToStringFunc="x => x?.Nombre"
                                MultiSelectionTextFunc="CanalesVentaDescriptions"
-                               For="() => cupos.CanalVenta">
+                               For="() => cupos.ValidationCanalVenta">
                         <ForIn Items="CanalesVenta" Context="canalVenta">
                             <MudSelectItem T="CanalVenta" Value="canalVenta" />
                         </ForIn>
@@ -92,7 +92,7 @@
                                Dense="true"
                                ToStringFunc="x => x?.Aka"
                                MultiSelectionTextFunc="DiasSemanaDescriptions"
-                               For="() => cupos.DiaSemana">
+                               For="() => cupos.ValidationDiaSemana">
                         <ForIn Items="DiasSemana" Context="diaSemana">
                             <MudSelectItem T="DiaSemana" Value="diaSemana" />
                         </ForIn>

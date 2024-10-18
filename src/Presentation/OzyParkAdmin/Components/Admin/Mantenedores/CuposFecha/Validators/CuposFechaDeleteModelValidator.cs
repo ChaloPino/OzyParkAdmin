@@ -38,11 +38,5 @@ public sealed class CuposFechaDeleteModelValidator : BaseValidator<CuposFechaDel
         RuleFor(x => x.HoraTermino)
             .NotNull()
             .GreaterThanOrEqualTo(x => x.HoraInicio);
-
-        RuleFor(x => x.CanalVenta)
-            .NotNull().WithMessage("Debe seleccionar al menos un canal de venta.");
-
-        RuleFor(x => x.DiaSemana)
-            .NotNull().WithMessage("Debe seleccionar al menos un día de semana.");
     }
 }

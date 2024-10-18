@@ -9,7 +9,7 @@ namespace OzyParkAdmin.Domain.Shared;
 public readonly record struct NotFound(string? ErrorMessage = null);
 
 /// <summary>
-/// Representa un error de tipo conflict.
+/// Representa un error de tipo conflict, por ejemplo valores duplicados.
 /// </summary>
 /// <param name="ErrorMessage">El mensaje de error.</param>
 public readonly record struct  Conflict(string? ErrorMessage = null);

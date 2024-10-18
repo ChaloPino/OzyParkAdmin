@@ -51,11 +51,5 @@ public sealed class CuposFechaModelValidator : BaseValidator<CuposFechaModel>
         RuleFor(x => x.IntervaloMinutos)
             .NotEmpty()
             .GreaterThanOrEqualTo(10);
-
-        RuleFor(x => x.CanalVenta)
-            .NotNull().WithMessage("Debe seleccionar al menos un canal de venta.");
-
-        RuleFor(x => x.DiaSemana)
-            .NotNull().WithMessage("Debe seleccionar al menos un día de semana.");
     }
 }

@@ -45,9 +45,9 @@ public class CuposFechaDeleteModel
     /// </summary>
     public int IntervaloMinutos { get; set; } = 20;
 
-    internal CanalVenta? CanalVenta => CanalesVenta.FirstOrDefault();
+    internal CanalVenta? ValidationCanalVenta => CanalesVenta.FirstOrDefault();
 
-    internal DiaSemana? DiaSemana => DiasSemana.FirstOrDefault();
+    internal DiaSemana? ValidationDiaSemana => DiasSemana.FirstOrDefault();
 
     internal bool Loading { get; set; }
 }

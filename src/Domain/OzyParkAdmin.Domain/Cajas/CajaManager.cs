@@ -6,7 +6,7 @@ namespace OzyParkAdmin.Domain.Cajas;
 /// <summary>
 /// Contiene la lógica de negocios para la caja.
 /// </summary>
-public class CajaManager
+public class CajaManager : IBusinessLogic
 {
     private readonly ICajaRepository _repository;
     private readonly IUsuarioRepository _usuarioRepository;

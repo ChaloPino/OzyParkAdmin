@@ -5,7 +5,7 @@ namespace OzyParkAdmin.Domain.Servicios;
 /// <summary>
 /// Contiene funciones de validación de la información de un servicio.
 /// </summary>
-public sealed class ServicioValidator
+public sealed class ServicioValidator : IBusinessLogic
 {
     private readonly IServicioRepository _repository;
 

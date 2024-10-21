@@ -8,7 +8,7 @@
         <MudText Typo="Typo.h5" Class="ml-3">OzyPark Admin</MudText>
         <MudSpacer />
         <UserView />
-        <MudIconButton Icon="@DarkLightModeButtonIcon" Title="@DarkLightModeButtonText" Color="Color.Inherit" Edge="Edge.End" OnClick="LayoutService.CycleDarkLightModeAsync" />
+        <ThemeMenu />
     </MudAppBar>
     <MudDrawer @bind-Open="drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />

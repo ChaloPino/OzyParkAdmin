@@ -9,7 +9,7 @@ namespace OzyParkAdmin.Domain.Seguridad.Usuarios;
 /// <summary>
 /// Lógica de negocios para crear y actalizar usuarios..
 /// </summary>
-public class UsuarioService
+public class UsuarioService : IBusinessLogic
 {
     private readonly UserManager<Usuario> _userManager;
     private readonly IRolRepository _rolRepository;
@@ -49,7 +49,7 @@ public class UsuarioService
     /// <param name="franquicias">Franquicias asociados al usuario.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>Resultado de la creación de un usuario.</returns>
-    public async Task<ResultOf<UsuarioFullInfo>> CreateUserAsync(string  username, string friendlyName, string? rut, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
+    public async Task<ResultOf<UsuarioFullInfo>> CreateUserAsync(string username, string friendlyName, string? rut, string? email, IEnumerable<string> roles, IEnumerable<int> centrosCosto, IEnumerable<int> franquicias, CancellationToken cancellationToken)
     {
         Usuario usuario = Usuario.Create(username, friendlyName, rut, email);
 
@@ -85,7 +85,7 @@ public class UsuarioService
         IEnumerable<CentroCostoInfo> centrosCostoPersisted = await _centroCostoRepository.ListCentrosCostoAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
         IEnumerable<Franquicia> franquiciasPersisted = await _faranquiciaRepository.ListFranquiciasAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
 
-        return usuario.ToFullInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToList());
+        return usuario.ToFullInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToInfo());
     }
 
     /// <summary>
@@ -118,17 +118,16 @@ public class UsuarioService
         IEnumerable<Rol> rolesPersisted = await _rolRepository.FinRolesByUserAsync(usuario.Id, cancellationToken);
 
         List<string> rolesToAdd = (from role in roles
-                                  join nullable in rolesPersisted on role equals nullable.Name into defRoles
-                                  from persisted in defRoles.DefaultIfEmpty()
-                                  where persisted is null
-                                  select role).ToList();
+                                   join nullable in rolesPersisted on role equals nullable.Name into defRoles
+                                   from persisted in defRoles.DefaultIfEmpty()
+                                   where persisted is null
+                                   select role).ToList();
 
         List<string> rolesToRemove = (from persisted in rolesPersisted
                                       join nullable in roles on persisted.Name equals nullable into defRoles
                                       from role in defRoles.DefaultIfEmpty()
                                       where role is null
                                       select persisted.Name).ToList();
-
 
         IdentityResult result = await _userManager.AddToRolesAsync(usuario, rolesToAdd);
 
@@ -200,10 +199,10 @@ public class UsuarioService
         IEnumerable<CentroCostoInfo> centrosCostoPersisted = await _centroCostoRepository.ListCentrosCostoAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
         IEnumerable<Franquicia> franquiciasPersisted = await _faranquiciaRepository.ListFranquiciasAsync(usuario.CentrosCosto.Select(x => x.CentroCostoId).ToArray(), cancellationToken);
 
-        return usuario.ToFullInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToList());
+        return usuario.ToFullInfo(rolesPersisted.ToList(), centrosCostoPersisted.ToList(), franquiciasPersisted.ToInfo());
     }
 
-    private async Task<IdentityResult> AddToCentrosCostoAsync(Usuario user,  IEnumerable<int> centrosCosto)
+    private async Task<IdentityResult> AddToCentrosCostoAsync(Usuario user, IEnumerable<int> centrosCosto)
     {
         user.AddCentrosCosto(centrosCosto);
         return await _userManager.UpdateAsync(user);

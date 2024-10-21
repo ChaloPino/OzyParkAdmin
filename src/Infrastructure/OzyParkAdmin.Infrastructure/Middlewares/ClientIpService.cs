@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
 using OzyParkAdmin.Application.Shared;
+using OzyParkAdmin.Infrastructure.Shared;
 
 namespace OzyParkAdmin.Infrastructure.Middlewares;
 
 /// <summary>
 /// Permite conseguir la IP del cliente.
 /// </summary>
-public sealed class ClientIpService : IClientIpService
+public sealed class ClientIpService : IClientIpService, IInfrastructure
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 

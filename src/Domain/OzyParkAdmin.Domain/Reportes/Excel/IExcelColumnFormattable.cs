@@ -5,7 +5,7 @@ namespace OzyParkAdmin.Domain.Reportes.Excel;
 /// <summary>
 /// Contiene la configuración para pintar un elemento en Excel.
 /// </summary>
-public interface IExcelColumnFormattable
+public interface IExcelColumnFormattable : IConditionable
 {
     /// <summary>
     /// El id del elemento.

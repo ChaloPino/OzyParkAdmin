@@ -1,4 +1,6 @@
 ﻿@page "/Reportes/{Aka}"
+@using Nextended.Blazor.Models
+@using Nextended.Core
 @using OzyParkAdmin.Application.Reportes.Filters
 @using OzyParkAdmin.Application.Reportes.Find
 @using System.Security.Claims
@@ -9,6 +11,7 @@
 @inject ISnackbar Snackbar
 @inject IMediator Mediator
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
 <IfThenElse Condition="report is null">
     <Then>
         <PageTitle>Cargando reporte...</PageTitle>
@@ -24,7 +27,13 @@
     <Else>
         <PageTitle>@report!.Title</PageTitle>
         <MudText Typo="Typo.h4">@report!.Title</MudText>
-        <FilterLayout Report="@report" FilterViewModel="filterViewModel" LoadFilterData="LoadFilterDataAsync" GenerateHtml="GenerateHtmlReportAsync" GenerateOtherFormat="GenerateOtherFormatAsync" />
+        <FilterLayout 
+        Report="@report" 
+        FilterViewModel="filterViewModel" 
+        User="user!"
+        LoadFilterData="LoadFilterDataAsync" 
+        GenerateHtml="GenerateHtmlReportAsync" 
+        GenerateOtherFormat="GenerateOtherFormatAsync" />
         <ReportVisualizer Report="@report" ReportGenerated="reportGenerated" />
     </Else>
 </IfThenElse>
@@ -34,6 +43,7 @@
     private Report? report;
     private FilterViewModel? filterViewModel;
     private ReportGeneratedModel reportGenerated = new();
+    private ReportExportedModel? reportExported;
 
     [Parameter]
     public string? Aka { get; set; }
@@ -81,8 +91,46 @@
 
     private void SetReportGenerated(ReportGenerated generated)
     {
-        reportGenerated = ReportGeneratedModel.Create(generated);
+        if (generated.Format == ActionType.Html)
+        {
+            reportGenerated = ReportGeneratedModel.Create(generated);
+        }
+        else if (generated.IsExcel || generated.IsPdf)
+        {
+            Stream stream = new MemoryStream(generated.Content);
+            stream.Position = 0;
+            StateHasChanged();
+
+            bool showContentError = generated.IsExcel;
+
+            DialogService.ShowFileDisplayDialog(
+                stream: stream,
+                fileName: generated.FileName, 
+                contentType: generated.MimeType, 
+                handleContentErrorFunc: HandleContentError, 
+                parameters: new DialogParameters
+                {
+                    { nameof(MudExFileDisplay.IgnoredRenderControls), new[] {typeof(MudExFileDisplayExcel)} },
+                    { nameof(MudExFileDisplay.AllowCopyUrl), false },
+                    { nameof(MudExFileDisplay.StreamUrlHandling), StreamUrlHandling.BlobUrl },
+                    { nameof(MudExFileDisplay.ShowContentError), showContentError },
+                });
+            reportGenerated.Loading = LoadingState.Loaded;
+        }
+
+
         StateHasChanged();
+    }
+
+    private Task<MudExFileDisplayContentErrorResult> HandleContentError(IMudExFileDisplayInfos arg)
+    {
+        if (MimeType.Matches(arg.ContentType, MimeType.OpenXml))
+        {
+            return Task.FromResult(
+                MudExFileDisplayContentErrorResult.DisplayMessage($"No se puede visualizar el archivo Excel '{arg.FileName}', favor descárguelo, usando las opciones del menú en la parte superior derecha."));
+        }
+        
+        return Task.FromResult(MudExFileDisplayContentErrorResult.Unhandled);
     }
 
     private async Task<List<ItemOption>> LoadFilterDataAsync(IFilterModel filterModel)

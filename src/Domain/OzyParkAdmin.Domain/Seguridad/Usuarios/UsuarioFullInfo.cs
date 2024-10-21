@@ -47,7 +47,7 @@ public sealed record UsuarioFullInfo
     /// <summary>
     /// Franquicias asociadas al usuario.
     /// </summary>
-    public List<Franquicia> Franquicias { get; set; } = [];
+    public List<FranquiciaInfo> Franquicias { get; set; } = [];
 
     /// <summary>
     /// Centros de costo asociados al usuario.

@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Domain.Reportes.Filters;
+﻿using System.Globalization;
+
+namespace OzyParkAdmin.Domain.Reportes.Filters;
 
 /// <summary>
 /// El filtro de tipo hora.
@@ -73,4 +75,8 @@ public sealed class TimeFilter : Filter
     /// <inheritdoc/>
     public override object? GetDefaultValue() =>
         UseNow ? DateTime.Today.TimeOfDay : DefaultValue;
+
+    /// <inheritdoc/>
+    public override object? GetText(object? value) =>
+        value is not null ? TimeSpan.Parse(value.ToString()!, CultureInfo.InvariantCulture) : null;
 }

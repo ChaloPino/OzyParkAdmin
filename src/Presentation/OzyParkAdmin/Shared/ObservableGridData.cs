@@ -26,6 +26,18 @@ internal class ObservableGridData<T> : GridData<T>
         return _items.Remove(item);
     }
 
+    public virtual bool RemoveWhere(Func<T, bool> predicate)
+    {
+        T? item = Find(predicate);
+
+        if (item is not null)
+        {
+            return _items.Remove(item);
+        }
+
+        return false;
+    }
+
     public T? Find(T item)
     {
         return _items.FirstOrDefault(x => EqualityComparer<T>.Default.Equals(x, item));

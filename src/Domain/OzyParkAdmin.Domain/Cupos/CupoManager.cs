@@ -8,7 +8,7 @@ namespace OzyParkAdmin.Domain.Cupos;
 /// <summary>
 /// Contiene las lógicas de negocio de <see cref="Cupo"/>.
 /// </summary>
-public sealed class CupoManager
+public sealed class CupoManager : IBusinessLogic
 {
     private readonly ICupoRepository _repository;
     private readonly IEscenarioCupoRepository _escenarioCupoRepository;
@@ -79,7 +79,7 @@ public sealed class CupoManager
     }
 
     /// <summary>
-    /// Crea varios cupos.
+    /// Actualiza un cupo.
     /// </summary>
     /// <param name="id">El id del cupo.</param>
     /// <param name="fechaEfectiva">La fecha efectiva del cupo.</param>
@@ -149,11 +149,7 @@ public sealed class CupoManager
         CancellationToken cancellationToken)
     {
         IEnumerable<(TimeSpan HoraInicio, TimeSpan HoraFin)> horas = CreateHoras(horaInicio, horaTermino, intervaloMinutos);
-
-        IEnumerable<(CanalVenta CanalVenta, DiaSemana DiaSemana, TimeSpan HoraInicio, TimeSpan HoraFin)> cuposToCreate = from canalVenta in canalesVenta
-                                                                                                                         from diaSemana in diasSemana
-                                                                                                                         from horario in horas
-                                                                                                                         select (canalVenta, diaSemana, horario.HoraInicio, horario.HoraFin);
+        IEnumerable<(CanalVenta CanalVenta, DiaSemana DiaSemana, TimeSpan HoraInicio, TimeSpan HoraFin)> cuposToCreate = ConstruirInfoToCreate(canalesVenta, diasSemana, horas);
 
         List<Cupo> cupos = [];
 
@@ -184,6 +180,14 @@ public sealed class CupoManager
         return cupos;
     }
 
+    private static IEnumerable<(CanalVenta CanalVenta, DiaSemana DiaSemana, TimeSpan HoraInicio, TimeSpan HoraFin)> ConstruirInfoToCreate(IEnumerable<CanalVenta> canalesVenta, IEnumerable<DiaSemana> diasSemana, IEnumerable<(TimeSpan HoraInicio, TimeSpan HoraFin)> horas)
+    {
+        return from canalVenta in canalesVenta
+               from diaSemana in diasSemana
+               from horario in horas
+               select (canalVenta, diaSemana, horario.HoraInicio, horario.HoraFin);
+    }
+
     private static IEnumerable<(TimeSpan HoraInicio, TimeSpan HoraFin)> CreateHoras(TimeSpan horaInicio, TimeSpan horaTermino, int intervaloMinutos)
     {
         TimeSpan hora = horaInicio;
@@ -195,7 +199,7 @@ public sealed class CupoManager
         }
     }
 
-    private async Task<ResultOf<Cupo>> CreateCupoAsync(
+    private async Task<SuccessOrFailure> CreateCupoAsync(
         int id,
         DateOnly fechaEfectiva,
         EscenarioCupo escenarioCupo,
@@ -223,11 +227,15 @@ public sealed class CupoManager
             ValidateDuplicityAsync,
             cancellationToken);
 
-        result.Switch(
-            onSuccess: cupos.Add,
-            onFailure: _ => { });
+        return result.Match(
+            onSuccess: cupo => AddToList(cupo, cupos),
+            onFailure: _ => _);
+    }
 
-        return result;
+    private static SuccessOrFailure AddToList(Cupo cupo, IList<Cupo> cupos)
+    {
+        cupos.Add(cupo);
+        return new Success();
     }
 
     private async Task ValidateDuplicityAsync(
@@ -240,7 +248,7 @@ public sealed class CupoManager
         IList<ValidationError> errors,
         CancellationToken cancellationToken)
     {
-        Cupo? cupo = await _repository.FindByUniqueKey(
+        Cupo? cupo = await _repository.FindByUniqueKeyAsync(
             cupoToValidate.FechaEfectiva,
             cupoToValidate.EscenarioCupo,
             cupoToValidate.CanalVenta,

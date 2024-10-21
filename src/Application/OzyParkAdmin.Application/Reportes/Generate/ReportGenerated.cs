@@ -2,7 +2,6 @@
 using OzyParkAdmin.Application.Reportes.Charts;
 using OzyParkAdmin.Application.Reportes.MasterDetails;
 using OzyParkAdmin.Domain.Reportes;
-using OzyParkAdmin.Domain.Reportes.Charts;
 using System.Diagnostics.CodeAnalysis;
 
 namespace OzyParkAdmin.Application.Reportes.Generate;
@@ -30,13 +29,13 @@ public sealed class ReportGenerated
     /// <summary>
     /// Si el reporte está generado para Excel.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(Content))]
+    [MemberNotNullWhen(true, nameof(FileName), nameof(Content), nameof(MimeType))]
     public bool IsExcel => Format == ActionType.Excel;
 
     /// <summary>
     /// Si el reporte está generado para Pdf.
     /// </summary>
-    [MemberNotNullWhen(true, nameof(Content))]
+    [MemberNotNullWhen(true, nameof(FileName), nameof(Content), nameof(MimeType))]
     public bool IsPdf => Format == ActionType.Pdf;
 
     /// <summary>
@@ -146,8 +145,20 @@ public sealed class ReportGenerated
     public IEnumerable<ChartMetaInfo> Charts { get; set; } = [];
 
     /// <summary>
+    /// El nombre del archivo del reporte generado.
+    /// Para todos los reportes con formato Html y Pdf.
+    /// </summary>
+    public string? FileName { get; set; }
+
+    /// <summary>
     /// El contenido del reporte generado.
     /// Para todos los reportes con formato Html y Pdf.
     /// </summary>
     public byte[]? Content { get; set; }
+
+    /// <summary>
+    /// El tipo de contenido del reporte generado.
+    /// Para todos los reportes con formato Html y Pdf.
+    /// </summary>
+    public string? MimeType { get; set; }
 }

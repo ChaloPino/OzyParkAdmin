@@ -4,7 +4,7 @@ using OzyParkAdmin.Application.Seguridad.Usuarios.Create;
 using OzyParkAdmin.Application.Seguridad.Usuarios.Search;
 using OzyParkAdmin.Application.Seguridad.Usuarios.Update;
 using OzyParkAdmin.Components.Admin.Mantenedores.Seguridad.Usuarios.Models;
-using OzyParkAdmin.Components.Admin.Shared;
+using OzyParkAdmin.Domain.Franquicias;
 using OzyParkAdmin.Domain.Seguridad.Roles;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
@@ -95,8 +95,8 @@ internal static class UsarioMappers
             Email = usuario.Email,
             IsLockedout = usuario.IsLockedout,
             Roles = usuario.Roles.ToModel(),
-            CentrosCosto = usuario.CentrosCosto.ToModel(),
-            Franquicias = usuario.Franquicias.ToModel(),
+            CentrosCosto = usuario.CentrosCosto,
+            Franquicias = usuario.Franquicias,
         };
 
     public static List<UsuarioRolModel> ToModel(this IEnumerable<Rol> roles) =>

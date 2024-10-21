@@ -8,10 +8,8 @@
         <form method="post" id="logoutForm" action="Account/Logout">
             <AntiforgeryToken />
             <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-            <MudMenu  Color="Color.Inherit" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomCenter">
-                <ActivatorContent>
-                    <MudChip T="string" Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Primary">@context.User.Identity?.Name</MudChip>
-                </ActivatorContent>
+            <MudMenu Color="Color.Inherit" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomCenter" 
+                     StartIcon="@Icons.Material.Filled.AccountCircle" Label="@context.User.Identity?.Name">
                 <ChildContent>
                     <MudMenuItem Href="Account/Manage" Icon="@Icons.Material.Filled.Person">Perfil</MudMenuItem>
                     <button type="submit" form="logoutForm" class="mud-list-item mud-list-item-gutters mud-list-item-clickable mud-ripple">

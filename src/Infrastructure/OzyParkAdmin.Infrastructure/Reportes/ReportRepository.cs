@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using OzyParkAdmin.Application.Reportes;
 using OzyParkAdmin.Domain.Reportes;
+using OzyParkAdmin.Domain.Reportes.Charts;
 using OzyParkAdmin.Domain.Reportes.DataSources;
 using OzyParkAdmin.Domain.Reportes.Filters;
 using OzyParkAdmin.Domain.Shared;
@@ -9,6 +10,7 @@ using OzyParkAdmin.Infrastructure.Reportes.Internals;
 using OzyParkAdmin.Infrastructure.Shared;
 using System.Collections.Immutable;
 using System.Data;
+using System.Security.Claims;
 
 namespace OzyParkAdmin.Infrastructure.Reportes;
 
@@ -18,6 +20,27 @@ namespace OzyParkAdmin.Infrastructure.Reportes;
 /// <param name="context">El <see cref="OzyParkAdminContext"/>.</param>
 public sealed class ReportRepository(OzyParkAdminContext context) : Repository<Report>(context), IReportRepository
 {
+    /// <inheritdoc/>
+    public async Task<ResultOf<ChartReport>> FindDashboardAsync(ClaimsPrincipal user, CancellationToken cancellationToken)
+    {
+        ChartReport? report = await Context.Set<ChartReport>()
+            .AsSplitQuery()
+            .OrderByDescending(x => x.LastUpdate)
+            .FirstOrDefaultAsync(x => x.ForDashboard && x.Published, cancellationToken).ConfigureAwait(false);
+
+        if (report is null)
+        {
+            return new NotFound();
+        }
+
+        if (!report.IsAccessibleByUser(user))
+        {
+            return new Unauthorized();
+        }
+
+        return report;
+    }
+
     /// <inheritdoc/>
     public async Task<ResultOf<Report>> FindReportByAkaAsync(string aka, string[] roles, CancellationToken cancellationToken)
     {
@@ -101,7 +124,7 @@ public sealed class ReportRepository(OzyParkAdminContext context) : Repository<R
             cancellationToken: cancellationToken);
 
         IEnumerable<T> results = await Context.Database.GetDbConnection().QueryAsync<T>(command);
-        return [..results];
+        return [.. results];
     }
 
     private static DynamicParameters? PrepareParameters(IEnumerable<Parameter> parameters, Filter filter, string?[] parameterValues)
@@ -119,6 +142,4 @@ public sealed class ReportRepository(OzyParkAdminContext context) : Repository<R
 
         return dynamicParameters;
     }
-
-    
 }

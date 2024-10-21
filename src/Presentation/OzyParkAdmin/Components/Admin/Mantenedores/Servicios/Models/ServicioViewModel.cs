@@ -1,6 +1,5 @@
-﻿using MassTransit.Internals;
-using OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
-using OzyParkAdmin.Components.Admin.Shared;
+﻿using OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
+using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.Servicios;
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
@@ -23,7 +22,7 @@ public sealed record ServicioViewModel
     /// <summary>
     /// El centro de costo asociado al servicio.
     /// </summary>
-    public CentroCostoModel CentroCosto { get; set; } = default!;
+    public CentroCostoInfo CentroCosto { get; set; } = default!;
 
     /// <summary>
     /// El aka del servicio.
@@ -210,7 +209,7 @@ public sealed record ServicioViewModel
         {
             Id = servicio.Id;
             FranquiciaId = servicio.FranquiciaId;
-            CentroCosto = servicio.CentroCosto.ToModel();
+            CentroCosto = servicio.CentroCosto;
             IsNew = false;
         }
 

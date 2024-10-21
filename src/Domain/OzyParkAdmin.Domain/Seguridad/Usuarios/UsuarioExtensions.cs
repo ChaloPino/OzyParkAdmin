@@ -46,7 +46,7 @@ public static class UsuarioExtensions
     /// <param name="centrosCosto">Centros de costo asociados al usuario.</param>
     /// <param name="franquicia">Franquicias asociafos al usuario.</param>
     /// <returns>Una nueva instancia de <see cref="UsuarioFullInfo"/> con los datos del <paramref name="usuario"/>.</returns>
-    public static UsuarioFullInfo ToFullInfo(this Usuario usuario, List<Rol> roles, List<CentroCosto> centrosCosto, List<Franquicia> franquicia)
+    public static UsuarioFullInfo ToFullInfo(this Usuario usuario, List<Rol> roles, List<CentroCosto> centrosCosto, List<FranquiciaInfo> franquicia)
     {
         UsuarioFullInfo usuarioInfo = usuario.ToFullInfo();
         usuarioInfo.Roles = roles;
@@ -63,7 +63,7 @@ public static class UsuarioExtensions
     /// <param name="centrosCosto">Centros de costo asociados al usuario.</param>
     /// <param name="franquicia">Franquicias asociafos al usuario.</param>
     /// <returns>Una nueva instancia de <see cref="UsuarioFullInfo"/> con los datos del <paramref name="usuario"/>.</returns>
-    public static UsuarioFullInfo ToFullInfo(this Usuario usuario, List<Rol> roles, List<CentroCostoInfo> centrosCosto, List<Franquicia> franquicia)
+    public static UsuarioFullInfo ToFullInfo(this Usuario usuario, List<Rol> roles, List<CentroCostoInfo> centrosCosto, List<FranquiciaInfo> franquicia)
     {
         UsuarioFullInfo usuarioInfo = usuario.ToFullInfo();
         usuarioInfo.Roles = roles;

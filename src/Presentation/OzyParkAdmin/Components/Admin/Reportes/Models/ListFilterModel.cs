@@ -42,6 +42,6 @@ public sealed class ListFilterModel(FilterViewModel parent, ListFilter filter, i
     /// <inheritdoc/>
     public override object? GetValue()
     {
-        return SelectedItem?.Valor;
+        return SelectedItem;
     }
 }

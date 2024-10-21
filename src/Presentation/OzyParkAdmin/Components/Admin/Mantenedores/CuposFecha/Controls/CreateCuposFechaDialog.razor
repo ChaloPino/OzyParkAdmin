@@ -1,0 +1,232 @@
+﻿@using OzyParkAdmin.Domain.CanalesVenta
+@using OzyParkAdmin.Domain.Entidades
+@using OzyParkAdmin.Domain.EscenariosCupo
+@inject CuposFechaModelValidator Validator
+
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <MudText Typo="Typo.h4" GutterBottom="true">Crear cupos por fecha</MudText>
+        <IfThen Condition="cuposFecha.Loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudForm @ref="form" Model="cuposFecha" Validation="Validator.ValidateValue" ValidationDelay="0">
+
+            <MudGrid Spacing="3" Class="mt-4">
+                <MudItem xs="4">
+                    <MudDateRangePicker @bind-DateRange="cuposFecha.RangoFechas"
+                                        Label="Rango de fechas"
+                                        Variant="Variant.Outlined"
+                                        Margin="Margin.Dense"
+                                        AutoClose="true"
+                                        For="() => cuposFecha.RangoFechas.Start"
+                                        Editable="true"
+                                        MinDate="DateTime.Today"
+                                        ImmediateText="true" />
+                </MudItem>
+                <MudItem xs="8">
+                    <MudSelect @bind-Value="cuposFecha.EscenarioCupo"
+                               Label="Escenario"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x?.Nombre"
+                               For="() => cuposFecha.EscenarioCupo">
+                        <ForIn Items="EscenariosCupo" Context="escenario">
+                            <MudSelectItem T="EscenarioCupoInfo" Value="escenario" />
+                        </ForIn>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid Spacing="3" Class="mt-4">
+                <MudItem xs="3">
+                    <MudNumericField @bind-Value="cuposFecha.Total"
+                                     Label="Cupo"
+                                     Min="0" Max="int.MaxValue"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     For="() => cuposFecha.Total"
+                                     Immediate="true" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudNumericField @bind-Value="cuposFecha.SobreCupo"
+                                     Label="SobreCupo"
+                                     Min="0" Max="int.MaxValue"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     For="() => cuposFecha.SobreCupo"
+                                     Immediate="true" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudNumericField @bind-Value="cuposFecha.TopeEnCupo"
+                                     Label="Tope en cupo"
+                                     Min="0" Max="int.MaxValue"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     For="() => cuposFecha.TopeEnCupo"
+                                     Immediate="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid Spacing="3" Class="mt-4">
+                <MudItem xs="6">
+                    <MudSelect @bind-SelectedValues="cuposFecha.CanalesVenta"
+                               SelectAll="true"
+                               SelectAllText="Seleccionar todos"
+                               Label="Canales de venta"
+                               MultiSelection="true"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x?.Nombre"
+                               MultiSelectionTextFunc="CanalesVentaDescriptions"
+                               For="() => cuposFecha.ValidationCanalVenta">
+                        <ForIn Items="CanalesVenta" Context="canalVenta">
+                            <MudSelectItem T="CanalVenta" Value="canalVenta" />
+                        </ForIn>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudSelect @bind-SelectedValues="cuposFecha.DiasSemana"
+                               SelectAll="true"
+                               SelectAllText="Seleccionar todos"
+                               Label="Dias de semana"
+                               MultiSelection="true"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x?.Aka"
+                               MultiSelectionTextFunc="DiasSemanaDescriptions"
+                               For="() => cuposFecha.ValidationDiaSemana">
+                        <ForIn Items="DiasSemana" Context="diaSemana">
+                            <MudSelectItem T="DiaSemana" Value="diaSemana" />
+                        </ForIn>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+            <MudGrid Spacing="3" Class="mt-4">
+                <MudItem xs="4">
+                    <MudTextField @bind-Value="cuposFecha.HoraInicio"
+                                   Label="Hora de inicio"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Immediate="true"
+                                   InputType="InputType.Time"
+                                   For="() => cuposFecha.HoraInicio" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudTextField @bind-Value="cuposFecha.HoraTermino"
+                                   Label="Hora de término"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Immediate="true"
+                                   InputType="InputType.Time"
+                                   step="1"
+                                   For="() => cuposFecha.HoraTermino" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudNumericField @bind-Value="cuposFecha.IntervaloMinutos"
+                                     Label="Intérvalo (mins)"
+                                     Min="10" Max="int.MaxValue"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     For="() => cuposFecha.IntervaloMinutos"
+                                     Immediate="true" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Disabled="cuposFecha.Loading" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="cuposFecha.Loading" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm form = default!;
+    private CuposFechaModel cuposFecha = new();
+
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsOpenChanged { get; set; }
+
+    [Parameter]
+    public Func<CuposFechaModel, Task<bool>>? CommitChanges { get; set; }
+
+    [Parameter]
+    public DialogOptions? DialogOptions { get; set; }
+
+    [Parameter]
+    public List<EscenarioCupoInfo> EscenariosCupo { get; set; } = [];
+
+    [Parameter]
+    public List<CanalVenta> CanalesVenta { get; set; } = [];
+
+    [Parameter]
+    public List<DiaSemana> DiasSemana { get; set; } = [];
+
+    private string CanalesVentaDescriptions(List<string> canalesVenta)
+    {
+        if (canalesVenta.Count == 0)
+        {
+            return "Seleccione canales de venta";
+        }
+        if (canalesVenta.Count == 1)
+        {
+            return canalesVenta[0];
+        }
+
+        return $"{canalesVenta.Count} canales de venta seleccionados";
+    }
+
+    private string DiasSemanaDescriptions(List<string> diasSemana)
+    {
+        if (diasSemana.Count == 0)
+        {
+            return "Seleccione días de semana";
+        }
+        if (diasSemana.Count == 1)
+        {
+            return diasSemana[0];
+        }
+
+        return $"{diasSemana.Count} días de semana seleccionados";
+    }
+
+    private async Task ChangeIsOpen(bool isOpen)
+    {
+        IsOpen = isOpen;
+        cuposFecha = new();
+        await IsOpenChanged.InvokeAsync(isOpen);
+    }
+
+    private async Task CommitItemChangesAsync()
+    {
+        if (cuposFecha is not null && CommitChanges is not null)
+        {
+            await form.Validate();
+
+            if (form.IsValid)
+            {
+                cuposFecha.Loading = true;
+                bool result = await CommitChanges(cuposFecha);
+
+                if (result)
+                {
+                    await ChangeIsOpen(false);
+                }
+
+                cuposFecha.Loading = false;
+            }
+        }
+    }
+
+    private async Task CancelEditingItemAsync()
+    {
+        await ChangeIsOpen(false);
+    }
+}

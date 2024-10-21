@@ -15,7 +15,6 @@
 @using OzyParkAdmin.Application.Productos.Lock
 @using OzyParkAdmin.Application.Productos.Search
 @using OzyParkAdmin.Application.Productos.Unlock
-@using OzyParkAdmin.Components.Admin.Shared
 @using OzyParkAdmin.Domain.Cajas
 @using OzyParkAdmin.Domain.CategoriasProducto
 @using OzyParkAdmin.Domain.CentrosCosto
@@ -31,7 +30,7 @@
 <MudText Typo="Typo.h4">Productos</MudText>
 
 <MudDataGrid @ref="dataGrid" T="ProductoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
-             ServerData="LoadProductosAsync" SortMode="SortMode.Multiple" 
+             ServerData="SearchProductosAsync" SortMode="SortMode.Multiple" 
              Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
              Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
@@ -291,7 +290,7 @@
 <CascadingValue Value="true" Name="IsNested">
     <ProductoEditDialog @bind-IsOpen="openEditing" Producto="currentProducto" CentrosCosto="centrosCosto" Franquicias="franquicias"
                         TiposProducto="tiposProducto" Familias="familias"
-                        LoadCategorias="LoadCategoriasAsync" LoadCategoriasDespliegue="LoadCategoriasDespliegueAsync" LoadComplementos="LoadComplementosAsync"
+                        LoadCategorias="LoadCategoriasAsync" LoadComplementos="LoadComplementosAsync"
                         CommitChanges="SaveProductoAsync" DialogOptions="DialogOptions" />
 
     <CajasDialog @bind-IsOpen="openCajas" Cajas="cajas" Producto="currentProducto" CommitChanges="SaveCajasAsync" 
@@ -308,7 +307,7 @@
     private string? searchText;
 
     private List<CentroCostoInfo> centrosCosto = [];
-    private List<FranquiciaModel> franquicias = [];
+    private List<FranquiciaInfo> franquicias = [];
     private List<CajaInfo> cajas = [];
     private List<TipoProducto> tiposProducto = [];
     private List<AgrupacionContable> familias = [];
@@ -337,7 +336,7 @@
         Task[] loadingTasks =
         [
             LoadCentrosCostoAsync(), LoadFranquiciasAsync(), LoadCajasAsync(),
-    LoadAgrupacionesContablesAsync(), LoadTiposProductoAsync(),
+            LoadAgrupacionesContablesAsync(), LoadTiposProductoAsync(),
     ];
 
         await Task.WhenAll(loadingTasks);
@@ -351,8 +350,8 @@
 
     private async Task LoadFranquiciasAsync()
     {
-        ResultListOf<Franquicia> result = await Mediator.SendRequest(new ListFranquicias(user!));
-        franquicias = result.Items.ToModel();
+        ResultListOf<FranquiciaInfo> result = await Mediator.SendRequest(new ListFranquicias(user!));
+        franquicias = result.Items.ToList();
     }
 
     private async Task LoadCajasAsync()
@@ -375,12 +374,6 @@
 
     private async Task<List<CategoriaProductoInfo>> LoadCategoriasAsync(int franquiciaId)
     {
-        ResultListOf<CategoriaProductoInfo> result = await Mediator.SendRequest(new ListCategoriasProductoFinales(franquiciaId));
-        return result.Items.ToList();
-    }
-
-    private async Task<List<CategoriaProductoInfo>> LoadCategoriasDespliegueAsync(int franquiciaId)
-    {
         ResultListOf<CategoriaProductoInfo> result = await Mediator.SendRequest(new ListCategoriasProducto(franquiciaId));
         return result.Items.ToList();
     }
@@ -397,7 +390,7 @@
         return result.Items.ToList();
     }
 
-    public async Task<GridData<ProductoViewModel>> LoadProductosAsync(GridState<ProductoViewModel> state)
+    public async Task<GridData<ProductoViewModel>> SearchProductosAsync(GridState<ProductoViewModel> state)
     {
         SearchProductos searchProductos = state.ToSearch(user!, searchText);
         PagedList<ProductoFullInfo> productos = await Mediator.SendRequest(searchProductos);

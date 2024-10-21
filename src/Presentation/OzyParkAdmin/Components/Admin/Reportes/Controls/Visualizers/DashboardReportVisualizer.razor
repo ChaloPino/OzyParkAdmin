@@ -15,10 +15,10 @@
                     </Then>
                     <Else>
                         <MudGrid Spacing="2">
-                            <ForIn Items="Charts" Context="chart">
+                            <ForIn Items="Report!.Charts" Context="chart">
                                 <MudItem xs="12" md="MdSize">
-                                    <MudPaper Elevation="2" Style="@GetLayoutFromChartInfo(chart)">
-                                        @RenderChartSkeleton()
+                                    <MudPaper Elevation="2" Class="pa-2">
+                                        @RenderChartSkeleton(chart.Type, $"height: {GetHeight(chart.Height)};" )
                                     </MudPaper>
                                 </MudItem>
                             </ForIn>
@@ -35,8 +35,8 @@
                         <MudGrid Spacing="2">
                             <ForIn Items="Charts" Context="chart">
                                 <MudItem xs="12" md="MdSize">
-                                    <MudPaper Elevation="2" Style="@GetLayoutFromChartInfo(chart)">
-                                        <ChartVisualizer ChartMetaInfo="chart" />
+                                    <MudPaper Elevation="2" Class="pa-2">
+                                        <ChartVisualizer ChartMetaInfo="chart" Height="@GetHeight(chart.Heigth)" Width="@chart.Width" />
                                     </MudPaper>
                                 </MudItem>
                             </ForIn>
@@ -49,6 +49,8 @@
 </IfThen>
 
 @code {
+    private const string defaultHeight = "300px";
+
     [Parameter]
     public ChartReport? Report { get; set; }
 
@@ -59,14 +61,9 @@
     [Parameter]
     public IEnumerable<ChartMetaInfo> Charts { get; set; } = [];
 
-
-    private string GetLayoutFromChartInfo(ChartMetaInfo chartInfo)
+    private string GetHeight(string? height)
     {
-        StyleBuilder styleBuilder = new StyleBuilder()
-        .AddStyle("width", chartInfo.Width, chartInfo.Width is not null)
-        .AddStyle("height", chartInfo.Heigth, chartInfo.Heigth is not null)
-        .AddStyle("height", "300px", chartInfo.Heigth is null);
-        return styleBuilder.Build();
+        return height ?? defaultHeight;
     }
 
     private RenderFragment? RenderLayout()
@@ -91,7 +88,11 @@
 
             if (className.Contains("col "))
             {
-                return RenderContent(element);
+                var content = element.Element("div");
+                if (content is not null)
+                {
+                    return RenderContent(element.Element("div")!);
+                }
             }
         }
         return
@@ -134,13 +135,19 @@
 
     private RenderFragment RenderContentPaper(XElement element) =>
     @<text>
-    <MudPaper Elevation="2">
-        <IfThenElse Condition="Loading == LoadingState.Loading">
+    @{
+        string chartName = element.Value.Trim().Trim('@');
+        var chart = Report!.Charts.First(x => string.Equals(chartName, x.Name));
+        string height = chart.Height ?? defaultHeight;
+        string style = $"height: {height};";
+    }
+    <MudPaper Elevation="2" Class="pa-2">
+        <IfThenElse Condition="Loading == LoadingState.Loaded">
             <Then>
-                @RenderChartSkeleton()
+                @RenderChart(chartName, height, chart.Width)
             </Then>
             <Else>
-                @RenderChart(element.Value)
+                @RenderChartSkeleton(chart.Type, style)
             </Else>
         </IfThenElse>
     </MudPaper>
@@ -150,18 +157,22 @@
     private RenderFragment RenderContentByClass(string[] classes, XElement element) =>
     @<text>
     @{
+        string chartName = element.Value.Trim().Trim('@');
+        var chart = Report!.Charts.First(x => string.Equals(chartName, x.Name));
+        string height = chart.Height ?? defaultHeight;
+        string skeletonStyle = $"height: {height};";
         bool isCard = classes.Any(x => x.StartsWith("card"));
     }
     <IfThenElse Condition="isCard">
         <Then>
-            <MudCard Elevation="2">
+            <MudCard Elevation="2" Class="pa-2">
                 <MudCardContent>
-                    <IfThenElse Condition="Loading == LoadingState.Loading">
+                    <IfThenElse Condition="Loading == LoadingState.Loaded">
                         <Then>
-                            @RenderChartSkeleton()
+                            @RenderChart(chartName, height, chart.Width)
                         </Then>
                         <Else>
-                            @RenderChart(element.Value)
+                            @RenderChartSkeleton(chart.Type, skeletonStyle)
                         </Else>
                     </IfThenElse>
                 </MudCardContent>
@@ -174,25 +185,42 @@
     </text>
     ;
 
-    private RenderFragment RenderChart(string name) =>
+    private RenderFragment RenderChart(string name, string height, string? width) =>
     @<text>
     @{
-        string chartName = name.Trim().Trim('@');
-        var chart = Charts.First(x => string.Equals(chartName, x.Name));
+        var chart = Charts.First(x => string.Equals(name, x.Name));
     }
-    <ChartVisualizer ChartMetaInfo="chart" />
-    </text>
-    ;
+    <ChartVisualizer ChartMetaInfo="chart" Height="@height" Width="@width" />
+    </text>;
 
-    private RenderFragment RenderChartSkeleton() =>
+    private RenderFragment RenderChartSkeleton(OzyParkAdmin.Domain.Reportes.Charts.ChartType? type, string style) =>
     @<text>
-        <MudStack Row="true" Spacing="4" AlignItems="AlignItems.End" Justify="Justify.Center" Style="height: 200px;">
-            <MudSkeleton Animation="Animation.Pulse" Class="py-1 px-3"  />
-            <MudSkeleton Animation="Animation.Pulse" Class="py-3 px-3" />
-            <MudSkeleton Animation="Animation.Pulse" Class="py-5 px-3" />
-            <MudSkeleton Animation="Animation.Pulse" Class="py-3 px-3" />
-            <MudSkeleton Animation="Animation.Pulse" Class="py-1 px-3" />
-        </MudStack>
+        <IfThenElse Condition="type == Domain.Reportes.Charts.ChartType.Table">
+            <Then>
+                <MudStack Row="false" AlignItems="AlignItems.Stretch" Justify="Justify.FlexStart" Style="@style">
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse mb-1" Height="250px" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse" Height="100px" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse" Height="100px" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse" Height="100px" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse" Height="100px" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse" Height="100px" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse" Height="100px" />
+                </MudStack>
+            </Then>
+            <Else>
+                <MudStack Row="true" AlignItems="AlignItems.End" Justify="Justify.Center" Style="@style">
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse py-18 px-5" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse py-10 px-5" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse py-20 px-5" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse py-15 px-5" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse py-8 px-5" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse py-14 px-5" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse py-18 px-5" />
+                    <MudPaper Class="mud-skeleton mud-skeleton-pulse py-7 px-5" />
+                </MudStack>
+            </Else>
+        </IfThenElse>
+        
     </text>;
 
 

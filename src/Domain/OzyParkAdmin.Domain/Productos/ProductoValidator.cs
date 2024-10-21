@@ -5,7 +5,7 @@ namespace OzyParkAdmin.Domain.Productos;
 /// <summary>
 /// El validador de <see cref="Producto"/>
 /// </summary>
-public sealed class ProductoValidator
+public sealed class ProductoValidator : IBusinessLogic
 {
     private readonly IProductoRepository _repository;
 

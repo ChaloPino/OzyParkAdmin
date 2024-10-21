@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using FluentValidation;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using MudBlazor;
 using MudBlazor.Extensions;
 using MudBlazor.Services;
@@ -21,6 +22,11 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Services.AddSerilog();
+
+builder.Services.Configure<HubOptions>(options =>
+{
+    options.MaximumReceiveMessageSize = null;
+});
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -56,6 +62,7 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
+builder.Services.AddLocalization();
 
 builder.AddOzyParkAdmin();
 
@@ -81,6 +88,12 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+app.UseRequestLocalization(options =>
+    options
+        .SetDefaultCulture("es-CL")
+        .AddSupportedCultures("es-CL")
+        .AddSupportedUICultures("es-CL"));
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

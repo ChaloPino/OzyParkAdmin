@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Rendering
 @using NReco.PivotData
 @using OzyParkAdmin.Application.Reportes
+@using OzyParkAdmin.Application.Reportes.Pivoted
 @using OzyParkAdmin.Domain.Reportes.Pivoted
 @using System.Globalization
 @using OzyParkAdmin.Domain.Reportes;
@@ -100,7 +101,7 @@
 
                                     @if (TotalsColumn || GrandTotal)
                                     {
-                                        @RenderColumnHeaderTotals(new PivotMetadata(-1, null, -1, -1), "totals", true, aggregatorsCount)
+                                        @RenderColumnHeaderTotals(PivotMetadata.CreateTotals(), "totals", true, aggregatorsCount)
                                     }
                                 </tr>
                             }
@@ -606,7 +607,7 @@
 
             @if (TotalsRow)
         {
-            @RenderTotalsValue(new PivotMetadata(-1, null, -1, -1) { IsSubtotal = true }, columns[0], "totalValue")
+            @RenderTotalsValue(PivotMetadata.CreateSubtotals(), columns[0], "totalValue")
         }
         else if (PivotTable!.ColumnKeys.Length != 0)
         {
@@ -617,8 +618,7 @@
             @RenderGrandTotal()
         </tr>
     }
-    </text>
-        ;
+    </text>;
 
     private RenderFragment RenderGrandTotal() =>
     @<text>
@@ -731,242 +731,6 @@
 
     private static string GetNumberIndex(int number, string defaultValue) =>
         number < 0 ? defaultValue : number.ToString();
-
-    private sealed class PivotMetadata
-    {
-        internal ValueKey? ValueKey;
-        internal int Index;
-        internal int Length;
-        internal List<PivotMetadata>? Children;
-        internal int Dimensions;
-        internal PivotMetadata? Parent;
-        internal int ValueKeyIndex = -1;
-        internal int DimKeysCount = -1;
-        internal int Count = -1;
-        internal bool IsValue;
-        internal bool IsDimension;
-        internal bool IsSubtotal;
-        internal bool Viewed;
-        internal PivotMetadata? PrevPivot;
-
-        internal PivotMetadata(int index, ValueKey? valueKey, int valueKeyIndex, int dimKeysCount)
-        {
-            Length = 1;
-            Index = index;
-            ValueKey = valueKey;
-            ValueKeyIndex = valueKeyIndex;
-            DimKeysCount = dimKeysCount;
-            IsValue = true;
-            IsDimension = true;
-            IsSubtotal = false;
-
-            if (ValueKey != null && ValueKey.DimKeys.Length != 0)
-            {
-                object dimKeys = ValueKey.DimKeys[index];
-            }
-        }
-
-        internal void AddChild(PivotMetadata pivotMetadata)
-        {
-            Children ??= new List<PivotMetadata>();
-            Children.Add(pivotMetadata);
-
-            if (pivotMetadata.IsDimension)
-            {
-                Dimensions++;
-            }
-        }
-
-        internal int GetDimensions()
-        {
-            return !IsSubtotal || PrevPivot == null ? Dimensions : PrevPivot.Dimensions;
-        }
-
-        internal string GetValue()
-        {
-            if (Count < 0)
-            {
-                return string.Empty;
-            }
-            string str = Count.ToString();
-            if (Parent != null)
-            {
-                str = string.Concat(Parent.GetValue(), ":", str);
-            }
-            return str;
-        }
-
-        internal int[] AllCounts()
-        {
-            int[] numArray = new int[Index + 1];
-            var a = this;
-
-            for (int i = numArray.Length - 1; i >= 0 && a != null; i--)
-            {
-                numArray[i] = a.Count;
-                a = a.Parent;
-            }
-
-            return numArray;
-        }
-
-        internal static List<PivotMetadata>[] Create(string[] values, ValueKey[] valueKeys, bool repeatKeysInGroups, string[]? subtotalDimensions)
-        {
-            ValueKey? valueKey;
-            List<PivotMetadata>[] bs = new List<PivotMetadata>[values.Length];
-            bool[] flagArray = new bool[values.Length];
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                bs[i] = new List<PivotMetadata>();
-                flagArray[i] = subtotalDimensions != null && !repeatKeysInGroups && i < values.Length - 1 && Array.IndexOf(subtotalDimensions, values[i]) >= 0;
-            }
-
-            int[] numArray = new int[values.Length];
-            PivotMetadata[] bArray = new PivotMetadata[values.Length];
-            int length = values.Length - 1;
-
-            for (int j = 0; j < valueKeys.Length; j++)
-            {
-                ValueKey valueKey1 = valueKeys[j];
-
-                valueKey = j > 0 ? valueKeys[j - 1] : null;
-
-                ValueKey? valueKey2 = valueKey;
-                PivotMetadata? b = null;
-
-                for (int k = 0; k < values.Length; k++)
-                {
-                    if (repeatKeysInGroups || valueKey2 == null || !AreEquals(valueKey2, valueKey1, k))
-                    {
-                        bool flag1 = k < length && Key.IsEmpty(valueKey1.DimKeys[k + 1]);
-                        PivotMetadata b1 = new(k, GetOrCreateValueKey(valueKey1, k), j, numArray[length]);
-
-                        if (flag1)
-                        {
-                            b1.IsSubtotal = true;
-                            b1.IsValue = false;
-                        }
-
-                        numArray[k]++;
-
-                        bs[k].Add(b1);
-
-                        if (b == null)
-                        {
-                            b1.Count = CountList(bs[k]) + 1;
-                        }
-                        else
-                        {
-                            b1.Parent = b;
-                            b.AddChild(b1);
-                            b1.Count = CountList(b.Children!) + 1;
-                        }
-
-                        if (flagArray[k] && b1.IsDimension && !flag1)
-                        {
-                            PivotMetadata a = new(b1.Index, b1.ValueKey!, b1.ValueKeyIndex, b1.DimKeysCount)
-                                {
-                                    IsValue = false,
-                                    IsDimension = false,
-                                    IsSubtotal = true,
-                                    Parent = b1.Parent,
-                                    PrevPivot = b1
-                                };
-
-                            var b2 = a;
-                            bs[k].Add(b2);
-
-                            if (b != null)
-                            {
-                                b.AddChild(b2);
-                                Increment(b);
-                            }
-                        }
-
-                        bArray[k] = b1;
-                        b = b1;
-
-                        if (flag1)
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        bArray[k].Length++;
-                        b = bArray[k];
-                    }
-                }
-            }
-            return bs;
-        }
-
-        internal static void Increment(PivotMetadata pivotMetadata)
-        {
-            while (pivotMetadata != null)
-            {
-                pivotMetadata.Length++;
-                pivotMetadata = pivotMetadata.Parent!;
-            }
-        }
-
-        private static int CountList(List<PivotMetadata> list)
-        {
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                if (list[i].Count >= 0)
-                {
-                    return list[i].Count;
-                }
-            }
-            return -1;
-        }
-
-        private static bool AreEquals(ValueKey firstValueKey, ValueKey valueKey, int index)
-        {
-            for (int i = index; i >= 0; i--)
-            {
-                if (!firstValueKey.DimKeys[i].Equals(valueKey.DimKeys[i]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static ValueKey GetOrCreateValueKey(ValueKey valueKey, int index)
-        {
-            if (index >= valueKey.DimKeys.Length - 1)
-            {
-                return valueKey;
-            }
-            object[] dimKeys = new object[valueKey.DimKeys.Length];
-            for (int i = 0; i < dimKeys.Length; i++)
-            {
-                dimKeys[i] = i <= index ? valueKey.DimKeys[i] : Key.Empty;
-            }
-            return new ValueKey(dimKeys);
-        }
-
-        internal static IEnumerable<PivotMetadata> Project(IList<PivotMetadata> list)
-        {
-            foreach (PivotMetadata item in list)
-            {
-                if (item.Children == null)
-                {
-                    yield return item;
-                }
-                else
-                {
-                    foreach (PivotMetadata child in Project(item.Children))
-                    {
-                        yield return child;
-                    }
-                }
-            }
-        }
-    }
 
     private sealed class ValueCellContext
     {

@@ -1,0 +1,101 @@
+﻿@using MassTransit
+@using MassTransit.Mediator
+@using OzyParkAdmin.Application.Reportes.Charts
+@using OzyParkAdmin.Application.Reportes.Find
+@using OzyParkAdmin.Application.Reportes.Generate
+@using OzyParkAdmin.Components.Admin.Reportes.Controls.Visualizers
+@using OzyParkAdmin.Components.Admin.Reportes.Models
+@using OzyParkAdmin.Domain.Reportes.Charts
+@using OzyParkAdmin.Domain.Shared
+@using System.Security.Claims
+@inject ISnackbar Snackbar
+@inject IMediator Mediator
+
+<IfThenElse Condition="dashboardReport is not null">
+    <Then>
+        <MudPaper Elevation="0">
+            <MudToolBar Class="justify-space-between">
+                <MudText Typo="Typo.h4">Dashboard</MudText>
+                <MudTooltip Text="Refrescar">
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Size="Size.Medium" Color="Color.Default" OnClick="RefreshAsync" />
+                </MudTooltip>
+            </MudToolBar>
+            <DashboardReportVisualizer Report="dashboardReport" Loading="loading" Charts="charts" />
+        </MudPaper>
+    </Then>
+    <Else>
+        <IfThen Condition="unauthorized">
+            <Then>
+                <Logo />
+            </Then>
+        </IfThen>
+    </Else>
+</IfThenElse>
+
+@code {
+    private ClaimsPrincipal user = default!;
+    private ChartReport? dashboardReport;
+    private LoadingState loading = LoadingState.None;
+    private IEnumerable<ChartMetaInfo> charts = [];
+    private bool unauthorized;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationState).User;
+
+        var result = await Mediator.SendRequest(new FindDashboard(user));
+
+        await result.SwitchAsync(
+            onSuccess: SetReportAsync,
+            onFailure: SetError
+        );
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task RefreshAsync()
+    {
+        if (dashboardReport is not null)
+        {
+            await SetReportAsync(dashboardReport);
+        }
+    }
+
+    private async Task SetReportAsync(ChartReport report, CancellationToken cancellationToken = default)
+    {
+        var generateHtml = report.ToGenerateHtml(user);
+        dashboardReport = report;
+        loading = LoadingState.Loading;
+        await InvokeAsync(StateHasChanged);
+
+        var result = await Mediator.SendRequest(generateHtml);
+
+        result.Switch(
+            onReportGenerated: SetReportGenerated,
+            onFailure: SetError
+        );
+    }
+
+    private void SetReportGenerated(ReportGenerated generated)
+    {
+        charts = generated.Charts;
+        StateHasChanged();
+        loading = LoadingState.Loaded;
+    }
+
+
+    private void SetError(Failure failure)
+    {
+        if (failure.IsUnauthorized(out _))
+        {
+            unauthorized = true;
+        }
+
+        Snackbar.AddFailure(failure, "conseguir bashboard");
+        loading = LoadingState.None;
+        StateHasChanged();
+    }
+}

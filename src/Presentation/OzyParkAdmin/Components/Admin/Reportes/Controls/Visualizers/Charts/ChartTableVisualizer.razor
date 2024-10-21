@@ -1,6 +1,6 @@
 ﻿@using OzyParkAdmin.Application.Reportes
 @inherits ReportVisualizerBase
-<MudTable T="DataInfo" Items="Data" Dense="true" Striped="true" Bordered="true" Hover="true">
+<MudTable T="DataInfo" Items="Data" Elevation="0" Dense="true" Striped="true" Bordered="true" Hover="true" FixedHeader="true" Height="@Height">
     <HeaderContent>
         <ForIn Items="Columns" Context="column">
             <MudTh>@column.Header</MudTh>
@@ -16,6 +16,9 @@
 @code {
     [Parameter]
     public IEnumerable<ColumnInfo> Columns { get; set; } = [];
+
+    [Parameter]
+    public string? Height { get; set; }
 
     [Parameter]
     public IEnumerable<DataInfo> Data { get; set; } = [];

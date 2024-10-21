@@ -1,0 +1,183 @@
+﻿@page "/Mantenedores/ExclusionesCupo"
+@using OzyParkAdmin.Application
+@using OzyParkAdmin.Application.CanalesVenta.List
+@using OzyParkAdmin.Application.CentrosCosto.List
+@using OzyParkAdmin.Application.CuposFecha.Create
+@using OzyParkAdmin.Application.CuposFecha.Delete
+@using OzyParkAdmin.Application.CuposFecha.Search
+@using OzyParkAdmin.Application.CuposFecha.Update
+@using OzyParkAdmin.Application.DiasSemana.List
+@using OzyParkAdmin.Application.EscenariosCupo.List
+@using OzyParkAdmin.Application.ExclusionesCupo.Create
+@using OzyParkAdmin.Application.ExclusionesCupo.Search
+@using OzyParkAdmin.Components.Admin.Mantenedores.Cupos.Controls
+@using OzyParkAdmin.Components.Admin.Mantenedores.Cupos.Models
+@using System.Security.Claims
+@using OzyParkAdmin.Domain.CanalesVenta
+@using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Cupos
+@using OzyParkAdmin.Domain.CuposFecha
+@using OzyParkAdmin.Domain.Entidades
+@using OzyParkAdmin.Domain.EscenariosCupo
+@using OzyParkAdmin.Domain.ExclusionesCupo
+@using OzyParkAdmin.Domain.Shared
+@inject IMediator Mediator
+@inject ISnackbar Snackbar
+@inject DialogOptions DialogOptions
+@inject IDialogService DialogService
+
+<PageTitle>Exclusiones de fecha para cupos</PageTitle>
+<MudText Typo="Typo.h4">Exclusiones de fecha para cupos</MudText>
+
+<MudDataGrid @ref="dataGrid" T="FechaExcluidaCupoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
+ServerData="SearchFechasExcluidasAsync" SortMode="SortMode.Multiple" MultiSelection="true" Loading="loading"
+@bind-SelectedItems="fechasExcluidasToDelete"
+Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+    <ToolBarContent>
+        <MudSpacer />
+        <SearchControl @bind-SearchText="searchText" />
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddFechasExcluidasAsync">Nuevos cupos por fecha</MudButton>
+        <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Filled" Class="ml-3" Disabled="fechasExcluidasToDelete.Count == 0" OnClick="DeleteFechaExcluidasAsync">Eliminar cupos por fecha</MudButton>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="FechaExcluidaCupoViewModel" Hideable="false" />
+        <PropertyColumn Property="x => x.CentroCosto.Descripcion" Title="Centro de costo">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.CentroCosto.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Centro de costo de cupo" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.CanalVenta.Nombre" Title="Canal de venta">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.CanalVenta.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Canal de venta" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Fecha" Title="Fecha" Hideable="false">
+            <FilterTemplate>
+                <DateOnlyFilter FilterContext="context" />
+            </FilterTemplate>
+        </PropertyColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="FechaExcluidaCupoViewModel" />
+    </PagerContent>
+</MudDataGrid>
+
+<CascadingValue Value="true" Name="IsNested">
+    <CreateFechasExcluidasDialog @bind-IsOpen="openCreating"
+    CentrosCosto="centrosCosto"
+    CanalesVenta="canalesVenta"
+    CommitChanges="SaveFechasExcluidasAsync"
+    DialogOptions="DialogOptions" />
+</CascadingValue>
+@code {
+    private bool loading;
+    private ClaimsPrincipal? user;
+    private MudDataGrid<FechaExcluidaCupoViewModel> dataGrid = default!;
+    private CalendarDialog calendario = default!;
+    private ObservableGridData<FechaExcluidaCupoViewModel>? currentFechasExcluidas;
+    private HashSet<FechaExcluidaCupoViewModel> fechasExcluidasToDelete = [];
+    private string? searchText;
+
+    private List<CentroCostoInfo> centrosCosto = [];
+    private List<CanalVenta> canalesVenta = [];
+
+    private bool openCreating;
+    private FechaExcluidaCupoViewModel? currentFechaExcluida;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = (await AuthenticationState).User;
+        await LoadReferencesAsync();
+    }
+
+    private async Task LoadReferencesAsync()
+    {
+        Task[] loadingTasks =
+        [
+            LoadCentrosCosto(), LoadCanalesVenta()
+        ];
+
+        await Task.WhenAll(loadingTasks);
+    }
+
+    private async Task LoadCentrosCosto()
+    {
+        ResultListOf<CentroCostoInfo> result = await Mediator.SendRequest(new ListCentrosCosto(user!));
+        centrosCosto = result.Items.ToList();
+    }
+
+    private async Task LoadCanalesVenta()
+    {
+        ResultListOf<CanalVenta> result = await Mediator.SendRequest(new ListCanalesVenta());
+        canalesVenta = result.Items.ToList();
+    }
+
+    public async Task<GridData<FechaExcluidaCupoViewModel>> SearchFechasExcluidasAsync(GridState<FechaExcluidaCupoViewModel> state)
+    {
+        SearchFechasExcluidasCupo searchFechasExcluidas = state.ToSearch(user!, searchText);
+        PagedList<FechaExcluidaCupoFullInfo> fechasExcluidas = await Mediator.SendRequest(searchFechasExcluidas);
+        currentFechasExcluidas = fechasExcluidas.ToGridData(dataGrid);
+        return currentFechasExcluidas;
+    }
+
+    private Task AddFechasExcluidasAsync()
+    {
+        openCreating = true;
+        return Task.CompletedTask;
+    }
+
+    private async Task<bool> SaveFechasExcluidasAsync(FechasExcluidasCupoModel fechasExcluidasCupo)
+    {
+        CreateFechasExcluidasCupo changeStatus = fechasExcluidasCupo.ToCreate();
+        var result = await Mediator.SendRequest(changeStatus);
+        return await result.MatchAsync(
+           onSuccess: RefreshAsync,
+           onFailure: (failure) => AddFailure(failure, "crear fechas excluidas para los cupos")
+       );
+    }
+
+    private async Task DeleteFechaExcluidasAsync()
+    {
+        var res = await DialogService.ShowConfirmationDialogAsync("Confirmación", "¿Está seguro que desea eliminar las fechas excluidas para cupos seleccionadas?", "Sí", "No");
+
+        if (res)
+        {
+            loading = true;
+
+            var result = await Mediator.SendRequest(fechasExcluidasToDelete.ToDelete());
+            await result.SwitchAsync(
+                    onSuccess: DeleteFechasExcluidasSelectedAsync,
+                    onFailure: failure => AddFailure(failure, "eliminar fechas excluidas para cupos"));
+
+            loading = false;
+        }
+    }
+
+    private async Task DeleteFechasExcluidasSelectedAsync(Success success, CancellationToken cancellationToken)
+    {
+        fechasExcluidasToDelete.Clear();
+        await RefreshAsync(success, cancellationToken);
+    }
+
+    private async Task<bool> RefreshAsync(Success success, CancellationToken cancellationToken)
+    {
+        await dataGrid.ReloadServerData();
+        return true;
+    }
+
+    private bool AddFailure(Failure failure, string action)
+    {
+        Snackbar.AddFailure(failure, action);
+        return false;
+    }
+}

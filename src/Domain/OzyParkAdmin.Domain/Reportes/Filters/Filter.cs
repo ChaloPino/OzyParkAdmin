@@ -1,5 +1,6 @@
 ﻿using OzyParkAdmin.Domain.Reportes.DataSources;
 using OzyParkAdmin.Domain.Reportes.Excel;
+using System.Globalization;
 
 namespace OzyParkAdmin.Domain.Reportes.Filters;
 
@@ -153,5 +154,26 @@ public abstract class Filter : SecureComponent<Filter>
     public virtual object? GetOtherValue(object? value)
     {
         return null;
+    }
+
+    /// <summary>
+    /// Consigue el valor como texto para el filtro.
+    /// </summary>
+    /// <param name="value">El valor a conseguir.</param>
+    /// <returns>El texto del valor para el filtro.</returns>
+    public virtual object? GetText(object? value) =>
+        value;
+
+    /// <summary>
+    /// Formatea el valor para el filtro.
+    /// </summary>
+    /// <param name="value">El valor a ser formateado.</param>
+    /// <returns>El valor formateado para el filtro.</returns>
+    public virtual string? GetFormattedText(object? value)
+    {
+        value = GetText(value);
+        return !string.IsNullOrEmpty(Format)
+            ? string.Format(CultureInfo.CurrentCulture, string.Concat("{0:", Format, "}"), value)
+            : value!.ToString();
     }
 }

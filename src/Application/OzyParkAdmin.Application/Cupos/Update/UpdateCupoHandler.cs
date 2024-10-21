@@ -39,7 +39,7 @@ public sealed class UpdateCupoHandler : MediatorRequestHandler<UpdateCupo, Resul
             request.CanalVenta,
             request.DiaSemana,
             request.HoraInicio,
-            request.HorFin,
+            request.HoraFin,
             request.Total,
             request.SobreCupo,
             request.TopeEnCupo,

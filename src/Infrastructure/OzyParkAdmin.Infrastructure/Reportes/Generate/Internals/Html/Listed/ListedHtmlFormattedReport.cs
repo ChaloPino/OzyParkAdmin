@@ -24,7 +24,7 @@ internal class ListedHtmlFormattedReport : HtmlFormattedReport
         foreach (var row in dataRows)
         {
             DataInfo dataInfo = new();
-            
+
             foreach (ColumnInfo column in columnsInfo)
             {
                 dataInfo[column] = row[column.Name];

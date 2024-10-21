@@ -23,7 +23,8 @@ public static class CategoriaProductoExtensions
         {
             Id = categoriaProducto.Id,
             Aka = categoriaProducto.Aka,
-            Nombre = categoriaProducto.ToNombreCompleto(),
+            Nombre = categoriaProducto.Nombre,
+            NombreCompleto = categoriaProducto.ToNombreCompleto(),
             EsActivo = categoriaProducto.EsActivo,
         };
 }

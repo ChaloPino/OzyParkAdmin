@@ -7,7 +7,7 @@ namespace OzyParkAdmin.Domain.Tickets;
 /// <summary>
 /// Contiene la lógica de negocio del <see cref="Ticket"/>
 /// </summary>
-public sealed class TicketManager
+public sealed class TicketManager : IBusinessLogic
 {
     private readonly ITicketRepository _repository;
     private readonly IUsuarioRepository _usuarioRepository;

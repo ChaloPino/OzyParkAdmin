@@ -1,9 +1,11 @@
-﻿namespace OzyParkAdmin.Domain.CatalogoImagenes;
+﻿using OzyParkAdmin.Domain.Shared;
+
+namespace OzyParkAdmin.Domain.CatalogoImagenes;
 
 /// <summary>
 /// Servicio que permite realizar transacciones de los catálogos de imagen.
 /// </summary>
-public sealed class CatalogoImagenService
+public sealed class CatalogoImagenService : IBusinessLogic
 {
     private readonly ICatalogoImagenRepository _repository;
 

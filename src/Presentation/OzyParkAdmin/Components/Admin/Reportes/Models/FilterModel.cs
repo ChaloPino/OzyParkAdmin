@@ -94,6 +94,9 @@ public abstract class FilterModel<TFilter, T>(FilterViewModel parent, TFilter fi
     /// </summary>
     public Func<T?, string?> Validation => Validate;
 
+    /// <inheritdoc/>
+    Filter IFilterModel.Filter => Filter;
+
     /// <summary>
     /// Consigue los valores de los filtros padres.
     /// </summary>

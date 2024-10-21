@@ -1,6 +1,5 @@
 ﻿using OzyParkAdmin.Domain.Reportes.DataSources;
 using System.Globalization;
-using System.Text;
 
 namespace OzyParkAdmin.Domain.Reportes.Filters;
 
@@ -9,6 +8,7 @@ namespace OzyParkAdmin.Domain.Reportes.Filters;
 /// </summary>
 public sealed class MonthFilter : Filter
 {
+    private static readonly TimeSpan LastTimeOfDay = new TimeSpan(23, 59, 59);
     private MonthFilter()
     {
     }
@@ -51,16 +51,8 @@ public sealed class MonthFilter : Filter
         UseToday ? new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) : null;
 
     /// <inheritdoc/>
-    public override object? GetValue(object? value)
-    {
-        if (value is not null && DateTime.TryParseExact(value.ToString(), "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out DateTime date))
-        {
-            return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-        }
-
-        return null;
-    }
+    public override object? GetValue(object? value) =>
+        GetDateTimeValue(value);
 
     /// <inheritdoc/>
     public override object? GetOtherValue(object? value)
@@ -70,12 +62,26 @@ public sealed class MonthFilter : Filter
             return null;
         }
 
+        DateTime? dateTime = GetDateTimeValue(value);
+
+        if (dateTime is not null)
+        {
+            return dateTime.Value.Add(LastTimeOfDay);
+        }
+
+        return null;
+    }
+
+    private static DateTime? GetDateTimeValue(object? value)
+    {
+        if (value is DateTime dateTime)
+        {
+            return new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0, 0, DateTimeKind.Local);
+        }
+        
         if (value is not null && DateTime.TryParseExact(value.ToString(), "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out DateTime date))
         {
-            int daysInMonth = DateTime.DaysInMonth(date.Year, date.Month);
-            date = new DateTime(date.Year, date.Month, daysInMonth, 23, 59, 59, 0, DateTimeKind.Unspecified);
-            return date.ToString("O", CultureInfo.InvariantCulture);
-
+            return date;
         }
 
         return null;

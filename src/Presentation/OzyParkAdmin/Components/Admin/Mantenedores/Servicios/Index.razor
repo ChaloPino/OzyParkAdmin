@@ -13,7 +13,6 @@
 @using OzyParkAdmin.Application.Servicios.Search
 @using OzyParkAdmin.Application.Tramos.List
 @using OzyParkAdmin.Application.Zonas.List
-@using OzyParkAdmin.Components.Admin.Shared
 @using OzyParkAdmin.Domain.Cajas
 @using OzyParkAdmin.Domain.CentrosCosto
 @using OzyParkAdmin.Domain.Franquicias
@@ -45,9 +44,9 @@
                 <MudHighlighter Text="@context.Item.Aka" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.CentroCosto.Nombre" Title="Centro de costo">
+        <PropertyColumn Property="x => x.CentroCosto.Descripcion" Title="Centro de costo">
             <CellTemplate>
-                <MudHighlighter Text="@context.Item.CentroCosto.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+                <MudHighlighter Text="@context.Item.CentroCosto.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
             <GroupTemplate>
                 <StringGrouping Title="Centro de costo" GroupDefinition="context" />
@@ -213,8 +212,8 @@
     private MudDataGrid<ServicioViewModel> dataGrid = default!;
     private ObservableGridData<ServicioViewModel>? currentServicios;
     private string? searchText;
-    private List<FranquiciaModel> franquicias = [];
-    private List<CentroCostoModel> centrosCosto = [];
+    private List<FranquiciaInfo> franquicias = [];
+    private List<CentroCostoInfo> centrosCosto = [];
     private List<TipoControlModel> tiposControl = [];
     private List<TipoDistribucionModel> tiposDistribucion = [];
     private List<TipoVigenciaModel> tiposVigencia = [];
@@ -258,13 +257,13 @@
     private async Task LoadCentrosCostoAsync()
     {
         ResultListOf<CentroCostoInfo> result = await Mediator.SendRequest(new ListCentrosCosto(user!));
-        centrosCosto = result.Items.ToModel();
+        centrosCosto = result.Items.ToList();
     }
 
     private async Task LoadFranquiciasAsync()
     {
-        ResultListOf<Franquicia> result = await Mediator.SendRequest(new ListFranquicias(user!));
-        franquicias = result.Items.ToModel();
+        ResultListOf<FranquiciaInfo> result = await Mediator.SendRequest(new ListFranquicias(user!));
+        franquicias = result.Items.ToList();
     }
 
     private async Task LoadTiposControlAsync()

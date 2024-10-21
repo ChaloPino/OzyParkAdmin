@@ -11,7 +11,7 @@ public static class CategoriaProductoExtensions
     /// <param name="source">La colección de <see cref="CategoriaProducto"/> a convertir.</param>
     /// <returns>La colección de <see cref="CategoriaProductoInfo"/> convertida desde <paramref name="source"/>.</returns>
     public static List<CategoriaProductoInfo> ToInfo(this IEnumerable<CategoriaProducto> source) =>
-        [.. source.Select(ToInfo).OrderBy(x => x.Nombre)];
+        [.. source.Select(ToInfo).OrderBy(x => x.NombreCompleto)];
 
     /// <summary>
     /// Convierte un <see cref="CategoriaProducto"/> en <see cref="CategoriaProductoInfo"/>.

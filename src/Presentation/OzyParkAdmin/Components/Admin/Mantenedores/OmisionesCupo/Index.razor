@@ -1,0 +1,64 @@
+﻿@page "/Mantenedores/OmisionesCupos"
+@inject IMediator Mediator
+<PageTitle>Omisiones de fechas</PageTitle>
+<MudText Typo="Typo.h4">Omisiones de fechas</MudText>
+
+<MudDataGrid @ref="dataGrid"
+             T="IgnoraEscenarioCupoExclusionViewModel"
+             ReadOnly="true"
+             Striped="true"
+             Hover="true"
+             ShowMenuIcon="true"
+             ServerData="SearchOmisionesAsync"
+             SortMode="SortMode.Multiple"
+             MultiSelection="true"
+             @bind-SelectedItems="omisionesToDelete"
+             Loading="loading"
+             Groupable="true"
+             Hideable="true"
+             GroupExpanded="true"
+             ColumnsPanelReordering="true"
+             Filterable="true"
+             FilterMode="DataGridFilterMode.ColumnFilterMenu">
+
+    <ToolBarContent>
+        <MudSpacer />
+        <SearchControl @bind-SearchText="searchText" />
+        @* <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddOmisionesAsync">Nuevas omisiones</MudButton>
+        <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Filled" Class="ml-3" Disabled="omisionesToDelete.Count == 0" OnClick="DeleteOmisionesAsync">Eliminar omisiones</MudButton> *@
+    </ToolBarContent>
+
+    <Columns>
+        <PropertyColumn Property="x => x.EscenarioCupo.Nombre" Hideable="false" Title="Escenario cupo">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.EscenarioCupo.Nombre" HighlightedText="@searchText" CaseSensitive="false" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.CanalVenta.Nombre" Title="Canal de venta">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.CanalVenta.Nombre" HighlightedText="@searchText" CaseSensitive="false" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.FechaIgnorada" Title="Fecha de omisión">
+            <FilterTemplate>
+                <DateOnlyFilter FilterContext="context" />
+            </FilterTemplate>
+        </PropertyColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="IgnoraEscenarioCupoExclusionViewModel" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    private MudDataGrid<IgnoraEscenarioCupoExclusionViewModel> dataGrid = default!;
+    private HashSet<IgnoraEscenarioCupoExclusionViewModel> omisionesToDelete = [];
+    private bool loading;
+    private string? searchText;
+
+    private async Task<GridData<IgnoraEscenarioCupoExclusionViewModel>> SearchOmisionesAsync(GridState<IgnoraEscenarioCupoExclusionViewModel> state)
+    {
+        var result = await Mediator.SendRequest(state.ToSearch(searchText));
+        return result.ToGridData();
+    }
+}

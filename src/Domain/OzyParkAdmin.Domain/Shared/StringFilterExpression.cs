@@ -28,9 +28,9 @@ public class StringFilterExpression<T> : FilterExpression<T>
         return @operator.ToLowerInvariant() switch
         {
             "contains" => new ContainsExpression<T>(member, value),
-            "notcontains" => new NotContainsExpression<T>(member, value),
+            "not contains" => new NotContainsExpression<T>(member, value),
             "equals" => new EqualsExpression<T, string>(member, value),
-            "notequals" => new NotEqualsExpression<T, string>(member, value),
+            "not equals" => new NotEqualsExpression<T, string>(member, value),
             "starts with" => new StartsWithExpression<T>(member, value),
             "ends with" => new EndsWithExpression<T>(member, value),
             "is empty" => new IsNullOrEmptyExpression<T>(member),

@@ -17,6 +17,12 @@ public sealed class EscenarioCupoRepository(OzyParkAdminContext context) : Repos
     }
 
     /// <inheritdoc/>
+    public async Task<IEnumerable<EscenarioCupo>> FindByIdsAsync(int[] ids, CancellationToken cancellationToken)
+    {
+        return await EntitySet.Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<List<EscenarioCupoInfo>> ListAsync(int[]? centroCostoIds, CancellationToken cancellationToken)
     {
         IQueryable<EscenarioCupo> query = EntitySet;

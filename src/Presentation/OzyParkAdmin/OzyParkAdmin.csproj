@@ -53,8 +53,6 @@
     <Folder Include="Components\Admin\Bodegas\" />
     <Folder Include="Components\Admin\CajaControl\Coordenadas\" />
     <Folder Include="Components\Admin\CajaControl\CoordenadasEmergencia\" />
-    <Folder Include="Components\Admin\Mantenedores\OmisionesCupo\Controls\" />
-    <Folder Include="Components\Admin\Mantenedores\OmisionesCupo\Validators\" />
   </ItemGroup>
 
   <ItemGroup>

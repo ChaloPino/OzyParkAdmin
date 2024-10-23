@@ -1,4 +1,7 @@
-﻿using MudBlazor;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using MudBlazor;
+using OzyParkAdmin.Application.OmisionesCupo.Create;
+using OzyParkAdmin.Application.OmisionesCupo.Delete;
 using OzyParkAdmin.Application.OmisionesCupo.Search;
 using OzyParkAdmin.Domain.OmisionesCupo;
 using OzyParkAdmin.Domain.Shared;
@@ -66,4 +69,22 @@ internal static class IgnoraEscenarioCupoExclusionMappers
 
     private static IgnoraEscenarioCupoExclusionViewModel ToViewModel(this IgnoraEscenarioCupoExclusionFullInfo omision) =>
         new() { EscenarioCupo = omision.EscenarioCupo, CanalVenta = omision.CanalVenta, FechaIgnorada = omision.FechaIgnorada, };
+
+    public static CreateOmisionesEscenarioCupoExclusion ToCreate(this OmisionesCupoExclusionModel omisiones) =>
+        new([.. omisiones.EscenariosCupo], [.. omisiones.CanalesVenta], omisiones.RangoFechas.ToStartDate(), omisiones.RangoFechas.ToEndDate());
+
+    private static DateOnly ToStartDate(this DateRange dateRange) =>
+        dateRange.Start.ToDateOnly();
+
+    private static DateOnly ToEndDate(this DateRange dateRange) =>
+        dateRange.End.ToDateOnly();
+
+    private static DateOnly ToDateOnly(this DateTime? date) =>
+        date is null ? DateOnly.FromDateTime(DateTime.Today) : DateOnly.FromDateTime(date.Value);
+
+    public static DeleteOmisionesEscenarioCupoExclusion ToDelete(this IEnumerable<IgnoraEscenarioCupoExclusionViewModel> source) =>
+        new([.. source.Select(ToFullInfo)]);
+
+    private static IgnoraEscenarioCupoExclusionFullInfo ToFullInfo(this IgnoraEscenarioCupoExclusionViewModel model) =>
+        new() { EscenarioCupo = model.EscenarioCupo, CanalVenta = model.CanalVenta, FechaIgnorada = model.FechaIgnorada };
 }

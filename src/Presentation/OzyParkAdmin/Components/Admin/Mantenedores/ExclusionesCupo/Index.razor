@@ -30,10 +30,10 @@
 <MudText Typo="Typo.h4">Exclusiones de fecha para cupos</MudText>
 
 <MudDataGrid @ref="dataGrid" T="FechaExcluidaCupoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
-ServerData="SearchFechasExcluidasAsync" SortMode="SortMode.Multiple" MultiSelection="true" Loading="loading"
-@bind-SelectedItems="fechasExcluidasToDelete"
-Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
-Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+             ServerData="SearchFechasExcluidasAsync" SortMode="SortMode.Multiple" MultiSelection="true" Loading="loading"
+             @bind-SelectedItems="fechasExcluidasToDelete"
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
         <MudSpacer />
         <SearchControl @bind-SearchText="searchText" />
@@ -71,10 +71,10 @@ Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
 
 <CascadingValue Value="true" Name="IsNested">
     <CreateFechasExcluidasDialog @bind-IsOpen="openCreating"
-    CentrosCosto="centrosCosto"
-    CanalesVenta="canalesVenta"
-    CommitChanges="SaveFechasExcluidasAsync"
-    DialogOptions="DialogOptions" />
+                                 CentrosCosto="centrosCosto"
+                                 CanalesVenta="canalesVenta"
+                                 CommitChanges="SaveFechasExcluidasAsync"
+                                 DialogOptions="DialogOptions" />
 </CascadingValue>
 @code {
     private bool loading;

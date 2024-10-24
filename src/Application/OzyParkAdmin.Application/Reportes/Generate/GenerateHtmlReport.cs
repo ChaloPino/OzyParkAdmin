@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using System.Security.Claims;
 
 namespace OzyParkAdmin.Application.Reportes.Generate;
@@ -9,4 +9,4 @@ namespace OzyParkAdmin.Application.Reportes.Generate;
 /// <param name="Aka">El aka del reporte a generar.</param>
 /// <param name="Filter">Los filtros usados para generar el reporte.</param>
 /// <param name="User">El usuario que solicita la generación del reporte.</param>
-public sealed record GenerateHtmlReport(string Aka, ReportFilter Filter, ClaimsPrincipal User) : Request<ReportResult>;
+public sealed record GenerateHtmlReport(string Aka, ReportFilter Filter, ClaimsPrincipal User) : IQuery<ReportGenerated>;

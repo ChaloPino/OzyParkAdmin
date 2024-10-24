@@ -102,11 +102,21 @@ public class TypeUnionSourceGenerator : IIncrementalGenerator
         BuildConstructor(context, source);
         BuildSwitchMethods(context, nameForDocumenation, source);
         BuildMatchMethods(context, nameForDocumenation, source);
-        BuildMatchTypeUnionMethods(context, nameForDocumenation, source);
+
+        if (context.HasGenericArguments)
+        {
+            BuildBindMethods(context, nameForDocumenation, source);
+        }
+
         BuildIsMethods(context, nameForDocumenation, source);
         BuildEqualityMethods(context, nameWithGenericTypes, source);
         BuildGetHashMethod(context, source);
-        BuildToStringMethod(context, source);
+
+        if (!context.HasStringMethodOverride)
+        {
+            BuildToStringMethod(context, source);
+        }
+
         BuildImplicitOperators(context, nameWithGenericTypes, nameForDocumenation, source);
         BuildOperators(context, nameWithGenericTypes, source);
         source.Append('}').AppendLine();
@@ -394,19 +404,19 @@ namespace {context.NameSpace};
         }
     }
 
-    private static void BuildMatchTypeUnionMethods(TypeUnionContext context, string nameForDocumenation, StringBuilder source)
+    private static void BuildBindMethods(TypeUnionContext context, string nameForDocumenation, StringBuilder source)
     {
-        // Match Type Union methods
-        foreach (var matchMethod in context.GetMatchTypeUnionMethods())
+        // Bind methods
+        foreach (var bindMethod in context.GetBindMethods())
         {
-            if (!matchMethod.IsAsync)
+            if (!bindMethod.IsAsync)
             {
                 source.Append($$"""
 
     /// <summary>
-    /// Executes the matching pattern for each of the members of the <see cref="{{nameForDocumenation}}" />, and returns a new instance of <see cref="{{nameForDocumenation}}" /> as a result.
+    /// Executes the bind pattern for each of the members of the <see cref="{{nameForDocumenation}}" />, and returns a new instance of <see cref="{{nameForDocumenation}}" /> as a result.
     /// </summary>
-{{context.MatchTypeArgumentsDocumentation}}
+{{context.BindArgumentsDocumentation}}
 {{context.MatchArgumentsDocumentation}}
     /// <returns>
     /// The <typeparamref name="TResult"/>.
@@ -414,7 +424,7 @@ namespace {context.NameSpace};
     /// <exception cref="UnreachableException">
     /// If none of the functions can be executed.
     /// </exception>
-    public {{context.Name}}{{context.MatchTypeArguments}} Match{{context.Name}}{{context.MatchTypeArguments}}({{matchMethod.Parameter}})
+    public {{context.Name}}{{context.BindArguments}} Bind{{context.BindArguments}}({{bindMethod.Parameter}})
     {
 
 """);
@@ -426,7 +436,7 @@ namespace {context.NameSpace};
     /// <summary>
     /// Executes asynchronously the matching pattern for each of the members of the <see cref="{{nameForDocumenation}}" />, and returns a new instance of <see cref="{{nameForDocumenation}}" /> as a result.
     /// </summary>
-{{context.MatchTypeArgumentsDocumentation}}
+{{context.BindArgumentsDocumentation}}
 {{context.MatchArgumentsDocumentation}}
     /// <param name="cancellationToken">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
     /// <returns>
@@ -436,7 +446,7 @@ namespace {context.NameSpace};
     /// <exception cref="UnreachableException">
     /// If none of the functions can be executed.
     /// </exception>
-    public async Task<{{context.Name}}{{context.MatchTypeArguments}}> Match{{context.Name}}Async{{context.MatchTypeArguments}}({{matchMethod.Parameter}}, CancellationToken cancellationToken = default)
+    public async Task<{{context.Name}}{{context.BindArguments}}> BindAsync{{context.BindArguments}}({{bindMethod.Parameter}}, CancellationToken cancellationToken = default)
     {
 
 """);
@@ -447,7 +457,7 @@ namespace {context.NameSpace};
             foreach (var parameter in context.Parameters)
             {
                 string onFunction = parameter.GetProperty("on");
-                string matchFunction = TypeUnionContext.GetMatchMethod(matchMethod, onFunction, parameter, index);
+                string matchFunction = TypeUnionContext.GetMatchMethod(bindMethod, onFunction, parameter, index);
                 source.Append($@"
         if (index == {index} && {onFunction} is not null)
         {{

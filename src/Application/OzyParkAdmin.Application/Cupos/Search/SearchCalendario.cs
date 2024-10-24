@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.Cupos;
 using OzyParkAdmin.Domain.Servicios;
@@ -21,4 +21,4 @@ public sealed record SearchCalendario(
     ServicioInfo Servicio,
     ZonaInfo? ZonaOrigen,
     DateTime? Inicio,
-    DateTime? Fin) : Request<ResultListOf<CupoFechaInfo>>;
+    DateTime? Fin) : IQueryListOf<CupoFechaInfo>;

@@ -1,18 +1,14 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Reportes;
 using OzyParkAdmin.Domain.Reportes.Filters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OzyParkAdmin.Application.Reportes.Filters;
 
 /// <summary>
 /// El manejador de <see cref="LoadFilter"/>.
 /// </summary>
-public sealed class LoadFilterHandler : MediatorRequestHandler<LoadFilter, ResultListOf<ItemOption>>
+public sealed class LoadFilterHandler : QueryListOfHandler<LoadFilter, ItemOption>
 {
     private readonly IReportRepository _repository;
 
@@ -20,16 +16,18 @@ public sealed class LoadFilterHandler : MediatorRequestHandler<LoadFilter, Resul
     /// Crea una nueva instancia de <see cref="LoadFilterHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="IReportRepository"/>.</param>
-    public LoadFilterHandler(IReportRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public LoadFilterHandler(IReportRepository repository, ILogger<LoadFilterHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<ItemOption>> Handle(LoadFilter request, CancellationToken cancellationToken)
+    protected override async Task<List<ItemOption>> ExecuteListAsync(LoadFilter query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return await _repository.LoadFilterAsync(request.ReportId, request.FilterId, request.Parameters, cancellationToken);
+        ArgumentNullException.ThrowIfNull(query);
+        return await _repository.LoadFilterAsync(query.ReportId, query.FilterId, query.Parameters, cancellationToken);
     }
 }

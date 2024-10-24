@@ -23,12 +23,48 @@ internal sealed class TypeUnionContext
         TypeDefinition = $"partial {classOrStruct} {NameWithGenericTypes} : IEquatable<{NameWithGenericTypes}>";
         SupportsMatchTypeUnion = symbol.TypeArguments.Any();
         ConstructorArguments = BuildConstructorArguments();
-        MatchTypeArguments = BuildMatchTypeArguments();
+        BindArguments = BuildBindArguments();
         SwitchArgumentsDocumentation = BuildSwitchArgumentsDocumentation(Parameters);
         MatchArgumentsDocumentation = BuildMatchArgumentsDocumentation(Parameters);
-        MatchTypeArgumentsDocumentation = BuildTypeMatchArgumentsDocumentation(symbol, NameForDocumentation);
+        BindArgumentsDocumentation = BuildBindArgumentsDocumentation(symbol, NameForDocumentation);
         Parent = parent;
+        HasStringMethodOverride = symbol.GetMembers().OfType<IMethodSymbol>().Any(m => m.Name == "ToString" && m.Parameters.Length == 0 && m.ReturnType.SpecialType == SpecialType.System_String && m.IsOverride);
+        HasGenericArguments = symbol.IsGenericType;
     }
+
+    public TypeUnionContext? Parent { get; }
+
+    public INamedTypeSymbol Symbol { get; }
+
+    public bool IsStruct { get; }
+
+    public string NameSpace { get; }
+
+    public string Name { get; }
+
+    public string TypeDefinition { get; }
+
+    public string NameWithGenericTypes { get; }
+
+    public string NameForDocumentation { get; }
+
+    public string ConstructorArguments { get; }
+
+    public IList<ParameterContext> Parameters { get; }
+
+    public string BindArguments { get; }
+
+    public string SwitchArgumentsDocumentation { get; }
+
+    public string MatchArgumentsDocumentation { get; }
+
+    public string BindArgumentsDocumentation { get; }
+
+    public bool SupportsMatchTypeUnion { get; }
+
+    public bool HasStringMethodOverride { get; }
+
+    public bool HasGenericArguments { get; }
 
     public static TypeUnionContext? Create(
         INamedTypeSymbol symbol,
@@ -163,36 +199,6 @@ internal sealed class TypeUnionContext
         return new(symbol, [.. typeParameters], [.. typeArguments], originalSymbols, parentContext);
     }
 
-    public TypeUnionContext? Parent { get; }
-
-    public INamedTypeSymbol Symbol { get; }
-
-    public bool IsStruct { get; }
-
-    public string NameSpace { get; }
-
-    public string Name { get; }
-
-    public string TypeDefinition { get; }
-
-    public string NameWithGenericTypes { get; }
-
-    public string NameForDocumentation { get; }
-
-    public string ConstructorArguments { get; }
-
-    public IList<ParameterContext> Parameters { get; }
-
-    public string MatchTypeArguments { get; }
-
-    public string SwitchArgumentsDocumentation { get; }
-
-    public string MatchArgumentsDocumentation { get; }
-
-    public string MatchTypeArgumentsDocumentation { get; }
-
-    public bool SupportsMatchTypeUnion { get; }
-
     public string GetPropertiesExcept(ParameterContext parameter, string propertyPrefix)
     {
         return Parameters.Except([parameter])
@@ -313,7 +319,7 @@ internal sealed class TypeUnionContext
                 .ToString();
     }
 
-    public List<(string Parameter, bool IsAsync, List<bool> AsyncPerArgument)> GetMatchTypeUnionMethods()
+    public List<(string Parameter, bool IsAsync, List<bool> AsyncPerArgument)> GetBindMethods()
     {
         List<(string, bool, List<bool>)> methods = [];
 
@@ -387,7 +393,7 @@ internal sealed class TypeUnionContext
     private string BuildConstructorArguments() =>
         string.Join(", ", Parameters.Select(x => x.ConstructorArgument));
 
-    private string BuildMatchTypeArguments() =>
+    private string BuildBindArguments() =>
         Symbol.TypeArguments.Any()
         ? $"<{BuildGenericPart(Symbol.TypeArguments, true)}>"
         : string.Empty;
@@ -450,7 +456,7 @@ internal sealed class TypeUnionContext
         return builder.ToString();
     }
 
-    private static string BuildTypeMatchArgumentsDocumentation(INamedTypeSymbol symbol, string nameForDocumentation)
+    private static string BuildBindArgumentsDocumentation(INamedTypeSymbol symbol, string nameForDocumentation)
     {
         StringBuilder builder = new();
 

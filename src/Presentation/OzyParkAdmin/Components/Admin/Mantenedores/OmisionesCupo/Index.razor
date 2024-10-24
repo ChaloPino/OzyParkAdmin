@@ -1,12 +1,4 @@
 ﻿@page "/Mantenedores/OmisionesCupos"
-@using OzyParkAdmin.Application
-@using OzyParkAdmin.Application.CanalesVenta.List
-@using OzyParkAdmin.Application.EscenariosCupo.List
-@using OzyParkAdmin.Application.OmisionesCupo.Create
-@using OzyParkAdmin.Domain.CanalesVenta
-@using OzyParkAdmin.Domain.EscenariosCupo
-@using OzyParkAdmin.Domain.Shared
-@using System.Security.Claims
 @inject IMediator Mediator
 @inject DialogOptions DialogOptions
 @inject ISnackbar Snackbar
@@ -14,22 +6,22 @@
 <MudText Typo="Typo.h4">Omisiones de fechas</MudText>
 
 <MudDataGrid @ref="dataGrid"
-T="IgnoraEscenarioCupoExclusionViewModel"
-ReadOnly="true"
-Striped="true"
-Hover="true"
-ShowMenuIcon="true"
-ServerData="SearchOmisionesAsync"
-SortMode="SortMode.Multiple"
-MultiSelection="true"
-@bind-SelectedItems="omisionesToDelete"
-Loading="loading"
-Groupable="true"
-Hideable="true"
-GroupExpanded="true"
-ColumnsPanelReordering="true"
-Filterable="true"
-FilterMode="DataGridFilterMode.ColumnFilterMenu">
+             T="IgnoraEscenarioCupoExclusionViewModel"
+             ReadOnly="true"
+             Striped="true"
+             Hover="true"
+             ShowMenuIcon="true"
+             ServerData="SearchOmisionesAsync"
+             SortMode="SortMode.Multiple"
+             MultiSelection="true"
+             @bind-SelectedItems="omisionesToDelete"
+             Loading="loading"
+             Groupable="true"
+             Hideable="true"
+             GroupExpanded="true"
+             ColumnsPanelReordering="true"
+             Filterable="true"
+             FilterMode="DataGridFilterMode.ColumnFilterMenu">
 
     <ToolBarContent>
         <MudSpacer />
@@ -39,7 +31,7 @@ FilterMode="DataGridFilterMode.ColumnFilterMenu">
     </ToolBarContent>
 
     <Columns>
-        <SelectColumn  Hideable="false"/>
+        <SelectColumn Hideable="false" />
         <PropertyColumn Property="x => x.EscenarioCupo.Nombre" Hideable="false" Title="Escenario cupo">
             <CellTemplate>
                 <MudHighlighter Text="@context.Item.EscenarioCupo.Nombre" HighlightedText="@searchText" CaseSensitive="false" />
@@ -62,111 +54,9 @@ FilterMode="DataGridFilterMode.ColumnFilterMenu">
 </MudDataGrid>
 
 <CascadingValue Value="true" Name="IsNested">
-    <CreateOmisionesDialog 
-    DialogOptions="DialogOptions"
-    @bind-IsOpen="createOpen"
-    CanalesVenta="canalesVenta"
-    EscenariosCupo="escenariosCupo"
-    CommitChanges="OnSaveOmisionesAsync" />
+    <CreateOmisionesDialog DialogOptions="DialogOptions"
+                           @bind-IsOpen="createOpen"
+                           CanalesVenta="canalesVenta"
+                           EscenariosCupo="escenariosCupo"
+                           CommitChanges="OnSaveOmisionesAsync" />
 </CascadingValue>
-
-
-@code {
-    private MudDataGrid<IgnoraEscenarioCupoExclusionViewModel> dataGrid = default!;
-    private HashSet<IgnoraEscenarioCupoExclusionViewModel> omisionesToDelete = [];
-    private bool loading;
-    private string? searchText;
-    private bool createOpen;
-    private List<CanalVenta> canalesVenta = [];
-    private List<EscenarioCupoInfo> escenariosCupo = [];
-    private ClaimsPrincipal? user;
-
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
-    {
-        user = (await AuthenticationState).User;
-        await LoadReferencesAsync();
-    }
-
-    private async Task LoadReferencesAsync()
-    {
-        Task[] loadingTasks =
-        [
-            LoadEscenariosCupo(), LoadCanalesVenta()
-        ];
-
-        await Task.WhenAll(loadingTasks);
-    }
-
-    private async Task LoadEscenariosCupo()
-    {
-        ResultListOf<EscenarioCupoInfo> result = await Mediator.SendRequest(new ListEscenariosCupo(user!));
-        escenariosCupo = result.Items.ToList();
-    }
-
-    private async Task LoadCanalesVenta()
-    {
-        ResultListOf<CanalVenta> result = await Mediator.SendRequest(new ListCanalesVenta());
-        canalesVenta = result.Items.ToList();
-    }
-
-    private async Task<GridData<IgnoraEscenarioCupoExclusionViewModel>> SearchOmisionesAsync(GridState<IgnoraEscenarioCupoExclusionViewModel> state)
-    {
-        var result = await Mediator.SendRequest(state.ToSearch(searchText));
-        return result.ToGridData();
-    }
-
-    private Task AddOmisionesAsync()
-    {
-        createOpen = true;
-        return Task.CompletedTask;
-    }
-
-    private async Task<bool> OnSaveOmisionesAsync(OmisionesCupoExclusionModel model)
-    {
-        loading = true;
-        var response = await Mediator.SendRequest(model.ToCreate());
-
-        bool result = await response.MatchAsync(
-            onSuccess: RefreshAsync,
-            onFailure: failure => AddFailure(failure, "crear omisiones de fechas")
-        );
-
-        loading = false;
-
-        return result;
-    }
-
-    private async Task DeleteOmisionesAsync()
-    {
-        loading = true;
-
-        var response = await Mediator.SendRequest(omisionesToDelete.ToDelete());
-        await response.SwitchAsync(
-            onSuccess: DeleteAsync,
-            onFailure: failure => AddFailure(failure, "eliminar omisiones de fechas")
-        );
-
-        loading = false;
-    }
-
-    private async Task DeleteAsync(Success success, CancellationToken cancellationToken)
-    {
-        await RefreshAsync(success, cancellationToken);
-        omisionesToDelete.Clear();
-    }
-
-    private async Task<bool> RefreshAsync(Success success, CancellationToken cancellationToken)
-    {
-        await dataGrid.ReloadServerData();
-        return true;
-    }
-
-    private bool AddFailure(Failure failure, string action)
-    {
-        Snackbar.AddFailure(failure, action);
-        return false;
-    }
-}

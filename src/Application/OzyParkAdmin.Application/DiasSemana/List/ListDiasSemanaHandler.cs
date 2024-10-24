@@ -1,4 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Entidades;
 using OzyParkAdmin.Domain.Shared;
 
@@ -7,7 +8,7 @@ namespace OzyParkAdmin.Application.DiasSemana.List;
 /// <summary>
 /// El manejador de <see cref="ListDiasSemana"/>.
 /// </summary>
-public sealed class ListDiasSemanaHandler : MediatorRequestHandler<ListDiasSemana, ResultListOf<DiaSemana>>
+public sealed class ListDiasSemanaHandler : QueryListOfHandler<ListDiasSemana, DiaSemana>
 {
     private readonly IGenericRepository<DiaSemana> _repository;
 
@@ -15,16 +16,18 @@ public sealed class ListDiasSemanaHandler : MediatorRequestHandler<ListDiasSeman
     /// Crea una nueva instancia de <see cref="ListDiasSemanaHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="IGenericRepository{TEntity}"/> de <see cref="DiaSemana"/>.</param>
-    public ListDiasSemanaHandler(IGenericRepository<DiaSemana> repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ListDiasSemanaHandler(IGenericRepository<DiaSemana> repository, ILogger<ListDiasSemanaHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<DiaSemana>> Handle(ListDiasSemana request, CancellationToken cancellationToken)
+    protected override async Task<List<DiaSemana>> ExecuteListAsync(ListDiasSemana query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(query);
         SortExpressionCollection<DiaSemana> sortExpressions = new SortExpressionCollection<DiaSemana>()
             .Add(x => x.Id, false);
 

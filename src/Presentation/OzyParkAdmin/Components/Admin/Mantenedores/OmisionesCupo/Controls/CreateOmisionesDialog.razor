@@ -33,7 +33,7 @@
                                Margin="Margin.Dense"
                                Dense="true"
                                ToStringFunc="x => x?.Nombre"
-                               MultiSelectionTextFunc="CanalesVentaDescriptions"
+                               MultiSelectionTextFunc="EscenariosCupoDescriptions"
                                For="() => omisionesCrear.ValidationEscenariosCupo">
                         <ForIn Items="EscenariosCupo" Context="escenarioCupo">
                             <MudSelectItem T="EscenarioCupoInfo" Value="escenarioCupo" />
@@ -65,74 +65,4 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="omisionesCrear.Loading" Class="px-10">Guardar</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    private MudForm form = default!;
-    private OmisionesCupoExclusionModel omisionesCrear = new();
-
-    [Parameter]
-    public bool IsOpen { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> IsOpenChanged { get; set; }
-
-    [Parameter]
-    public Func<OmisionesCupoExclusionModel, Task<bool>>? CommitChanges { get; set; }
-
-    [Parameter]
-    public DialogOptions? DialogOptions { get; set; }
-
-    [Parameter]
-    public List<EscenarioCupoInfo> EscenariosCupo { get; set; } = [];
-
-    [Parameter]
-    public List<CanalVenta> CanalesVenta { get; set; } = [];
-
-    private string CanalesVentaDescriptions(List<string> canalesVenta)
-    {
-        if (canalesVenta.Count == 0)
-        {
-            return "Seleccione canales de venta";
-        }
-        if (canalesVenta.Count == 1)
-        {
-            return canalesVenta[0];
-        }
-
-        return $"{canalesVenta.Count} canales de venta seleccionados";
-    }
-
-    private async Task ChangeIsOpen(bool isOpen)
-    {
-        IsOpen = isOpen;
-        omisionesCrear = new();
-        await IsOpenChanged.InvokeAsync(isOpen);
-    }
-
-    private async Task CommitItemChangesAsync()
-    {
-        if (omisionesCrear is not null && CommitChanges is not null)
-        {
-            await form.Validate();
-
-            if (form.IsValid)
-            {
-                omisionesCrear.Loading = true;
-                bool result = await CommitChanges(omisionesCrear);
-
-                if (result)
-                {
-                    await ChangeIsOpen(false);
-                }
-
-                omisionesCrear.Loading = false;
-            }
-        }
-    }
-
-    private async Task CancelEditingItemAsync()
-    {
-        await ChangeIsOpen(false);
-    }
-}
 

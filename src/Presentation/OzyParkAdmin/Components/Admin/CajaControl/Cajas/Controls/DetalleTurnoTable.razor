@@ -1,5 +1,5 @@
 ﻿@using OzyParkAdmin.Domain.Cajas
-<MudDataGrid @ref="dataGrid" T="DetalleTurnoInfo" Items="Detalle" Dense="true" ReadOnly="true">
+<MudDataGrid T="DetalleTurnoInfo" Items="Detalle" Dense="true" ReadOnly="true">
     <Columns>
         <PropertyColumn Property="x => x.Fecha" Title="Fecha" />
         <PropertyColumn Property="x => x.Hora" Title="Hora" />
@@ -29,43 +29,3 @@
         </IfThen>
     </PagerContent>
 </MudDataGrid>
-
-@code {
-    private MudDataGrid<DetalleTurnoInfo> dataGrid = default!;
-
-    [Parameter]
-    public IEnumerable<DetalleTurnoInfo> Detalle { get; set; } = [];
-
-    [Parameter]
-    public bool Paginate { get; set; } = true;
-
-    [Parameter]
-    public bool SummarizeMonto{ get; set; }
-
-    private AggregateDefinition<DetalleTurnoInfo>? MontoAggregateDefinition =>
-        SummarizeMonto 
-        ? new()
-        {
-            Type = AggregateType.Custom,
-            CustomAggregate = Summarize
-        }
-        : null;
-
-
-    private string Summarize(IEnumerable<DetalleTurnoInfo> detalles)
-    {
-        decimal total = Detalle.Sum(x => x.Monto);
-
-        if (Paginate)
-        {
-            decimal totalPaginado = detalles.Sum(x => x.Monto);
-
-            if (totalPaginado != total)
-            {
-                return $"{totalPaginado:C0} ({total:C0})";
-            }
-        }
-
-        return $"{total:C0}";
-    }
-}

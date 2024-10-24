@@ -1,9 +1,7 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CanalesVenta;
-using OzyParkAdmin.Domain.CuposFecha;
 using OzyParkAdmin.Domain.Entidades;
 using OzyParkAdmin.Domain.EscenariosCupo;
-using OzyParkAdmin.Domain.Shared;
 using System.Collections.Immutable;
 
 namespace OzyParkAdmin.Application.CuposFecha.Create;
@@ -33,4 +31,4 @@ public sealed record CreateCuposFecha(
     int IntervaloMinutos,
     int Total,
     int SobreCupo,
-    int TopeEnCupo) : Request<SuccessOrFailure>;
+    int TopeEnCupo) : ICommand;

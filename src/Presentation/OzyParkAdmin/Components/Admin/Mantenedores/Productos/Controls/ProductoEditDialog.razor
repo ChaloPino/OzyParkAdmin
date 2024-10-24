@@ -1,10 +1,7 @@
 ﻿@using OzyParkAdmin.Domain.CategoriasProducto
 @using OzyParkAdmin.Domain.CentrosCosto
 @using OzyParkAdmin.Domain.Contabilidad
-@using OzyParkAdmin.Domain.Franquicias
 @using OzyParkAdmin.Domain.Productos
-@using System.Collections.ObjectModel
-@using System.Diagnostics.CodeAnalysis
 @inject ProductoViewModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
@@ -15,16 +12,16 @@
         </IfThen>
         <MudForm Model="Producto" @ref="form" Validation="Validator.ValidateValue" ValidationDelay="0">
             <MudSelect T="int" Value="Producto.FranquiciaId" ValueChanged="FranquiciaChanged" Variant="Variant.Outlined" Margin="Margin.Dense"
-            Label="Franquicia" Required="true" Class="mt-4" ToStringFunc="GetFranquicia"
-            Disabled="!Producto.IsNew" For="() => Producto.FranquiciaId" Immediate="true">
+                       Label="Franquicia" Required="true" Class="mt-4" ToStringFunc="GetFranquicia"
+                       Disabled="!Producto.IsNew" For="() => Producto.FranquiciaId" Immediate="true">
                 <ForIn Items="Franquicias" Context="franquicia">
                     <MudSelectItem T="int" Value="franquicia.Id"></MudSelectItem>
                 </ForIn>
             </MudSelect>
 
             <MudSelect @bind-Value="Producto.CentroCosto" Variant="Variant.Outlined" Margin="Margin.Dense"
-            Label="Centro de costo" ToStringFunc="(x) => x?.Descripcion" Class="mt-4"
-            Disabled="!Producto.IsNew" For="() => Producto.CentroCosto" Immediate="true">
+                       Label="Centro de costo" ToStringFunc="(x) => x?.Descripcion" Class="mt-4"
+                       Disabled="!Producto.IsNew" For="() => Producto.CentroCosto" Immediate="true">
                 <ForIn Items="CentrosCosto" Context="centroCosto">
                     <MudSelectItem T="CentroCostoInfo" Value="centroCosto"></MudSelectItem>
                 </ForIn>
@@ -32,8 +29,8 @@
 
             <MudStack Row="true" Class="mt-4">
                 <MudSelect T="CategoriaProductoInfo" Value="Producto.Categoria" ValueChanged="CategoriaChanged" Variant="Variant.Outlined" Margin="Margin.Dense"
-                Label="Categoria" ToStringFunc="(x) => x?.NombreCompleto"
-                For="() => Producto.Categoria" Immediate="true">
+                           Label="Categoria" ToStringFunc="(x) => x?.NombreCompleto"
+                           For="() => Producto.Categoria" Immediate="true">
 
                     <ForIn Items="categorias" Context="categoria">
                         <MudSelectItem T="CategoriaProductoInfo" Value="categoria"></MudSelectItem>
@@ -42,8 +39,8 @@
                 </MudSelect>
 
                 <MudSelect @bind-Value="Producto.CategoriaDespliegue" Variant="Variant.Outlined" Margin="Margin.Dense"
-                Label="Categoria de despliegue" ToStringFunc="(x) => x?.NombreCompleto"
-                For="() => Producto.CategoriaDespliegue" Immediate="true">
+                           Label="Categoria de despliegue" ToStringFunc="(x) => x?.NombreCompleto"
+                           For="() => Producto.CategoriaDespliegue" Immediate="true">
                     <ForIn Items="categorias" Context="categoria">
                         <MudSelectItem T="CategoriaProductoInfo" Value="categoria"></MudSelectItem>
                     </ForIn>
@@ -51,8 +48,8 @@
             </MudStack>
 
             <MudSelect @bind-Value="Producto.Familia" Variant="Variant.Outlined" Margin="Margin.Dense"
-            Label="Familia" For="() => Producto.Familia" Immediate="true" Class="mt-4"
-            ToStringFunc="(x) => x?.Nombre">
+                       Label="Familia" For="() => Producto.Familia" Immediate="true" Class="mt-4"
+                       ToStringFunc="(x) => x?.Nombre">
                 <ForIn Items="Familias" Context="familia">
                     <MudSelectItem T="AgrupacionContable" Value="familia" />
                 </ForIn>
@@ -60,29 +57,29 @@
 
             <MudStack Row="true" Class="mt-4">
                 <MudTextField @bind-Value="Producto.Sku" Variant="Variant.Outlined" Margin="Margin.Dense"
-                Label="Sku" For="() => Producto.Sku" Immediate="true" />
+                              Label="Sku" For="() => Producto.Sku" Immediate="true" />
                 <MudTextField @bind-Value="Producto.Aka" Variant="Variant.Outlined" Margin="Margin.Dense"
-                Label="Aka" For="() => Producto.Aka" Immediate="true" />
+                              Label="Aka" For="() => Producto.Aka" Immediate="true" />
             </MudStack>
 
             <MudTextField @bind-Value="Producto.Nombre" Variant="Variant.Outlined" Margin="Margin.Dense"
-            Label="Nombre" Class="mt-4" For="() => Producto.Nombre" Immediate="true" />
+                          Label="Nombre" Class="mt-4" For="() => Producto.Nombre" Immediate="true" />
 
             <MudStack Row="true" Class="mt-4">
                 <MudSelect @bind-Value="Producto.TipoProducto" Variant="Variant.Outlined" Margin="Margin.Dense"
-                Label="Tipo producto" For="() => Producto.TipoProducto" Immediate="true"
-                ToStringFunc="x => x?.Nombre">
+                           Label="Tipo producto" For="() => Producto.TipoProducto" Immediate="true"
+                           ToStringFunc="x => x?.Nombre">
                     <ForIn Items="TiposProducto" Context="tipo">
                         <MudSelectItem T="TipoProducto" Value="tipo"></MudSelectItem>
                     </ForIn>
                 </MudSelect>
 
                 <MudDatePicker @bind-Date="Producto.FechaAltaDate" Variant="Variant.Outlined" Margin="Margin.Dense"
-                Label="Fecha de alta" For="() => Producto.FechaAltaDate" ImmediateText="true" />
+                               Label="Fecha de alta" For="() => Producto.FechaAltaDate" ImmediateText="true" />
 
                 <MudNumericField @bind-Value="Producto.Orden" Variant="Variant.Outlined" Margin="Margin.Dense"
-                Label="Orden" For="() => Producto.Orden" Immediate="true"
-                Min="OneInt" Max="MaxInt" />
+                                 Label="Orden" For="() => Producto.Orden" Immediate="true"
+                                 Min="OneInt" Max="MaxInt" />
             </MudStack>
 
             <ImageViewer Imagen="Producto.Imagen" Class="mt-4" />
@@ -110,7 +107,7 @@
                                     <PropertyColumn Property="x => x.Orden">
                                         <EditTemplate>
                                             <MudNumericField @bind-Value="context.Item.Orden" Margin="Margin.Dense" Min="1" Max="int.MaxValue"
-                                            Required="true" Variant="@Variant.Text" Style="margin-top:0" />
+                                                             Required="true" Variant="@Variant.Text" Style="margin-top:0" />
 
                                         </EditTemplate>
                                     </PropertyColumn>
@@ -134,228 +131,3 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    private const int OneInt = 1;
-    private const int MaxInt = int.MaxValue;
-    private const string TipoCatalogo = "Producto";
-    private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
-    private List<CategoriaProductoInfo> categorias = [];
-    private List<ProductoInfo> complementos = [];
-
-    private MudForm form = default!;
-    private string _dragClass = DefaultDragClass;
-
-    private List<ProductoInfo> _complementosSelecionados = [];
-    private ObservableCollection<ProductoComplementarioModel> _complementosProducto = [];
-
-    [Parameter]
-    public DialogOptions? DialogOptions { get; set; }
-
-    [Parameter]
-    public bool IsOpen { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> IsOpenChanged { get; set; }
-
-    [Parameter]
-    public ProductoViewModel Producto { get; set; } = default!;
-
-    [Parameter]
-    public List<CentroCostoInfo> CentrosCosto { get; set; } = [];
-
-    [Parameter]
-    public List<FranquiciaInfo> Franquicias { get; set; } = [];
-
-    [Parameter]
-    public List<AgrupacionContable> Familias { get; set; } = [];
-
-    [Parameter]
-    public List<TipoProducto> TiposProducto { get; set; } = [];
-
-    [Parameter]
-    public Func<int, Task<List<CategoriaProductoInfo>>>? LoadCategorias { get; set; }
-
-    [Parameter]
-    public Func<int, int, Task<List<ProductoInfo>>>? LoadComplementos { get; set; }
-
-    [Parameter]
-    public Func<ProductoViewModel, Task<bool>>? CommitChanges { get; set; }
-
-    private bool PuedeAsociarComplementos => complementos.Count > 0 && !Producto.EsComplemento;
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if (IsOpen && Producto is not null && !Producto.IsNew && !Producto.Loading)
-        {
-            Producto.Loading = true;
-            await OnLoadCategoriasAsync(Producto.FranquiciaId);
-            await OnLoadComplementosAsync(Producto.Categoria);
-            PrepareProducto();
-            PrepareComplementos();
-            Producto.Loading = false;
-        }
-    }
-
-    private async Task ChangeIsOpen(bool isOpen)
-    {
-        IsOpen = isOpen;
-        await IsOpenChanged.InvokeAsync(isOpen);
-    }
-
-    /// <summary>
-    /// Prepara el producto asignando los nhombre completos de categoría y categoría despliegue.
-    /// </summary>
-    /// <remarks>
-    /// La busqueda se hace en la clase <see cref="CategoriaProductoInfo" /> el método <see cref="CategoriaProductoInfo.Equals(CategoriaProductoInfo?)" />.
-    /// </remarks>
-    private void PrepareProducto()
-    {
-        int categoriaId = categorias.IndexOf(Producto!.Categoria);
-        int categoriaDespliegueId = categorias.IndexOf(Producto!.CategoriaDespliegue);
-
-        if (categoriaId >= 0)
-        {
-            Producto.Categoria.NombreCompleto = categorias[categoriaId].NombreCompleto;
-        }
-
-        if (categoriaDespliegueId >= 0)
-        {
-            Producto.CategoriaDespliegue.NombreCompleto = categorias[categoriaDespliegueId].NombreCompleto;
-        }
-    }
-
-    private void PrepareComplementos()
-    {
-        _complementosProducto = [.. Producto.Complementos];
-        _complementosSelecionados = (from complemento in complementos
-                                     join productoComplemento in _complementosProducto on complemento.Id equals productoComplemento.Complemento.Id
-                                     select complemento).ToList();
-    }
-
-    private string GetFranquicia(int franquiciaId)
-    {
-        return Franquicias.Find(x => x.Id == franquiciaId)?.Nombre ?? "Seleccione franquicia";
-    }
-
-    private async Task FranquiciaChanged(int franquiciaId)
-    {
-        Producto.FranquiciaId = franquiciaId;
-        Producto.Loading = true;
-        await OnLoadCategoriasAsync(franquiciaId);
-        Producto.Loading = false;
-    }
-
-    private async Task OnLoadCategoriasAsync(int franquiciaId)
-    {
-        if (LoadCategorias is not null)
-        {
-            categorias = await LoadCategorias(franquiciaId);
-        }
-    }
-
-    private async Task CategoriaChanged(CategoriaProductoInfo categoria)
-    {
-        Producto.Categoria = categoria;
-        Producto.Loading = true;
-        await OnLoadComplementosAsync(categoria);
-        Producto.Loading = false;
-    }
-
-    private async Task OnLoadComplementosAsync(CategoriaProductoInfo categoria)
-    {
-        if (LoadComplementos is not null)
-        {
-            complementos = await LoadComplementos(categoria.Id, Producto.Id);
-        }
-    }
-
-    private void EsComplementoChanged(bool esComplemento)
-    {
-        Producto.EsComplemento = esComplemento;
-        TryCleanComplementos();
-    }
-
-    private void TryCleanComplementos()
-    {
-        if (Producto.EsComplemento)
-        {
-            _complementosProducto = [];
-            _complementosSelecionados = [];
-            Producto.Complementos = [];
-        }
-    }
-
-    private void SetDragClass()
-        => _dragClass = $"{DefaultDragClass} mud-border-primary";
-
-    private void ClearDragClass()
-        => _dragClass = DefaultDragClass;
-
-    private void SelectComplementos(IReadOnlyCollection<ProductoInfo> productos)
-    {
-        _complementosSelecionados = [.. productos];
-
-        List<ProductoInfo> toAdd = (from producto in _complementosSelecionados
-                                    join complemento in _complementosProducto on producto.Id equals complemento.Complemento.Id into defComplementos
-                                    from defComplemento in defComplementos.DefaultIfEmpty()
-                                    where defComplemento is null
-                                    select producto).ToList();
-
-        List<ProductoComplementarioModel> toRemove = (from complemento in _complementosProducto
-                                                      join producto in _complementosSelecionados on complemento.Complemento.Id equals producto.Id into defProductos
-                                                      from defProducto in defProductos.DefaultIfEmpty()
-                                                      where defProducto is null
-                                                      select complemento).ToList();
-
-        toRemove.ForEach(x => _complementosProducto.Remove(x));
-        toAdd.ForEach(x => _complementosProducto.Add(new ProductoComplementarioModel { Complemento = x, Orden = _complementosProducto.Count }));
-    }
-
-    private void RemoveComplemento(CellContext<ProductoComplementarioModel> context)
-    {
-        var complemento = _complementosProducto.FirstOrDefault(x => x.Complemento.Id == context.Item.Complemento.Id);
-
-        if (complemento is not null)
-        {
-            _complementosProducto.Remove(complemento);
-            _complementosSelecionados = _complementosSelecionados.Where(x => x.Id != complemento.Complemento.Id).ToList();
-        }
-    }
-
-    private async Task CancelEditingItemAsync()
-    {
-        await ChangeIsOpen(false);
-        Clean();
-    }
-
-    private async Task CommitItemChangesAsync()
-    {
-        await form.Validate();
-
-        if (!form.IsValid)
-        {
-            return;
-        }
-
-        if (Producto is not null && CommitChanges is not null)
-        {
-            Producto.Complementos = [.. _complementosProducto];
-            bool result = await CommitChanges(Producto);
-
-            if (result)
-            {
-                await ChangeIsOpen(false);
-                Clean();
-            }
-        }
-    }
-
-    private void Clean()
-    {
-        categorias = [];
-        complementos = [];
-        _complementosSelecionados = [];
-        _complementosProducto = [];
-    }
-}

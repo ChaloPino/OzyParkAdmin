@@ -1,6 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Reportes;
-using OzyParkAdmin.Domain.Shared;
 using System.Security.Claims;
 
 namespace OzyParkAdmin.Application.Reportes.Find;
@@ -10,4 +9,4 @@ namespace OzyParkAdmin.Application.Reportes.Find;
 /// </summary>
 /// <param name="User">El usuario que realiza la consulta.</param>
 /// <param name="Aka">El aka del reporte a buscar.</param>
-public sealed record FindReporte(ClaimsPrincipal User, string Aka) : Request<ResultOf<Report>>;
+public sealed record FindReporte(ClaimsPrincipal User, string Aka) : IQuery<Report>;

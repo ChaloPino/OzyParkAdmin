@@ -1,5 +1,6 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Identity;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Franquicias;
 
 namespace OzyParkAdmin.Application.Franquicias.List;
@@ -7,7 +8,7 @@ namespace OzyParkAdmin.Application.Franquicias.List;
 /// <summary>
 /// El manejador de <see cref="ListFranquicias"/>.
 /// </summary>
-public sealed class ListFranquiciasHandler : MediatorRequestHandler<ListFranquicias, ResultListOf<FranquiciaInfo>>
+public sealed class ListFranquiciasHandler : QueryListOfHandler<ListFranquicias, FranquiciaInfo>
 {
     private readonly IFranquiciaRepository _repository;
 
@@ -15,18 +16,20 @@ public sealed class ListFranquiciasHandler : MediatorRequestHandler<ListFranquic
     /// Crea una nueva instancia de <see cref="ListFranquiciasHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="IFranquiciaRepository"/></param>
-    public ListFranquiciasHandler(IFranquiciaRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ListFranquiciasHandler(IFranquiciaRepository repository, ILogger<ListFranquiciasHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<FranquiciaInfo>> Handle(ListFranquicias request, CancellationToken cancellationToken)
+    protected override async Task<List<FranquiciaInfo>> ExecuteListAsync(ListFranquicias query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(query);
 
-        int[]? franquiciaIds = request.User.GetFranquicias();
+        int[]? franquiciaIds = query.User.GetFranquicias();
         List<Franquicia> franquicias = await _repository.ListFranquiciasAsync(franquiciaIds, cancellationToken);
         return franquicias.ToInfo();
     }

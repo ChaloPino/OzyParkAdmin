@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Productos;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Productos.Desactivar;
@@ -15,14 +16,15 @@ public sealed class DesactivarProductoHandler : ProductoStateChangeableHandler<D
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="productoManager">El <see cref="ProductoManager"/>.</param>
-    public DesactivarProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager)
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public DesactivarProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager, ILogger<DesactivarProductoHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(productoManager);
         _productoManager = productoManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Producto>> ExecuteAsync(DesactivarProducto request, CancellationToken cancellationToken) =>
-        await _productoManager.DesactivarProductoAsync(request.ProductoId, cancellationToken);
+    protected override async Task<ResultOf<Producto>> ExecuteChangeStateAsync(DesactivarProducto command, CancellationToken cancellationToken) =>
+        await _productoManager.DesactivarProductoAsync(command.ProductoId, cancellationToken);
 }

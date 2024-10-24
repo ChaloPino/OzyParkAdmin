@@ -1,4 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CuposFecha;
 using OzyParkAdmin.Domain.Shared;
 
@@ -7,7 +8,7 @@ namespace OzyParkAdmin.Application.CuposFecha.Delete;
 /// <summary>
 /// El manejador de <see cref="DeleteCuposFecha"/>.
 /// </summary>
-public sealed class DeleteCuposFechaHandler : MediatorRequestHandler<DeleteCuposFecha, SuccessOrFailure>
+public sealed class DeleteCuposFechaHandler : CommandHandler<DeleteCuposFecha>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly ICupoFechaRepository _repository;
@@ -16,7 +17,9 @@ public sealed class DeleteCuposFechaHandler : MediatorRequestHandler<DeleteCupos
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="repository">El <see cref="CupoFechaManager"/>.</param>
-    public DeleteCuposFechaHandler(IOzyParkAdminContext context, ICupoFechaRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public DeleteCuposFechaHandler(IOzyParkAdminContext context, ICupoFechaRepository repository, ILogger<DeleteCuposFechaHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(repository);
@@ -25,17 +28,17 @@ public sealed class DeleteCuposFechaHandler : MediatorRequestHandler<DeleteCupos
     }
 
     /// <inheritdoc/>
-    protected override async Task<SuccessOrFailure> Handle(DeleteCuposFecha request, CancellationToken cancellationToken)
+    protected override async Task<SuccessOrFailure> ExecuteAsync(DeleteCuposFecha command, CancellationToken cancellationToken)
     {
         IEnumerable<CupoFecha> cuposFecha = await _repository.FindByUniqueKeysAsync(
-            request.FechaDesde,
-            request.FechaHasta,
-            request.EscenarioCupo,
-            request.CanalesVenta,
-            request.DiasSemana,
-            request.HoraInicio,
-            request.HoraTermino,
-            request.IntervaloMinutos,
+            command.FechaDesde,
+            command.FechaHasta,
+            command.EscenarioCupo,
+            command.CanalesVenta,
+            command.DiasSemana,
+            command.HoraInicio,
+            command.HoraTermino,
+            command.IntervaloMinutos,
             cancellationToken);
 
         if (cuposFecha.Count() < 30)

@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Productos;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Productos.Activar;
@@ -15,14 +16,15 @@ public sealed class ActivarProductoHandler : ProductoStateChangeableHandler<Acti
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="productoManager">El <see cref="ProductoManager"/>.</param>
-    public ActivarProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager)
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ActivarProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager, ILogger<ActivarProductoHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(productoManager);
         _productoManager = productoManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Producto>> ExecuteAsync(ActivarProducto request, CancellationToken cancellationToken) =>
-        await _productoManager.ActivarProductoAsync(request.ProductoId, cancellationToken);
+    protected override async Task<ResultOf<Producto>> ExecuteChangeStateAsync(ActivarProducto command, CancellationToken cancellationToken) =>
+        await _productoManager.ActivarProductoAsync(command.ProductoId, cancellationToken);
 }

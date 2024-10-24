@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.OmisionesCupo;
 using OzyParkAdmin.Domain.Shared;
 
@@ -17,4 +17,4 @@ public sealed record SearchOmisionesEscenarioCupoExlusion(
     FilterExpressionCollection<IgnoraEscenarioCupoExclusion> FilterExpressions,
     SortExpressionCollection<IgnoraEscenarioCupoExclusion> SortExpressions,
     int Page,
-    int PageSize) : Request<PagedList<IgnoraEscenarioCupoExclusionFullInfo>>;
+    int PageSize) : IQueryPagedOf<IgnoraEscenarioCupoExclusionFullInfo>;

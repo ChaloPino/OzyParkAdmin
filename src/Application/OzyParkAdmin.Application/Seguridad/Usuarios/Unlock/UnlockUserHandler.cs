@@ -1,5 +1,6 @@
-﻿using MassTransit.Mediator;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
 
@@ -8,7 +9,7 @@ namespace OzyParkAdmin.Application.Seguridad.Usuarios.Unlock;
 /// <summary>
 /// El manejador de <see cref="UnlockUser"/>.
 /// </summary>
-public sealed class UnlockUserHandler : MediatorRequestHandler<UnlockUser, ResultOf<UsuarioFullInfo>>
+public sealed class UnlockUserHandler : CommandHandler<UnlockUser, UsuarioFullInfo>
 {
     private readonly UserManager<Usuario> _userManager;
 
@@ -16,18 +17,20 @@ public sealed class UnlockUserHandler : MediatorRequestHandler<UnlockUser, Resul
     /// Crea una nueva instancia de <see cref="UnlockUserHandler"/>.
     /// </summary>
     /// <param name="userManager">El <see cref="UserManager{TUser}"/>.</param>
-    public UnlockUserHandler(UserManager<Usuario> userManager)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public UnlockUserHandler(UserManager<Usuario> userManager, ILogger<UnlockUserHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(userManager);
         _userManager = userManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<UsuarioFullInfo>> Handle(UnlockUser request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<UsuarioFullInfo>> ExecuteAsync(UnlockUser command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(command);
 
-        Usuario? usuario = await _userManager.FindByIdAsync(request.UserId.ToString());
+        Usuario? usuario = await _userManager.FindByIdAsync(command.UserId.ToString());
 
         if (usuario is null)
         {

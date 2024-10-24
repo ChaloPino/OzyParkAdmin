@@ -74,7 +74,7 @@
         var result = await Mediator.SendRequest(generateHtml);
 
         result.Switch(
-            onReportGenerated: SetReportGenerated,
+            onSuccess: SetReportGenerated,
             onFailure: SetError
         );
     }

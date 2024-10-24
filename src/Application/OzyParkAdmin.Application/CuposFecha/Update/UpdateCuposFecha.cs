@@ -1,8 +1,7 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.Entidades;
 using OzyParkAdmin.Domain.EscenariosCupo;
-using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.CuposFecha.Update;
 
@@ -23,4 +22,4 @@ public sealed record UpdateCuposFecha(
     DiaSemana DiaSemana,
     int Total,
     int Sobrecupo,
-    int TopeEnCupo) : Request<SuccessOrFailure>;
+    int TopeEnCupo) : ICommand;

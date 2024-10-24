@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.ExclusionesCupo;
 using OzyParkAdmin.Domain.Shared;
 using System.Security.Claims;
@@ -20,4 +20,4 @@ public sealed record SearchFechasExcluidasCupo(
     FilterExpressionCollection<FechaExcluidaCupo> FilterExpressions,
     SortExpressionCollection<FechaExcluidaCupo> SortExpressions,
     int Page,
-    int PageSize) : Request<PagedList<FechaExcluidaCupoFullInfo>>;
+    int PageSize) : IQueryPagedOf<FechaExcluidaCupoFullInfo>;

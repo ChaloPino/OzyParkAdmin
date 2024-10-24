@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
 
 namespace OzyParkAdmin.Application.Servicios.List;
@@ -7,4 +7,4 @@ namespace OzyParkAdmin.Application.Servicios.List;
 /// Lista todos los servicios que pertenecen a un centro de costo.
 /// </summary>
 /// <param name="CentroCostoId">El id del centro de costo.</param>
-public sealed record ListServiciosPorCentroCosto(int CentroCostoId) : Request<ResultListOf<ServicioInfo>>;
+public sealed record ListServiciosPorCentroCosto(int CentroCostoId) : IQueryListOf<ServicioInfo>;

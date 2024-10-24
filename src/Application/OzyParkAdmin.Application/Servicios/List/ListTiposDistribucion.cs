@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
 
 namespace OzyParkAdmin.Application.Servicios.List;
@@ -6,4 +6,4 @@ namespace OzyParkAdmin.Application.Servicios.List;
 /// <summary>
 /// Lista todos los tipos de distribución.
 /// </summary>
-public sealed record ListTiposDistribucion : Request<ResultListOf<TipoDistribucion>>;
+public sealed record ListTiposDistribucion : IQueryListOf<TipoDistribucion>;

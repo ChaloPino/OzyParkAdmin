@@ -1,5 +1,4 @@
-﻿using MassTransit.Mediator;
-using OzyParkAdmin.Domain.Shared;
+﻿using OzyParkAdmin.Application.Shared;
 
 namespace OzyParkAdmin.Application.Productos.Validate;
 
@@ -9,4 +8,4 @@ namespace OzyParkAdmin.Application.Productos.Validate;
 /// <param name="ProductoId">El id del producto a validar.</param>
 /// <param name="FranquiciaId">El id de la franquicia.</param>
 /// <param name="Aka">El aka del producto.</param>
-public sealed record ValidateProductoAka(int ProductoId, int FranquiciaId, string? Aka) : Request<SuccessOrFailure>;
+public sealed record ValidateProductoAka(int ProductoId, int FranquiciaId, string? Aka) : ICommand;

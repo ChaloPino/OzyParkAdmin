@@ -1,4 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 
@@ -7,7 +8,7 @@ namespace OzyParkAdmin.Application.Servicios.List;
 /// <summary>
 /// El manejador de <see cref="ListTiposVigencia"/>.
 /// </summary>
-public sealed class ListTiposVigenciaHandler : MediatorRequestHandler<ListTiposVigencia, ResultListOf<TipoVigencia>>
+public sealed class ListTiposVigenciaHandler : QueryListOfHandler<ListTiposVigencia, TipoVigencia>
 {
     private readonly IGenericRepository<TipoVigencia> _repository;
 
@@ -15,16 +16,18 @@ public sealed class ListTiposVigenciaHandler : MediatorRequestHandler<ListTiposV
     /// Crea una nueva instancia de <see cref="ListTiposVigenciaHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="IGenericRepository{TEntity}"/>.</param>
-    public ListTiposVigenciaHandler(IGenericRepository<TipoVigencia> repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ListTiposVigenciaHandler(IGenericRepository<TipoVigencia> repository, ILogger<ListTiposVigenciaHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<TipoVigencia>> Handle(ListTiposVigencia request, CancellationToken cancellationToken)
+    protected override async Task<List<TipoVigencia>> ExecuteListAsync(ListTiposVigencia query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(query);
         return await _repository.ListAsync(cancellationToken: cancellationToken);
     }
 }

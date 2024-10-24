@@ -1,5 +1,6 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Identity;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cupos;
 using OzyParkAdmin.Domain.Shared;
 
@@ -8,7 +9,7 @@ namespace OzyParkAdmin.Application.Cupos.Search;
 /// <summary>
 /// El manejador de <see cref="SearchCupos"/>.
 /// </summary>
-public sealed class SearchCuposHandler : MediatorRequestHandler<SearchCupos, PagedList<CupoFullInfo>>
+public sealed class SearchCuposHandler : QueryPagedOfHandler<SearchCupos, CupoFullInfo>
 {
     private readonly ICupoRepository _repository;
 
@@ -16,16 +17,25 @@ public sealed class SearchCuposHandler : MediatorRequestHandler<SearchCupos, Pag
     /// Crea una nueva instancia de <see cref="SearchCuposHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="ICupoRepository"/>.</param>
-    public SearchCuposHandler(ICupoRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public SearchCuposHandler(ICupoRepository repository, ILogger<SearchCuposHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<PagedList<CupoFullInfo>> Handle(SearchCupos request, CancellationToken cancellationToken)
+    protected override async Task<PagedList<CupoFullInfo>> ExecutePagedListAsync(SearchCupos query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return await _repository.SearchAsync(request.User.GetCentrosCosto(), request.SearchText, request.FilterExpressions, request.SortExpressions, request.Page, request.PageSize, cancellationToken);
+        ArgumentNullException.ThrowIfNull(query);
+        return await _repository.SearchAsync(
+            query.User.GetCentrosCosto(),
+            query.SearchText,
+            query.FilterExpressions,
+            query.SortExpressions,
+            query.Page,
+            query.PageSize,
+            cancellationToken);
     }
 }

@@ -74,7 +74,7 @@
         GenerateHtmlReport generateHtmlReport = filterViewModel.ToGenerateHtml(user!);
         var result = await Mediator.SendRequest(generateHtmlReport);
         result.Switch(
-            onReportGenerated: SetReportGenerated,
+            onSuccess: SetReportGenerated,
             onFailure: failure => AddFailure(failure)
         );
     }
@@ -84,7 +84,7 @@
         GenerateOtherFormat generateOtherFormat = filterViewModel.ToGenerateOtherFormat(actionType, user!);
         var result = await Mediator.SendRequest(generateOtherFormat);
         result.Switch(
-            onReportGenerated: SetReportGenerated,
+            onSuccess: SetReportGenerated,
             onFailure: failure => AddFailure(failure)
         );
     }
@@ -129,22 +129,21 @@
             return Task.FromResult(
                 MudExFileDisplayContentErrorResult.DisplayMessage($"No se puede visualizar el archivo Excel '{arg.FileName}', favor descárguelo, usando las opciones del menú en la parte superior derecha."));
         }
-        
+
         return Task.FromResult(MudExFileDisplayContentErrorResult.Unhandled);
     }
 
     private async Task<List<ItemOption>> LoadFilterDataAsync(IFilterModel filterModel)
     {
-        try
-        {
-            var result = await Mediator.SendRequest(new LoadFilter(filterModel.ReportId, filterModel.Id, BuildParameters(filterModel)));
-            return [.. result.Items];
-        }
-        catch (Exception exception)
-        {
-            Snackbar.AddFailure($"Error al cargar filtro {filterModel.Name}", exception);
-            return [];
-        }
+        var result = await Mediator.SendRequest(new LoadFilter(filterModel.ReportId, filterModel.Id, BuildParameters(filterModel)));
+
+        return result.Match(
+            onSuccess: items => items,
+            onFailure: failure =>
+            {
+                AddFailure(failure);
+                return [];
+            });
     }
 
     private string?[] BuildParameters(IFilterModel filterModel)

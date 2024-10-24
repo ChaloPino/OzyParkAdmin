@@ -1,5 +1,5 @@
 ﻿@using OzyParkAdmin.Domain.Cajas
-<MudDataGrid @ref="dataGrid" T="ServicioDiaInfo" Items="Servicios" Dense="true" ReadOnly="true">
+<MudDataGrid T="ServicioDiaInfo" Items="Servicios" Dense="true" ReadOnly="true">
     <Columns>
         <PropertyColumn Property="x => x.VentaId" Title="Nro. Venta" />
         <PropertyColumn Property="x => x.Ejecutivo" Title="Ejecutivo" />
@@ -22,44 +22,3 @@
         </IfThen>
     </PagerContent>
 </MudDataGrid>
-
-@code {
-    private MudDataGrid<ServicioDiaInfo> dataGrid = default!;
-
-    [Parameter]
-    public IEnumerable<ServicioDiaInfo> Servicios { get; set; } = [];
-
-    [Parameter]
-    public bool Paginate { get; set; } = true;
-
-    private AggregateDefinition<ServicioDiaInfo> PasajerosAggregateDefinition => new()
-        {
-            Type = AggregateType.Custom,
-            CustomAggregate = (items) => Summarize(items, x => x.Cantidad),
-        };
-
-    private AggregateDefinition<ServicioDiaInfo> GuiasAggregateDefinition => new()
-        {
-            Type = AggregateType.Custom,
-            CustomAggregate = (items) => Summarize(items, x => x.Guias),
-        };
-
-
-    private string Summarize(IEnumerable<ServicioDiaInfo> servicios, Func<ServicioDiaInfo, int> selector)
-    {
-        int total = Servicios.Sum(selector);
-
-
-        if (Paginate)
-        {
-            decimal totalPaginado = servicios.Sum(selector);
-
-            if (totalPaginado != total)
-            {
-                return $"{totalPaginado} ({total})";
-            }
-        }
-
-        return $"{total}";
-    }
-}

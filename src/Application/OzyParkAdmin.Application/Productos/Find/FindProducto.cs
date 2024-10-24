@@ -1,6 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Productos;
-using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Productos.Find;
 
@@ -8,4 +7,4 @@ namespace OzyParkAdmin.Application.Productos.Find;
 /// Busca un producto por su id.
 /// </summary>
 /// <param name="ProductoId">El id del producto a buscar.</param>
-public sealed record FindProducto(int ProductoId) : Request<ResultOf<ProductoFullInfo>>;
+public sealed record FindProducto(int ProductoId) : IQuery<ProductoFullInfo>;

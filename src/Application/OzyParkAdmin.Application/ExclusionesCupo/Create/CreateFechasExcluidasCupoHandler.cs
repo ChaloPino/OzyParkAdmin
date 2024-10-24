@@ -1,4 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.ExclusionesCupo;
 using OzyParkAdmin.Domain.Shared;
 
@@ -7,34 +8,38 @@ namespace OzyParkAdmin.Application.ExclusionesCupo.Create;
 /// <summary>
 /// El manejador de <see cref="CreateFechasExcluidasCupo"/>.
 /// </summary>
-public sealed class CreateFechasExcluidasCupoHandler : MediatorRequestHandler<CreateFechasExcluidasCupo, SuccessOrFailure>
+public sealed class CreateFechasExcluidasCupoHandler : CommandHandler<CreateFechasExcluidasCupo>
 {
     private readonly IOzyParkAdminContext _context;
-    private readonly FechaExcluidaCupoManager _fechaExcluidaCupoManager;
+    private readonly FechaExcluidaCupoManager _manager;
 
     /// <summary>
     /// Crea una nueva instancia de <see cref="CreateFechasExcluidasCupoHandler"/>.
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
-    /// <param name="fechaExcluidaCupoManager">El <see cref="FechaExcluidaCupoManager"/>.</param>
-    public CreateFechasExcluidasCupoHandler(IOzyParkAdminContext context, FechaExcluidaCupoManager fechaExcluidaCupoManager)
+    /// <param name="manager">El <see cref="FechaExcluidaCupoManager"/>.</param>
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public CreateFechasExcluidasCupoHandler(IOzyParkAdminContext context, FechaExcluidaCupoManager manager, ILogger<CreateFechasExcluidasCupoHandler> logger)
+        : base(logger)
     {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(manager);
         _context = context;
-        _fechaExcluidaCupoManager = fechaExcluidaCupoManager;
+        _manager = manager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<SuccessOrFailure> Handle(CreateFechasExcluidasCupo request, CancellationToken cancellationToken)
+    protected override async Task<SuccessOrFailure> ExecuteAsync(CreateFechasExcluidasCupo command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(command);
         
-        _context.AttachRange(request.CanalesVenta);
+        _context.AttachRange(command.CanalesVenta);
 
-        var result = await _fechaExcluidaCupoManager.CreateFechasExcluidasAsync(
-            request.CentroCosto,
-            request.CanalesVenta,
-            request.FechaDesde,
-            request.FechaHasta,
+        var result = await _manager.CreateFechasExcluidasAsync(
+            command.CentroCosto,
+            command.CanalesVenta,
+            command.FechaDesde,
+            command.FechaHasta,
             cancellationToken);
 
         return await result.MatchAsync(
@@ -57,5 +62,4 @@ public sealed class CreateFechasExcluidasCupoHandler : MediatorRequestHandler<Cr
 
         return new Success();
     }
-
 }

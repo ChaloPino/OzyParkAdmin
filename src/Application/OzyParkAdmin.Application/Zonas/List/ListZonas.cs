@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Zonas;
 
 namespace OzyParkAdmin.Application.Zonas.List;
@@ -6,4 +6,4 @@ namespace OzyParkAdmin.Application.Zonas.List;
 /// <summary>
 /// Lista todas las zonas.
 /// </summary>
-public sealed record ListZonas : Request<ResultListOf<ZonaInfo>>;
+public sealed record ListZonas : IQueryListOf<ZonaInfo>;

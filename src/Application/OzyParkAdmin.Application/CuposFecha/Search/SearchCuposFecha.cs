@@ -1,5 +1,4 @@
-﻿using MassTransit.Mediator;
-using OzyParkAdmin.Domain.Cupos;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CuposFecha;
 using OzyParkAdmin.Domain.Shared;
 using System.Security.Claims;
@@ -15,4 +14,10 @@ namespace OzyParkAdmin.Application.CuposFecha.Search;
 /// <param name="SortExpressions">Las expresiones de ordenamiento.</param>
 /// <param name="Page">La página actual.</param>
 /// <param name="PageSize">El tamaño de la página actual.</param>
-public sealed record SearchCuposFecha(ClaimsPrincipal User, string? SearchText, FilterExpressionCollection<CupoFecha> FilterExpressions, SortExpressionCollection<CupoFecha> SortExpressions, int Page, int PageSize) : Request<PagedList<CupoFechaFullInfo>>;
+public sealed record SearchCuposFecha(
+    ClaimsPrincipal User,
+    string? SearchText,
+    FilterExpressionCollection<CupoFecha> FilterExpressions,
+    SortExpressionCollection<CupoFecha> SortExpressions,
+    int Page,
+    int PageSize) : IQueryPagedOf<CupoFechaFullInfo>;

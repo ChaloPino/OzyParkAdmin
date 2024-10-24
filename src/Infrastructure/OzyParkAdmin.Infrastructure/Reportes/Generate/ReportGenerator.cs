@@ -1,6 +1,7 @@
 ﻿using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Application.Reportes.Generate;
 using OzyParkAdmin.Domain.Reportes;
+using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Infrastructure.Shared;
 using System.Security.Claims;
 
@@ -27,15 +28,15 @@ public sealed class ReportGenerator : IReportGenerator, IInfrastructure
     }
 
     /// <inheritdoc/>
-    public async Task<ReportResult> GenerateHtmlReportAsync(string aka, ReportFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken)
+    public async Task<ResultOf<ReportGenerated>> GenerateHtmlReportAsync(string aka, ReportFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken)
     {
         var result = await _repository.FindReportByAkaAsync(aka, user.GetRoles(), cancellationToken);
-        return result.Match(
+        return result.Bind(
             onSuccess: report => GenerateHtmlReport(report, filter, user),
             onFailure: failure => failure);
     }
 
-    private ReportResult GenerateHtmlReport(Report report, ReportFilter filter, ClaimsPrincipal user)
+    private ResultOf<ReportGenerated> GenerateHtmlReport(Report report, ReportFilter filter, ClaimsPrincipal user)
     {
         IFormatReportGenerator reportExecutor = _reportExecutorProvider.GetGenerator(ActionType.Html);
         IFormattedReport formattedReport = reportExecutor.GenerateReport(report, filter, user);
@@ -43,7 +44,7 @@ public sealed class ReportGenerator : IReportGenerator, IInfrastructure
     }
 
     /// <inheritdoc/>
-    public async Task<ReportResult> GenerateOhterFormatReportAsync(string aka, ActionType format, ReportFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken)
+    public async Task<ResultOf<ReportGenerated>> GenerateOhterFormatReportAsync(string aka, ActionType format, ReportFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken)
     {
         var result = await _repository.FindReportByAkaAsync(aka, user.GetRoles(), cancellationToken);
         return result.Match(
@@ -51,7 +52,7 @@ public sealed class ReportGenerator : IReportGenerator, IInfrastructure
             onFailure: failure => failure);
     }
 
-    private ReportResult GenerateOhterFormatReport(Report report, ActionType format, ReportFilter filter, ClaimsPrincipal user)
+    private ResultOf<ReportGenerated> GenerateOhterFormatReport(Report report, ActionType format, ReportFilter filter, ClaimsPrincipal user)
     {
         IFormatReportGenerator reportExecutor = _reportExecutorProvider.GetGenerator(format);
         IFormattedReport formattedReport = reportExecutor.GenerateReport(report, filter, user);

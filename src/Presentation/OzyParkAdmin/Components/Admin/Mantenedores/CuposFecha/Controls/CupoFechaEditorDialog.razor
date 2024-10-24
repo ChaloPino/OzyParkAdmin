@@ -1,7 +1,6 @@
 ﻿@using OzyParkAdmin.Domain.CanalesVenta
 @using OzyParkAdmin.Domain.Entidades
 @using OzyParkAdmin.Domain.EscenariosCupo
-@using System.Diagnostics.CodeAnalysis
 @inject CupoFechaViewModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
@@ -121,64 +120,3 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="CupoFecha.Loading" Class="px-10">Guardar</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    private MudForm form = default!;
-
-    [Parameter]
-    public bool IsOpen { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> IsOpenChanged { get; set; }
-
-    [Parameter]
-    public CupoFechaViewModel CupoFecha { get; set; } = new();
-
-    [Parameter]
-    public Func<CupoFechaViewModel, Task<bool>>? CommitChanges { get; set; }
-
-    [Parameter]
-    public DialogOptions? DialogOptions { get; set; }
-
-    [Parameter]
-    public List<EscenarioCupoInfo> EscenariosCupo { get; set; } = [];
-
-    [Parameter]
-    public List<CanalVenta> CanalesVenta { get; set; } = [];
-
-    [Parameter]
-    public List<DiaSemana> DiasSemana { get; set; } = [];
-
-    private async Task ChangeIsOpen(bool isOpen)
-    {
-        IsOpen = isOpen;
-        CupoFecha = new();
-        await IsOpenChanged.InvokeAsync(isOpen);
-    }
-
-    private async Task CommitItemChangesAsync()
-    {
-        if (CupoFecha is not null && CommitChanges is not null)
-        {
-            await form.Validate();
-
-            if (form.IsValid)
-            {
-                CupoFecha.Loading = true;
-                bool result = await CommitChanges(CupoFecha);
-
-                if (result)
-                {
-                    await ChangeIsOpen(false);
-                }
-
-                CupoFecha.Loading = false;
-            }
-        }
-    }
-
-    private async Task CancelEditingItemAsync()
-    {
-        await ChangeIsOpen(false);
-    }
-}

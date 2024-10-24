@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Servicios;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Servicios.Activar;
@@ -15,14 +16,15 @@ public sealed class ActivarServicioHandler : ServicioStateChangeableHandler<Acti
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="servicioManager">El <see cref="ServicioManager"/>.</param>
-    public ActivarServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager) 
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ActivarServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager, ILogger<ActivarServicioHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(servicioManager);
         _servicioManager = servicioManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Servicio>> ExecuteAsync(ActivarServicio request, CancellationToken cancellationToken) =>
-        await _servicioManager.ActivarServicioAsync(request.ServicioId, cancellationToken);
+    protected override async Task<ResultOf<Servicio>> ExecuteChangeStateAsync(ActivarServicio command, CancellationToken cancellationToken) =>
+        await _servicioManager.ActivarServicioAsync(command.ServicioId, cancellationToken);
 }

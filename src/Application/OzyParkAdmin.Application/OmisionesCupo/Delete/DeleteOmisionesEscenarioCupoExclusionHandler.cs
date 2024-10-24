@@ -1,19 +1,14 @@
-﻿using MassTransit.Mediator;
-using Microsoft.Win32.SafeHandles;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.OmisionesCupo;
 using OzyParkAdmin.Domain.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OzyParkAdmin.Application.OmisionesCupo.Delete;
 
 /// <summary>
 /// El manejador de <see cref="DeleteOmisionesEscenarioCupoExclusion"/>
 /// </summary>
-public sealed class DeleteOmisionesEscenarioCupoExclusionHandler : MediatorRequestHandler<DeleteOmisionesEscenarioCupoExclusion, SuccessOrFailure>
+public sealed class DeleteOmisionesEscenarioCupoExclusionHandler : CommandHandler<DeleteOmisionesEscenarioCupoExclusion>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly IIgnoraEscenarioCupoExclusionRepository _repository;
@@ -23,7 +18,12 @@ public sealed class DeleteOmisionesEscenarioCupoExclusionHandler : MediatorReque
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="repository">El <see cref="IIgnoraEscenarioCupoExclusionRepository"/>.</param>
-    public DeleteOmisionesEscenarioCupoExclusionHandler(IOzyParkAdminContext context, IIgnoraEscenarioCupoExclusionRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public DeleteOmisionesEscenarioCupoExclusionHandler(
+        IOzyParkAdminContext context,
+        IIgnoraEscenarioCupoExclusionRepository repository,
+        ILogger<DeleteOmisionesEscenarioCupoExclusionHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(repository);
@@ -32,11 +32,11 @@ public sealed class DeleteOmisionesEscenarioCupoExclusionHandler : MediatorReque
     }
 
     /// <inheritdoc/>
-    protected override async Task<SuccessOrFailure> Handle(DeleteOmisionesEscenarioCupoExclusion request, CancellationToken cancellationToken)
+    protected override async Task<SuccessOrFailure> ExecuteAsync(DeleteOmisionesEscenarioCupoExclusion command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(command);
 
-        var keys = request.Omisiones.Select(x => (x.EscenarioCupo.Id, x.CanalVenta.Id, x.FechaIgnorada));
+        var keys = command.Omisiones.Select(x => (x.EscenarioCupo.Id, x.CanalVenta.Id, x.FechaIgnorada));
         var omisiones = await _repository.FindByKeysAsync(keys, cancellationToken);
 
         if (omisiones.Count() < 30)

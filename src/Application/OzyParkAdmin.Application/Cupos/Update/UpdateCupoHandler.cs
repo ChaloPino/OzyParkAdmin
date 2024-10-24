@@ -1,4 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cupos;
 using OzyParkAdmin.Domain.Shared;
 
@@ -7,7 +8,7 @@ namespace OzyParkAdmin.Application.Cupos.Update;
 /// <summary>
 /// El manejador de <see cref="UpdateCupo"/>.
 /// </summary>
-public sealed class UpdateCupoHandler : MediatorRequestHandler<UpdateCupo, ResultOf<CupoFullInfo>>
+public sealed class UpdateCupoHandler : CommandHandler<UpdateCupo, CupoFullInfo>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly CupoManager _cupoManager;
@@ -17,7 +18,9 @@ public sealed class UpdateCupoHandler : MediatorRequestHandler<UpdateCupo, Resul
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="cupoManager">El <see cref="CupoManager"/>.</param>
-    public UpdateCupoHandler(IOzyParkAdminContext context, CupoManager cupoManager)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public UpdateCupoHandler(IOzyParkAdminContext context, CupoManager cupoManager, ILogger<UpdateCupoHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(cupoManager);
@@ -26,26 +29,26 @@ public sealed class UpdateCupoHandler : MediatorRequestHandler<UpdateCupo, Resul
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<CupoFullInfo>> Handle(UpdateCupo request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<CupoFullInfo>> ExecuteAsync(UpdateCupo command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(command);
 
-        _context.AttachRange(request.CanalVenta, request.DiaSemana);
+        _context.AttachRange(command.CanalVenta, command.DiaSemana);
 
         ResultOf<Cupo> result = await _cupoManager.UpdateCupoAsync(
-            request.Id,
-            request.FechaEfectiva,
-            request.EscenarioCupo,
-            request.CanalVenta,
-            request.DiaSemana,
-            request.HoraInicio,
-            request.HoraFin,
-            request.Total,
-            request.SobreCupo,
-            request.TopeEnCupo,
+            command.Id,
+            command.FechaEfectiva,
+            command.EscenarioCupo,
+            command.CanalVenta,
+            command.DiaSemana,
+            command.HoraInicio,
+            command.HoraFin,
+            command.Total,
+            command.SobreCupo,
+            command.TopeEnCupo,
             cancellationToken);
 
-        return await result.MatchResultOfAsync(
+        return await result.BindAsync(
             onSuccess: SaveAsync,
             onFailure: failure => failure,
             cancellationToken: cancellationToken);

@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
 
 namespace OzyParkAdmin.Application.Servicios.List;
@@ -6,4 +6,4 @@ namespace OzyParkAdmin.Application.Servicios.List;
 /// <summary>
 /// Lista todos los tipos de control.
 /// </summary>
-public sealed record ListTiposControl : Request<ResultListOf<TipoControl>>;
+public sealed record ListTiposControl : IQueryListOf<TipoControl>;

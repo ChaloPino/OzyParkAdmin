@@ -1,4 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Domain.Shared;
 
@@ -7,7 +8,7 @@ namespace OzyParkAdmin.Application.Cajas.Dia;
 /// <summary>
 /// El manejador de <see cref="ReabrirDia"/>.
 /// </summary>
-public sealed class ReabrirDiaHandler : MediatorRequestHandler<ReabrirDia, ResultOf<AperturaCajaInfo>>
+public sealed class ReabrirDiaHandler : CommandHandler<ReabrirDia, AperturaCajaInfo>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly CajaManager _cajaManager;
@@ -17,7 +18,9 @@ public sealed class ReabrirDiaHandler : MediatorRequestHandler<ReabrirDia, Resul
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="cajaManager">El <see cref="CajaManager"/>.</param>
-    public ReabrirDiaHandler(IOzyParkAdminContext context, CajaManager cajaManager)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ReabrirDiaHandler(IOzyParkAdminContext context, CajaManager cajaManager, ILogger<ReabrirDiaHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(cajaManager);
@@ -26,13 +29,14 @@ public sealed class ReabrirDiaHandler : MediatorRequestHandler<ReabrirDia, Resul
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<AperturaCajaInfo>> Handle(ReabrirDia request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<AperturaCajaInfo>> ExecuteAsync(ReabrirDia command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ResultOf<AperturaDia> result = await _cajaManager.ReabrirDiaAsync(request.DiaId, cancellationToken);
-        return await result.MatchResultOfAsync(
+        ArgumentNullException.ThrowIfNull(command);
+        ResultOf<AperturaDia> result = await _cajaManager.ReabrirDiaAsync(command.DiaId, cancellationToken);
+        return await result.BindAsync(
             onSuccess: SaveAsync,
-            onFailure: failure => failure);
+            onFailure: failure => failure,
+            cancellationToken: cancellationToken);
     }
 
     private async Task<ResultOf<AperturaCajaInfo>> SaveAsync(AperturaDia aperturaDia, CancellationToken cancellationToken)

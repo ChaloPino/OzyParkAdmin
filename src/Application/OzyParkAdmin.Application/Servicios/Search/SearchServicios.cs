@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 using System.Security.Claims;
@@ -14,4 +14,10 @@ namespace OzyParkAdmin.Application.Servicios.Search;
 /// <param name="SortExpressions">Las expresiones de ordenamiento.</param>
 /// <param name="Page">La página actual.</param>
 /// <param name="PageSize">El tamaño de la página actual.</param>
-public sealed record SearchServicios(ClaimsPrincipal User, string? SearchText, FilterExpressionCollection<Servicio> FilterExpressions, SortExpressionCollection<Servicio> SortExpressions, int Page, int PageSize) : Request<PagedList<ServicioFullInfo>>;
+public sealed record SearchServicios(
+    ClaimsPrincipal User,
+    string? SearchText,
+    FilterExpressionCollection<Servicio> FilterExpressions,
+    SortExpressionCollection<Servicio> SortExpressions,
+    int Page,
+    int PageSize) : IQueryPagedOf<ServicioFullInfo>;

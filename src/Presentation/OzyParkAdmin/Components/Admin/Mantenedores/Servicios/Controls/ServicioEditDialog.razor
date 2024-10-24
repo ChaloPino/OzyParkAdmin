@@ -36,19 +36,19 @@
             </MudSelect>
 
             <MudSelect @bind-Value="Servicio.TipoDistribucion" Variant="Variant.Outlined" Margin="Margin.Dense"
-                       Label="Tipo distribución" ToStringFunc="(x) => x?.Nombre" Class="mt-4"
+                       Label="Tipo distribución" ToStringFunc="(x) => x?.Descripcion" Class="mt-4"
                        For="() => Servicio.TipoDistribucion" Immediate="true">
                 <ForIn Items="TiposDistribucion" Context="tipoDitribucion">
-                    <MudSelectItem T="TipoDistribucionModel" Value="tipoDitribucion"></MudSelectItem>
+                    <MudSelectItem T="TipoDistribucion" Value="tipoDitribucion"></MudSelectItem>
                 </ForIn>
             </MudSelect>
 
             <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-4">
                 <MudSelect @bind-Value="Servicio.TipoVigencia" Variant="Variant.Outlined" Margin="Margin.Dense"
-                           Label="Vigencia" ToStringFunc="(x) => x?.Nombre"
+                           Label="Vigencia" ToStringFunc="(x) => x?.Descripcion"
                            For="() => Servicio.TipoVigencia" Immediate="true">
                     <ForIn Items="TiposVigencia" Context="tipoVigencia">
-                        <MudSelectItem T="TipoVigenciaModel" Value="tipoVigencia"></MudSelectItem>
+                        <MudSelectItem T="TipoVigencia" Value="tipoVigencia"></MudSelectItem>
                     </ForIn>
                 </MudSelect>
 
@@ -72,10 +72,10 @@
             </MudStack>
 
             <MudSelect @bind-Value="Servicio.TipoControl" Variant="Variant.Outlined" Margin="Margin.Dense"
-                       Label="Tipo control" ToStringFunc="(x) => x?.Nombre" Class="mt-4"
+                       Label="Tipo control" ToStringFunc="(x) => x?.Aka" Class="mt-4"
                        For="() => Servicio.TipoControl" Immediate="true">
                 <ForIn Items="TiposControl" Context="tipoControl">
-                    <MudSelectItem T="TipoControlModel" Value="tipoControl"></MudSelectItem>
+                    <MudSelectItem T="TipoControl" Value="tipoControl"></MudSelectItem>
                 </ForIn>
             </MudSelect>
 
@@ -154,94 +154,3 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
     </DialogActions>
 </MudDialog>
-@code {
-    private const short ZeroShort = 0;
-    private const short OneShort = 1;
-    private const short MaxShort = short.MaxValue;
-    private const int OneInt = 1;
-    private const int MaxInt = int.MaxValue;
-    private const byte ZeroByte = 0;
-    private const byte MaxByte = byte.MaxValue;
-
-    private MudForm form = default!;
-
-    [Parameter]
-    public DialogOptions? DialogOptions { get; set; }
-
-    [Parameter]
-    public bool IsOpen { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> IsOpenChanged { get; set; }
-
-    [Parameter]
-    public ServicioViewModel Servicio { get; set; } = default!;
-
-    [Parameter]
-    public List<CentroCostoInfo> CentrosCosto { get; set; } = [];
-
-    [Parameter]
-    public List<FranquiciaInfo> Franquicias { get; set; } = [];
-
-    [Parameter]
-    public List<TipoControlModel> TiposControl { get; set; } = [];
-
-    [Parameter]
-    public List<TipoDistribucionModel> TiposDistribucion { get; set; } = [];
-
-    [Parameter]
-    public List<TipoVigenciaModel> TiposVigencia { get; set; } = [];
-
-    [Parameter]
-    public List<ServicioModel> Servicios { get; set; } = [];
-
-    [Parameter]
-    public List<Plantilla> Plantillas { get; set; } = [];
-
-    [Parameter]
-    public Func<int, Task>? LoadServicios { get; set; }
-
-    [Parameter]
-    public Func<ServicioViewModel, Task<bool>>? CommitChanges { get; set; }
-
-    private async Task ChangeIsOpen(bool isOpen)
-    {
-        IsOpen = isOpen;
-        await IsOpenChanged.InvokeAsync(isOpen);
-    }
-
-    private async Task FranquiciaChanged(int franquiciaId)
-    {
-        Servicio.FranquiciaId = franquiciaId;
-
-        if (LoadServicios is not null)
-        {
-            await LoadServicios(franquiciaId);
-        }
-    }
-
-    private async Task CancelEditingItemAsync()
-    {
-        await ChangeIsOpen(false);
-    }
-
-    private async Task CommitItemChangesAsync()
-    {
-        await form.Validate();
-
-        if (!form.IsValid)
-        {
-            return;
-        }
-
-        if (Servicio is not null && CommitChanges is not null)
-        {
-            bool result = await CommitChanges(Servicio);
-
-            if (result)
-            {
-                await ChangeIsOpen(false);
-            }
-        }
-    }
-}

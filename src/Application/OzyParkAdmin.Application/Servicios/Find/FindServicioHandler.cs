@@ -1,14 +1,13 @@
-﻿using MassTransit.Mediator;
-using OzyParkAdmin.Domain.Seguridad.Usuarios;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
-using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Servicios.Find;
 
 /// <summary>
 /// El manejador de <see cref="FindServicio"/>.
 /// </summary>
-public sealed class FindServicioHandler : MediatorRequestHandler<FindServicio, ResultOf<ServicioFullInfo>>
+public sealed class FindServicioHandler : QueryHandler<FindServicio, ServicioFullInfo>
 {
     private readonly IServicioRepository _repository;
 
@@ -16,17 +15,19 @@ public sealed class FindServicioHandler : MediatorRequestHandler<FindServicio, R
     /// Crea una nueva instancia de <see cref="FindServicioHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="IServicioRepository"/>.</param>
-    public FindServicioHandler(IServicioRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public FindServicioHandler(IServicioRepository repository, ILogger<FindServicioHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<ServicioFullInfo>> Handle(FindServicio request, CancellationToken cancellationToken)
+    protected override async Task<ServicioFullInfo?> ExecuteQueryAsync(FindServicio query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        Servicio? servicio = await _repository.FindByIdAsync(request.ServicioId, cancellationToken);
-        return servicio is null ? new NotFound() : servicio.ToInfo();
+        ArgumentNullException.ThrowIfNull(query);
+        Servicio? servicio = await _repository.FindByIdAsync(query.ServicioId, cancellationToken);
+        return servicio?.ToInfo();
     }
 }

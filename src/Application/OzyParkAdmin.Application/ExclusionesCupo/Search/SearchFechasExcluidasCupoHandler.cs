@@ -1,5 +1,6 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Identity;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.ExclusionesCupo;
 using OzyParkAdmin.Domain.Shared;
 
@@ -8,7 +9,7 @@ namespace OzyParkAdmin.Application.ExclusionesCupo.Search;
 /// <summary>
 /// El manejador de <see cref="SearchFechasExcluidasCupo"/>
 /// </summary>
-public sealed class SearchFechasExcluidasCupoHandler : MediatorRequestHandler<SearchFechasExcluidasCupo, PagedList<FechaExcluidaCupoFullInfo>>
+public sealed class SearchFechasExcluidasCupoHandler : QueryPagedOfHandler<SearchFechasExcluidasCupo, FechaExcluidaCupoFullInfo>
 {
     private readonly IFechaExcluidaCupoRepository _repository;
 
@@ -16,23 +17,25 @@ public sealed class SearchFechasExcluidasCupoHandler : MediatorRequestHandler<Se
     /// Crea una nueva instancia de <see cref="SearchFechasExcluidasCupoHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="IFechaExcluidaCupoRepository"/>.</param>
-    public SearchFechasExcluidasCupoHandler(IFechaExcluidaCupoRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public SearchFechasExcluidasCupoHandler(IFechaExcluidaCupoRepository repository, ILogger<SearchFechasExcluidasCupoHandler> logger)
+        : base(logger)  
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<PagedList<FechaExcluidaCupoFullInfo>> Handle(SearchFechasExcluidasCupo request, CancellationToken cancellationToken)
+    protected override async Task<PagedList<FechaExcluidaCupoFullInfo>> ExecutePagedListAsync(SearchFechasExcluidasCupo query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(query);
         return await _repository.SearchAsync(
-            request.User.GetCentrosCosto(),
-            request.SearchText,
-            request.FilterExpressions,
-            request.SortExpressions,
-            request.Page,
-            request.PageSize,
+            query.User.GetCentrosCosto(),
+            query.SearchText,
+            query.FilterExpressions,
+            query.SortExpressions,
+            query.Page,
+            query.PageSize,
             cancellationToken);
     }
 }

@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Servicios;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Servicios.Update;
@@ -15,44 +16,45 @@ public sealed class UpdateServicioHandler : ServicioStateChangeableHandler<Updat
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="servicioManager">El <see cref="ServicioManager"/>.</param>
-    public UpdateServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager)
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public UpdateServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager, ILogger<UpdateServicioHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(servicioManager);
         _servicioManager = servicioManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Servicio>> ExecuteAsync(UpdateServicio request, CancellationToken cancellationToken) =>
+    protected override async Task<ResultOf<Servicio>> ExecuteChangeStateAsync(UpdateServicio command, CancellationToken cancellationToken) =>
         await _servicioManager.UpdateAsync(
-            request.Id,
-            request.CentroCosto,
-            request.FranquiciaId,
-            request.Aka,
-            request.Nombre,
-            request.TipoControl,
-            request.TipoDistribucion,
-            request.TipoServicio,
-            request.TipoVigencia,
-            request.NumeroVigencia,
-            request.NumeroValidez,
-            request.NumeroPaxMinimo,
-            request.NumeroPaxMaximo,
-            request.EsConHora,
-            request.EsPorTramos,
-            request.EsParaVenta,
-            request.Orden,
-            request.HolguraInicio,
-            request.HolguraFin,
-            request.EsParaMovil,
-            request.MostrarTramos,
-            request.EsParaBuses,
-            request.IdaVuelta,
-            request.HolguraEntrada,
-            request.ControlParental,
-            request.ServicioResponsableId,
-            request.Politicas,
-            request.PlantillaId,
-            request.PlantillaDigitalId,
+            command.Id,
+            command.CentroCosto,
+            command.FranquiciaId,
+            command.Aka,
+            command.Nombre,
+            command.TipoControl,
+            command.TipoDistribucion,
+            command.TipoServicio,
+            command.TipoVigencia,
+            command.NumeroVigencia,
+            command.NumeroValidez,
+            command.NumeroPaxMinimo,
+            command.NumeroPaxMaximo,
+            command.EsConHora,
+            command.EsPorTramos,
+            command.EsParaVenta,
+            command.Orden,
+            command.HolguraInicio,
+            command.HolguraFin,
+            command.EsParaMovil,
+            command.MostrarTramos,
+            command.EsParaBuses,
+            command.IdaVuelta,
+            command.HolguraEntrada,
+            command.ControlParental,
+            command.ServicioResponsableId,
+            command.Politicas,
+            command.PlantillaId,
+            command.PlantillaDigitalId,
             cancellationToken);
 }

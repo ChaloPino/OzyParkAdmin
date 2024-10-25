@@ -39,4 +39,12 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
 
         return categorias.ToInfo();
     }
+
+    /// <inheritdoc/>
+    public async Task<int> MaxIdAsync(CancellationToken cancellationToken)
+    {
+        int? id = await EntitySet.MaxAsync(x => (int?)x.Id, cancellationToken);
+        return id ?? 0;
+    }
+
 }

@@ -206,13 +206,16 @@
     /// <summary>
     /// Prepara el producto asignando los nhombre completos de categoría y categoría despliegue.
     /// </summary>
-    /// <remarks>
-    /// La busqueda se hace en la clase <see cref="CategoriaProductoInfo" /> el método <see cref="CategoriaProductoInfo.Equals(CategoriaProductoInfo?)" />.
-    /// </remarks>
     private void PrepareProducto()
     {
+        /*
+        /// <remarks>
+        /// La busqueda se hace en la clase <see cref="CategoriaProductoInfo" /> el método <see cref="CategoriaProductoInfo.Equals(CategoriaProductoInfo?)" />.
+        /// </remarks>
+
         int categoriaId = categorias.IndexOf(Producto!.Categoria);
         int categoriaDespliegueId = categorias.IndexOf(Producto!.CategoriaDespliegue);
+
 
         if (categoriaId >= 0)
         {
@@ -223,6 +226,20 @@
         {
             Producto.CategoriaDespliegue.NombreCompleto = categorias[categoriaDespliegueId].NombreCompleto;
         }
+        */
+
+        string? nombreCompleto = categorias.Where(w => w.Id == Producto!.Categoria.Id).Select(s => s.NombreCompleto).FirstOrDefault();
+        if (!string.IsNullOrEmpty(nombreCompleto))
+        {
+            Producto.Categoria.NombreCompleto = nombreCompleto;
+        }
+
+        string? nombreCompletoDespliegue = categorias.Where(w => w.Id == Producto!.CategoriaDespliegue.Id).Select(s => s.NombreCompleto).FirstOrDefault();
+        if (!string.IsNullOrEmpty(nombreCompletoDespliegue))
+        {
+            Producto.CategoriaDespliegue.NombreCompleto = nombreCompletoDespliegue;
+        }
+
     }
 
     private void PrepareComplementos()

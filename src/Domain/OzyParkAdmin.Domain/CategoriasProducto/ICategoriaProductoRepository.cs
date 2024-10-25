@@ -22,4 +22,11 @@ public interface ICategoriaProductoRepository
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>La lista de <see cref="CategoriaProductoInfo"/>.</returns>
     Task<List<CategoriaProductoInfo>> ListByFranquiciaIdAsync(int franquiciaId, TipoCategoria tipoCategoria, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Obtiene el Valor de ID mayor en Categoria de Productos
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<int> MaxIdAsync(CancellationToken cancellationToken);
 }

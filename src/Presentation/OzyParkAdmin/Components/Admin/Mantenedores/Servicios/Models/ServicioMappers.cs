@@ -1,4 +1,5 @@
-﻿using MudBlazor;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using MudBlazor;
 using MudBlazor.Interfaces;
 using OzyParkAdmin.Application.Servicios.Assigns;
 using OzyParkAdmin.Application.Servicios.Create;
@@ -97,10 +98,10 @@ internal static class ServicioMappers
             Nombre = servicio.Nombre,
             FranquiciaId = servicio.FranquiciaId,
             CentroCosto = servicio.CentroCosto,
-            TipoControl = servicio.TipoControl.ToModel(),
-            TipoDistribucion = servicio.TipoDistribucion.ToModel(),
+            TipoControl = servicio.TipoControl,
+            TipoDistribucion = servicio.TipoDistribucion,
             TipoServicio = servicio.TipoServicio,
-            TipoVigencia = servicio.TipoVigencia.ToModel(),
+            TipoVigencia = servicio.TipoVigencia,
             NumeroVigencia = servicio.NumeroVigencia,
             NumeroValidez = servicio.NumeroValidez,
             NumeroPaxMinimo = servicio.NumeroPaxMinimo,
@@ -121,43 +122,19 @@ internal static class ServicioMappers
             ServicioResponsableId = servicio.ServicioResponsableId,
             Tramos = servicio.Tramos.ToModel(),
             CentrosCosto = servicio.CentrosCosto.ToModel(),
-            GruposEtarios = servicio.GruposEtarios.ToModel(),
+            GruposEtarios = [..servicio.GruposEtarios],
             Cajas = servicio.Cajas.ToModel(),
-            Zonas = servicio.Zonas.ToModel(),
             Permisos = servicio.Permisos.ToModel(),
             PlantillaId = servicio.PlantillaId,
             PlantillaDigitalId = servicio.PlantillaDigitalId,
             EsActivo = servicio.EsActivo,
         };
 
-    public static List<TipoControlModel> ToModel(this IEnumerable<TipoControl> source) =>
-        source.Select(ToModel).ToList();
-    public static TipoControlModel ToModel(this TipoControl tipoControl) =>
-        new() { Id = tipoControl.Id, Nombre = tipoControl.Aka, EsActivo = tipoControl.EsActivo };
-
-    public static List<TipoDistribucionModel> ToModel(this IEnumerable<TipoDistribucion> source) =>
-        source.Select(ToModel).ToList();
-
-    public static TipoDistribucionModel ToModel(this TipoDistribucion tipoDistribucion) =>
-        new() { Id = tipoDistribucion.Id, Nombre = tipoDistribucion.Descripcion, EsActivo = tipoDistribucion.EsActivo };
-
-    public static List<TipoVigenciaModel> ToModel(this IEnumerable<TipoVigencia> source) =>
-        source.Select(ToModel).ToList();
-
-    public static TipoVigenciaModel ToModel(this TipoVigencia tipoVigencia) =>
-        new() { Id = tipoVigencia.Id, Aka = tipoVigencia.Aka, Nombre = tipoVigencia.Descripcion, EsActivo = tipoVigencia.EsActivo };
-
     public static List<TramoServicioModel> ToModel(this IEnumerable<TramoServicioInfo> source) =>
         source.Select(ToModel).ToList();
 
     private static TramoServicioModel ToModel(TramoServicioInfo tramoServicio) =>
-        new() { CentroCosto = tramoServicio.CentroCosto, Tramo = tramoServicio.Tramo.ToModel(), Nombre = tramoServicio.Nombre, CantidadPersmisos = tramoServicio.CantidadPermisos };
-
-    public static List<TramoModel> ToModel(this IEnumerable<TramoInfo> source) =>
-        source.Select(ToModel).ToList();
-
-    public static TramoModel ToModel(this TramoInfo tramo) =>
-        new() { Id = tramo.Id, Aka = tramo.Aka, Nombre = tramo.Descripcion };
+        new() { CentroCosto = tramoServicio.CentroCosto, Tramo = tramoServicio.Tramo, Nombre = tramoServicio.Nombre, CantidadPersmisos = tramoServicio.CantidadPermisos };
 
     public static List<CentroCostoServicioModel> ToModel(this IEnumerable<CentroCostoServicioInfo> source) =>
         source.Select(ToModel).ToList();
@@ -165,47 +142,17 @@ internal static class ServicioMappers
     public static CentroCostoServicioModel ToModel(this CentroCostoServicioInfo centroCostoServicio) =>
         new() { CentroCosto = centroCostoServicio.CentroCosto, Nombre = centroCostoServicio.Nombre };
 
-    public static List<GrupoEtarioModel> ToModel(this IEnumerable<GrupoEtarioInfo> source) =>
-        source.Select(ToModel).ToList();
-
-    private static GrupoEtarioModel ToModel(GrupoEtarioInfo grupoEtario) =>
-        new() { Id = grupoEtario.Id, Aka = grupoEtario.Aka, Nombre = grupoEtario.Descripcion };
-
     public static List<CajaServicioModel> ToModel(this IEnumerable<ServicioPorCajaInfo> source) =>
         source.Select(ToModel).ToList();
 
     private static CajaServicioModel ToModel(ServicioPorCajaInfo servicioPorCaja) =>
-        new() { Caja = servicioPorCaja.Caja.ToModel(), NoUsaZona = servicioPorCaja.NoUsaZona };
-
-    public static List<CajaModel> ToModel(this IEnumerable<CajaInfo> source) =>
-        source.Select(ToModel).ToList();
-
-    private static CajaModel ToModel(this CajaInfo cajaInfo) =>
-        new() { Id = cajaInfo.Id, Aka = cajaInfo.Aka, Nombre = cajaInfo.Descripcion };
-
-    public static List<ZonaTramoModel> ToModel(this IEnumerable<ZonaPorTramoInfo> source) =>
-        source.Select(ToModel).ToList();
-
-    private static ZonaTramoModel ToModel(ZonaPorTramoInfo zonaPorTramo) =>
-        new() { Tramo = zonaPorTramo.Tramo.ToModel(), Zona = zonaPorTramo.Zona.ToModel(), EsRetorno = zonaPorTramo.EsRetorno, EsCombinacion = zonaPorTramo.EsCombinacion, Orden = zonaPorTramo.Orden, EsActivo = zonaPorTramo.EsActivo };
-
-    public static List<ZonaModel> ToModel(this IEnumerable<ZonaInfo> source) =>
-        source.Select(ToModel).ToList();
-
-    public static ZonaModel ToModel(this ZonaInfo zona) =>
-        new() { Id = zona.Id, Nombre = zona.Descripcion };
+        new() { Caja = servicioPorCaja.Caja, NoUsaZona = servicioPorCaja.NoUsaZona };
 
     public static List<PermisoServicioModel> ToModel(this IEnumerable<PermisoServicioInfo> source) =>
         source.Select(ToModel).ToList();
 
     private static PermisoServicioModel ToModel(PermisoServicioInfo permisoServicio) =>
-        new() { Tramo = permisoServicio.Tramo.ToModel(), CentroCosto = permisoServicio.CentroCosto };
-
-    public static List<ServicioModel> ToModel(this IEnumerable<ServicioInfo> source) =>
-        source.Select(ToModel).ToList();
-
-    private static ServicioModel ToModel(ServicioInfo servicio) =>
-        new(servicio.Id, servicio.Aka, servicio.Nombre);
+        new() { Tramo = permisoServicio.Tramo, CentroCosto = permisoServicio.CentroCosto };
 
     public static CreateServicio ToCreate(this ServicioViewModel servicio) =>
         new(
@@ -213,10 +160,10 @@ internal static class ServicioMappers
             servicio.FranquiciaId,
             servicio.Aka,
             servicio.Nombre,
-            servicio.TipoControl.ToEntity(),
-            servicio.TipoDistribucion.ToEntity(),
+            servicio.TipoControl,
+            servicio.TipoDistribucion,
             servicio.TipoServicio,
-            servicio.TipoVigencia.ToEntity(),
+            servicio.TipoVigencia,
             servicio.NumeroVigencia,
             servicio.NumeroValidez,
             servicio.NumeroPaxMinimo,
@@ -245,10 +192,10 @@ internal static class ServicioMappers
             servicio.FranquiciaId,
             servicio.Aka,
             servicio.Nombre,
-            servicio.TipoControl.ToEntity(),
-            servicio.TipoDistribucion.ToEntity(),
+            servicio.TipoControl,
+            servicio.TipoDistribucion,
             servicio.TipoServicio,
-            servicio.TipoVigencia.ToEntity(),
+            servicio.TipoVigencia,
             servicio.NumeroVigencia,
             servicio.NumeroValidez,
             servicio.NumeroPaxMinimo,
@@ -270,15 +217,6 @@ internal static class ServicioMappers
             servicio.PlantillaId,
             servicio.PlantillaDigitalId);
 
-    private static TipoControl ToEntity(this TipoControlModel tipoControl) =>
-        new(tipoControl.Id, tipoControl.Nombre, tipoControl.EsActivo);
-
-    private static TipoDistribucion ToEntity(this TipoDistribucionModel tipoDistribucion) =>
-        new(tipoDistribucion.Id, tipoDistribucion.Nombre, tipoDistribucion.EsActivo);
-
-    private static TipoVigencia ToEntity(this TipoVigenciaModel tipoVigencia) =>
-        new(tipoVigencia.Id, tipoVigencia.Aka, tipoVigencia.Nombre, tipoVigencia.EsActivo);
-
     public static AssignCentrosCostoToServicio ToAssignCentrosCosto(this ServicioViewModel servicio) =>
         new(servicio.Id, servicio.CentrosCosto.ToInfo());
 
@@ -288,11 +226,8 @@ internal static class ServicioMappers
     public static AssignPermisosToServicio ToAssignPermisos(this ServicioViewModel servicio) =>
         new(servicio.Id, servicio.Permisos.ToInfo());
 
-    public static AssignZonasToServicio ToAssignZonas(this ServicioViewModel servicio) =>
-        new(servicio.Id, servicio.Zonas.ToInfo());
-
     public static AssignGruposEtariosToServicio ToAssignGruposEtarios(this ServicioViewModel servicio) =>
-        new(servicio.Id, servicio.GruposEtarios.ToInfo());
+        new(servicio.Id, [..servicio.GruposEtarios]);
 
     public static AssignCajasToServicio ToAssignCajas(this ServicioViewModel servicio) =>
         new(servicio.Id, servicio.Cajas.ToInfo());
@@ -307,38 +242,23 @@ internal static class ServicioMappers
         [.. source.Select(ToInfo)];
 
     private static TramoServicioInfo ToInfo(TramoServicioModel tramoServicio) =>
-        new() { CentroCosto = tramoServicio.CentroCosto, Tramo = tramoServicio.Tramo.ToInfo(), Nombre = tramoServicio.Nombre, CantidadPermisos = tramoServicio.CantidadPersmisos };
-
-    private static TramoInfo ToInfo(this TramoModel tramo) =>
-        new() { Id = tramo.Id, Aka = tramo.Aka, Descripcion = tramo.Nombre };
+        new() { CentroCosto = tramoServicio.CentroCosto, Tramo = tramoServicio.Tramo, Nombre = tramoServicio.Nombre, CantidadPermisos = tramoServicio.CantidadPersmisos };
 
     private static ImmutableArray<PermisoServicioInfo> ToInfo(this IEnumerable<PermisoServicioModel> source) =>
         [.. source.Select(ToInfo)];
 
     private static PermisoServicioInfo ToInfo(PermisoServicioModel permiso) =>
-        new() {  Tramo = permiso.Tramo.ToInfo(), CentroCosto = permiso.CentroCosto };
-
-    private static ImmutableArray<ZonaPorTramoInfo> ToInfo(this IEnumerable<ZonaTramoModel> source) =>
-        [.. source.Select(ToInfo)];
-
-    private static ZonaPorTramoInfo ToInfo(ZonaTramoModel zonaTramo) =>
-        new() { Tramo = zonaTramo.Tramo.ToInfo(), Zona = zonaTramo.Zona.ToInfo(), EsRetorno = zonaTramo.EsRetorno, EsCombinacion = zonaTramo.EsCombinacion, Orden = zonaTramo.Orden, EsActivo = zonaTramo.EsActivo };
-
-    private static ZonaInfo ToInfo(this ZonaModel zona) =>
-        new() { Id = zona.Id, Descripcion = zona.Nombre };
-
-    private static ImmutableArray<GrupoEtarioInfo> ToInfo(this IEnumerable<GrupoEtarioModel> source) =>
-        [.. source.Select(ToInfo)];
-
-    private static GrupoEtarioInfo ToInfo(GrupoEtarioModel grupoEtario) =>
-        new() { Id = grupoEtario.Id, Aka = grupoEtario.Aka, Descripcion = grupoEtario.Nombre };
+        new() {  Tramo = permiso.Tramo, CentroCosto = permiso.CentroCosto };
 
     private static ImmutableArray<ServicioPorCajaInfo> ToInfo(this IEnumerable<CajaServicioModel> source) =>
         [.. source.Select(ToInfo)];
 
     private static ServicioPorCajaInfo ToInfo(CajaServicioModel cajaServicio) =>
-        new() { Caja = cajaServicio.Caja.ToInfo(), NoUsaZona = cajaServicio.NoUsaZona };
+        new() { Caja = cajaServicio.Caja, NoUsaZona = cajaServicio.NoUsaZona };
 
-    private static CajaInfo ToInfo(this CajaModel caja) =>
-        new() { Id = caja.Id, Aka = caja.Aka, Descripcion = caja.Nombre };
+    public static string ToLabel(this TipoVigencia tipoVigencia) =>
+        string.Equals(tipoVigencia.Aka, "dd", StringComparison.OrdinalIgnoreCase) ? "Días" : "Hora";
+
+    public static string ToVigencia(this TipoVigencia tipoVigencia) =>
+        string.Equals(tipoVigencia.Aka, "dd", StringComparison.OrdinalIgnoreCase) ? "día" : "hora";
 }

@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Productos;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Productos.Assign;
@@ -15,14 +16,15 @@ public sealed class AssignCajasToProductoHandler : ProductoStateChangeableHandle
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="productoManager">El <see cref="ProductoManager"/>.</param>
-    public AssignCajasToProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager)
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public AssignCajasToProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager, ILogger<AssignCajasToProductoHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(productoManager);
         _productoManager = productoManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Producto>> ExecuteAsync(AssignCajasToProducto request, CancellationToken cancellationToken) =>
-        await _productoManager.AssignCajasAsync(request.ProductoId, request.Cajas, cancellationToken);
+    protected override async Task<ResultOf<Producto>> ExecuteChangeStateAsync(AssignCajasToProducto command, CancellationToken cancellationToken) =>
+        await _productoManager.AssignCajasAsync(command.ProductoId, command.Cajas, cancellationToken);
 }

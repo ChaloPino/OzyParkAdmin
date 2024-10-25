@@ -1,4 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
 
 namespace OzyParkAdmin.Application.Servicios.List;
@@ -6,7 +7,7 @@ namespace OzyParkAdmin.Application.Servicios.List;
 /// <summary>
 /// El manejador de <see cref="ListServicios"/>.
 /// </summary>
-public sealed class ListServiciosHandler : MediatorRequestHandler<ListServicios, ResultListOf<ServicioInfo>>
+public sealed class ListServiciosHandler : QueryListOfHandler<ListServicios, ServicioInfo>
 {
     private readonly IServicioRepository _repository;
 
@@ -14,16 +15,18 @@ public sealed class ListServiciosHandler : MediatorRequestHandler<ListServicios,
     /// Crea una nueva instancia de <see cref="ListServiciosHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="IServicioRepository"/>.</param>
-    public ListServiciosHandler(IServicioRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ListServiciosHandler(IServicioRepository repository, ILogger<ListServiciosHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<ServicioInfo>> Handle(ListServicios request, CancellationToken cancellationToken)
+    protected override async Task<List<ServicioInfo>> ExecuteListAsync(ListServicios query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return await _repository.ListAsync(request.FranquiciaId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(query);
+        return await _repository.ListAsync(query.FranquiciaId, cancellationToken);
     }
 }

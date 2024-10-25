@@ -20,7 +20,7 @@ using System.Text;
 namespace {{AttributeNameSpace}};
 internal static class {{FunctionClassName}}
 {
-    internal static string FormatValue<T>(T value) => $"{typeof(T)}.FullName: {FormatInternal(value)}";
+    internal static string FormatValue<T>(T value) => $"{typeof(T).Name}: {FormatInternal(value)}";
     private static string? FormatInternal<T>(T value) => value is IEnumerable enumerable ? FormatEnumerable(enumerable) : FormatObject(value);
     private static string? FormatObject<T>(T value) => value?.ToString();
     private static string? FormatEnumerable(IEnumerable enumerable)
@@ -37,7 +37,6 @@ internal static class {{FunctionClassName}}
         }
         return builder.ToString();
     }
-
 }
 
 """;

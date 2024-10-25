@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
 
 namespace OzyParkAdmin.Application.Servicios.List;
@@ -6,4 +6,4 @@ namespace OzyParkAdmin.Application.Servicios.List;
 /// <summary>
 /// Lista todos los grupos etarios.
 /// </summary>
-public sealed record ListGruposEtarios : Request<ResultListOf<GrupoEtarioInfo>>;
+public sealed record ListGruposEtarios : IQueryListOf<GrupoEtarioInfo>;

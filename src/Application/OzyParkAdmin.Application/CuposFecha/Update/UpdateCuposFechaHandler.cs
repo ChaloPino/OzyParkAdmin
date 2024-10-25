@@ -1,18 +1,14 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CuposFecha;
 using OzyParkAdmin.Domain.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OzyParkAdmin.Application.CuposFecha.Update;
 
 /// <summary>
 /// El manejador de <see cref="UpdateCuposFecha"/>
 /// </summary>
-public sealed class UpdateCuposFechaHandler : MediatorRequestHandler<UpdateCuposFecha, SuccessOrFailure>
+public sealed class UpdateCuposFechaHandler : CommandHandler<UpdateCuposFecha>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly CupoFechaManager _cupoFechaManager;
@@ -22,7 +18,9 @@ public sealed class UpdateCuposFechaHandler : MediatorRequestHandler<UpdateCupos
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="cupoFechaManager">El <see cref="CupoFechaManager"/>.</param>
-    public UpdateCuposFechaHandler(IOzyParkAdminContext context, CupoFechaManager cupoFechaManager)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public UpdateCuposFechaHandler(IOzyParkAdminContext context, CupoFechaManager cupoFechaManager, ILogger<UpdateCuposFechaHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(cupoFechaManager);
@@ -31,19 +29,19 @@ public sealed class UpdateCuposFechaHandler : MediatorRequestHandler<UpdateCupos
     }
 
     /// <inheritdoc/>
-    protected override async Task<SuccessOrFailure> Handle(UpdateCuposFecha request, CancellationToken cancellationToken)
+    protected override async Task<SuccessOrFailure> ExecuteAsync(UpdateCuposFecha command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        _context.AttachRange(request.CanalVenta, request.DiaSemana);
+        ArgumentNullException.ThrowIfNull(command);
+        _context.AttachRange(command.CanalVenta, command.DiaSemana);
 
         ResultOf<IEnumerable<CupoFecha>> result = await _cupoFechaManager.UpdateCuposFechaAsync(
-            request.Fecha,
-            request.EscenarioCupo,
-            request.CanalVenta,
-            request.DiaSemana,
-            request.Total,
-            request.Sobrecupo,
-            request.TopeEnCupo,
+            command.Fecha,
+            command.EscenarioCupo,
+            command.CanalVenta,
+            command.DiaSemana,
+            command.Total,
+            command.Sobrecupo,
+            command.TopeEnCupo,
             cancellationToken);
 
         return await result.MatchAsync(

@@ -9,6 +9,7 @@ namespace OzyParkAdmin.Shared;
 public abstract class BaseValidator<T> : AbstractValidator<T>
 {
     private const string ValidationMemberPrefix = "Validation";
+    private const string ItemMemberPrefix = "Item.";
 
     /// <summary>
     /// Crea una nueva instancia de <see cref="BaseValidator{T}"/>.
@@ -25,6 +26,11 @@ public abstract class BaseValidator<T> : AbstractValidator<T>
         if (propertyName.StartsWith(ValidationMemberPrefix, StringComparison.Ordinal))
         {
             propertyName = propertyName.Substring(ValidationMemberPrefix.Length);
+        }
+
+        if (propertyName.StartsWith("Item."))
+        {
+            propertyName = propertyName.Substring(ItemMemberPrefix.Length);
         }
 
         var result = await ValidateAsync(ValidationContext<T>.CreateWithOptions((T)model, x => x.IncludeProperties(propertyName)));

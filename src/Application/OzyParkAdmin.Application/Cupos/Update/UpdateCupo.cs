@@ -1,9 +1,8 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.Cupos;
 using OzyParkAdmin.Domain.Entidades;
 using OzyParkAdmin.Domain.EscenariosCupo;
-using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Cupos.Update;
 
@@ -30,4 +29,4 @@ public sealed record UpdateCupo(
     TimeSpan HoraFin,
     int Total,
     int SobreCupo,
-    int TopeEnCupo) : Request<ResultOf<CupoFullInfo>>;
+    int TopeEnCupo) : ICommand<CupoFullInfo>;

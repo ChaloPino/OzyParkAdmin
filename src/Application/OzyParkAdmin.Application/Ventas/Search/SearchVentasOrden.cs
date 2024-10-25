@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Domain.Ventas;
 
@@ -18,4 +18,15 @@ namespace OzyParkAdmin.Application.Ventas.Search;
 /// <param name="SortExpressions">Las expresiones de ordenamiento.</param>
 /// <param name="Page">La página actual.</param>
 /// <param name="PageSize">El tamaño de la página.</param>
-public sealed record SearchVentasOrden(DateTime Fecha, string? NumeroOrden, string? VentaId, string? TicketId, string? Email, string? Telefono, string? Nombres, string? Apellidos, SortExpressionCollection<VentaOrdenInfo> SortExpressions, int Page, int PageSize) : Request<PagedList<VentaOrdenInfo>>;
+public sealed record SearchVentasOrden(
+    DateTime Fecha,
+    string? NumeroOrden,
+    string? VentaId,
+    string? TicketId,
+    string? Email,
+    string? Telefono,
+    string? Nombres,
+    string? Apellidos,
+    SortExpressionCollection<VentaOrdenInfo> SortExpressions,
+    int Page,
+    int PageSize) : IQueryPagedOf<VentaOrdenInfo>;

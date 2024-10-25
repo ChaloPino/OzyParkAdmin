@@ -1,5 +1,6 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Identity;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
 
@@ -8,7 +9,7 @@ namespace OzyParkAdmin.Application.Productos.Search;
 /// <summary>
 /// El manejador de <see cref="SearchProductosHandler"/>.
 /// </summary>
-public sealed class SearchProductosHandler : MediatorRequestHandler<SearchProductos, PagedList<ProductoFullInfo>>
+public sealed class SearchProductosHandler : QueryPagedOfHandler<SearchProductos, ProductoFullInfo>
 {
     private readonly IProductoRepository _repository;
 
@@ -16,16 +17,25 @@ public sealed class SearchProductosHandler : MediatorRequestHandler<SearchProduc
     /// Crea una nueva instancia de <see cref="SearchProductosHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="IProductoRepository"/>.</param>
-    public SearchProductosHandler(IProductoRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public SearchProductosHandler(IProductoRepository repository, ILogger<SearchProductosHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<PagedList<ProductoFullInfo>> Handle(SearchProductos request, CancellationToken cancellationToken)
+    protected override async Task<PagedList<ProductoFullInfo>> ExecutePagedListAsync(SearchProductos query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return await _repository.SearchProductosAsync(request.User.GetCentrosCosto(), request.SearchText, request.FilterExpressions, request.SortExpressions, request.Page, request.PageSize, cancellationToken);
+        ArgumentNullException.ThrowIfNull(query);
+        return await _repository.SearchProductosAsync(
+            query.User.GetCentrosCosto(),
+            query.SearchText,
+            query.FilterExpressions,
+            query.SortExpressions,
+            query.Page,
+            query.PageSize,
+            cancellationToken);
     }
 }

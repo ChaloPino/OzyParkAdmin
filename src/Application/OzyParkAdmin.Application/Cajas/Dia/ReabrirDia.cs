@@ -1,6 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cajas;
-using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Cajas.Dia;
 
@@ -8,4 +7,4 @@ namespace OzyParkAdmin.Application.Cajas.Dia;
 /// Reapertura el día de una caja.
 /// </summary>
 /// <param name="DiaId">El id de la caja a reaperturar.</param>
-public sealed record ReabrirDia(Guid DiaId) : Request<ResultOf<AperturaCajaInfo>>;
+public sealed record ReabrirDia(Guid DiaId) : ICommand<AperturaCajaInfo>;

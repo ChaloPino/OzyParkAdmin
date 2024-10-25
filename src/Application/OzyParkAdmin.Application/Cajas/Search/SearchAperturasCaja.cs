@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Domain.Shared;
 
@@ -14,4 +14,11 @@ namespace OzyParkAdmin.Application.Cajas.Search;
 /// <param name="SortExpressions">Las expresiones de ordeanmiento.</param>
 /// <param name="Page">La página actual.</param>
 /// <param name="PageSize">El tamaño de la página actual.</param>
-public sealed record SearchAperturasCaja(int CentroCostoId, string? SearchText, DateOnly SearchDate, FilterExpressionCollection<AperturaCajaInfo> FilterExpressions, SortExpressionCollection<AperturaCajaInfo> SortExpressions, int Page, int PageSize) : Request<PagedList<AperturaCajaInfo>>;
+public sealed record SearchAperturasCaja(
+    int CentroCostoId,
+    string? SearchText,
+    DateOnly SearchDate,
+    FilterExpressionCollection<AperturaCajaInfo> FilterExpressions,
+    SortExpressionCollection<AperturaCajaInfo> SortExpressions,
+    int Page,
+    int PageSize) : IQueryPagedOf<AperturaCajaInfo>;

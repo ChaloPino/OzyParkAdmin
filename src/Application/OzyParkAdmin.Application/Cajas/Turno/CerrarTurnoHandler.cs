@@ -1,5 +1,6 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Identity;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Domain.Shared;
 
@@ -8,7 +9,7 @@ namespace OzyParkAdmin.Application.Cajas.Turno;
 /// <summary>
 /// El manejador de <see cref="CerrarTurno"/>.
 /// </summary>
-public sealed class CerrarTurnoHandler : MediatorRequestHandler<CerrarTurno, ResultOf<TurnoCajaInfo>>
+public sealed class CerrarTurnoHandler : CommandHandler<CerrarTurno, TurnoCajaInfo>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly CajaManager _cajaManager;
@@ -18,7 +19,9 @@ public sealed class CerrarTurnoHandler : MediatorRequestHandler<CerrarTurno, Res
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="cajaManager">El <see cref="CajaManager"/></param>
-    public CerrarTurnoHandler(IOzyParkAdminContext context, CajaManager cajaManager)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public CerrarTurnoHandler(IOzyParkAdminContext context, CajaManager cajaManager, ILogger<CerrarTurnoHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(cajaManager);
@@ -27,13 +30,19 @@ public sealed class CerrarTurnoHandler : MediatorRequestHandler<CerrarTurno, Res
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<TurnoCajaInfo>> Handle(CerrarTurno request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<TurnoCajaInfo>> ExecuteAsync(CerrarTurno command, CancellationToken cancellationToken)
     {
         var result = await _cajaManager.CerrarTurnoAsync(
-            request.DiaId, request.Id, request.User.ToInfo(), request.RegularizacionEfectivo, request.RegularizacionMontoTransbank, request.Comentario, request.Movimientos, cancellationToken);
+            command.DiaId,
+            command.Id,
+            command.User.ToInfo(),
+            command.RegularizacionEfectivo, command.RegularizacionMontoTransbank,
+            command.Comentario,
+            command.Movimientos,
+            cancellationToken);
 
-        return await result.MatchResultOfAsync(
-            onSuccess: (apertura, token) => SaveAsync(apertura, request, token),
+        return await result.BindAsync(
+            onSuccess: (apertura, token) => SaveAsync(apertura, command, token),
             onFailure: failure => failure,
             cancellationToken: cancellationToken);
     }

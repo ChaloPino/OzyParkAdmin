@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CentrosCosto;
 using System.Security.Claims;
 
@@ -8,4 +8,4 @@ namespace OzyParkAdmin.Application.CentrosCosto.List;
 /// Lista todos los centros de costo activo.
 /// </summary>
 /// <param name="User">El usuario que realiza la consulta.</param>
-public sealed record ListCentrosCosto(ClaimsPrincipal User) : Request<ResultListOf<CentroCostoInfo>>;
+public sealed record ListCentrosCosto(ClaimsPrincipal User) : IQueryListOf<CentroCostoInfo>;

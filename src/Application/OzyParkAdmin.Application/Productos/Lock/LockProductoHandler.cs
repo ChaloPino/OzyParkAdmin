@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Productos;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Productos.Lock;
@@ -15,14 +16,15 @@ public sealed class LockProductoHandler : ProductoStateChangeableHandler<LockPro
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="productoManager">El <see cref="ProductoManager"/>.</param>
-    public LockProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager)
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public LockProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager, ILogger<LockProductoHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(productoManager);
         _productoManager = productoManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Producto>> ExecuteAsync(LockProducto request, CancellationToken cancellationToken) =>
-        await _productoManager.BloquearProductoAsync(request.ProductoId, cancellationToken);
+    protected override async Task<ResultOf<Producto>> ExecuteChangeStateAsync(LockProducto command, CancellationToken cancellationToken) =>
+        await _productoManager.BloquearProductoAsync(command.ProductoId, cancellationToken);
 }

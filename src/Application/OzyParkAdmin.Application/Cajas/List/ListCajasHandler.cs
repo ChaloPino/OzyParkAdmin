@@ -1,5 +1,6 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Identity;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cajas;
 
 namespace OzyParkAdmin.Application.Cajas.List;
@@ -7,7 +8,7 @@ namespace OzyParkAdmin.Application.Cajas.List;
 /// <summary>
 /// El manejador de <see cref="ListCajas"/>.
 /// </summary>
-public sealed class ListCajasHandler : MediatorRequestHandler<ListCajas, ResultListOf<CajaInfo>>
+public sealed class ListCajasHandler : QueryListOfHandler<ListCajas, CajaInfo>
 {
     private readonly ICajaRepository _repository;
 
@@ -15,16 +16,18 @@ public sealed class ListCajasHandler : MediatorRequestHandler<ListCajas, ResultL
     /// Crea una nueva instancia de <see cref="ListCajasHandler"/>.
     /// </summary>
     /// <param name="repostitory">El <see cref="ICajaRepository"/>.</param>
-    public ListCajasHandler(ICajaRepository repostitory)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ListCajasHandler(ICajaRepository repostitory, ILogger<ListCajasHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repostitory);
         _repository = repostitory;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<CajaInfo>> Handle(ListCajas request, CancellationToken cancellationToken)
+    protected override async Task<List<CajaInfo>> ExecuteListAsync(ListCajas query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return await _repository.ListCajasAsync(request.User.GetCentrosCosto(), cancellationToken);
+        ArgumentNullException.ThrowIfNull(query);
+        return await _repository.ListCajasAsync(query.User.GetCentrosCosto(), cancellationToken);
     }
 }

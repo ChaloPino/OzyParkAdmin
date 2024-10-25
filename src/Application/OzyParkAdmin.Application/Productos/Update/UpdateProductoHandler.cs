@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Application.Identity;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
 
@@ -16,39 +17,36 @@ public sealed class UpdateProductoHandler : ProductoStateChangeableHandler<Updat
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="productoManager">El <see cref="ProductoManager"/>.</param>
-    public UpdateProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager)
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public UpdateProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager, ILogger<UpdateProductoHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(productoManager);
         _productoManager = productoManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Producto>> ExecuteAsync(UpdateProducto request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<Producto>> ExecuteChangeStateAsync(UpdateProducto command, CancellationToken cancellationToken)
     {
-        Context.Attach(request.TipoProducto);
-
-        if (request.Familia is not null)
-        {
-            Context.Attach(request.Familia);
-        }
+        Context.Attach(command.TipoProducto);
+        Context.Attach(command.Familia);
 
         return await _productoManager.UpdateProductoAsync(
-            request.Id,
-            request.Aka,
-            request.Sku,
-            request.Nombre,
-            request.CentroCosto,
-            request.Categoria,
-            request.CategoriaDespliegue,
-            request.Imagen,
-            request.TipoProducto,
-            request.Familia,
-            request.Orden,
-            request.EsComplemento,
-            request.FechaAlta,
-            request.UsuarioModificacion.ToInfo(),
-            request.Complementos,
+            command.Id,
+            command.Aka,
+            command.Sku,
+            command.Nombre,
+            command.CentroCosto,
+            command.Categoria,
+            command.CategoriaDespliegue,
+            command.Imagen,
+            command.TipoProducto,
+            command.Familia,
+            command.Orden,
+            command.EsComplemento,
+            command.FechaAlta,
+            command.UsuarioModificacion.ToInfo(),
+            command.Complementos,
             cancellationToken);
     }
 }

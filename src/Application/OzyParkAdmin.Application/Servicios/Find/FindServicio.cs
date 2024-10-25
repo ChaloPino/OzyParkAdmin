@@ -1,6 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
-using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Servicios.Find;
 
@@ -8,4 +7,4 @@ namespace OzyParkAdmin.Application.Servicios.Find;
 /// Busca un servicio dado el id de servicio.
 /// </summary>
 /// <param name="ServicioId">El id del servicio a buscar.</param>
-public sealed record FindServicio(int ServicioId) : Request<ResultOf<ServicioFullInfo>>;
+public sealed record FindServicio(int ServicioId) : IQuery<ServicioFullInfo>;

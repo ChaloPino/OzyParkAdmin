@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Plantillas;
@@ -10,7 +10,7 @@ namespace OzyParkAdmin.Application.Tickets.Download;
 /// <summary>
 /// El manejador de <see cref="DownloadTicket"/>.
 /// </summary>
-public sealed class DownloadTicketHandler : MediatorRequestHandler<DownloadTicket, ResultOf<DownloadedTicket>>
+public sealed class DownloadTicketHandler : CommandHandler<DownloadTicket, DownloadedTicket>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly TicketManager _ticketManager;
@@ -24,7 +24,14 @@ public sealed class DownloadTicketHandler : MediatorRequestHandler<DownloadTicke
     /// <param name="ticketManager">El <see cref="TicketManager"/>.</param>
     /// <param name="documentGenerator">El <see cref="IDocumentGenerator"/>.</param>
     /// <param name="clientIpService">El <see cref="IClientIpService"/>.</param>
-    public DownloadTicketHandler(IOzyParkAdminContext context, TicketManager ticketManager, IDocumentGenerator documentGenerator, IClientIpService clientIpService)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public DownloadTicketHandler(
+        IOzyParkAdminContext context,
+        TicketManager ticketManager,
+        IDocumentGenerator documentGenerator,
+        IClientIpService clientIpService,
+        ILogger<DownloadTicketHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(ticketManager);
@@ -37,18 +44,18 @@ public sealed class DownloadTicketHandler : MediatorRequestHandler<DownloadTicke
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<DownloadedTicket>> Handle(DownloadTicket request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<DownloadedTicket>> ExecuteAsync(DownloadTicket command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(command);
 
         ResultOf<Ticket> result = await _ticketManager.ReprintTicketAsync(
-            request.TicketId,
-            request.User.ToInfo(),
+            command.TicketId,
+            command.User.ToInfo(),
             _clientIpService.GetIpClient(),
             cancellationToken);
 
-        return await result.MatchResultOfAsync(
-            onSuccess: (ticket, token) =>  SaveAndGenerateDocumentAsync(ticket, request, token),
+        return await result.BindAsync(
+            onSuccess: (ticket, token) => SaveAndGenerateDocumentAsync(ticket, command, token),
             onFailure: failure => failure,
             cancellationToken: cancellationToken);
     }
@@ -58,7 +65,7 @@ public sealed class DownloadTicketHandler : MediatorRequestHandler<DownloadTicke
         _context.Update(ticket);
         await _context.SaveChangesAsync(cancellationToken);
         var result = await GenerateDocumentAsync(ticket, request, cancellationToken);
-        return await result.MatchResultOfAsync(
+        return await result.BindAsync(
             onSuccess: SaveGenerationAsync,
             onFailure: failure => failure,
             cancellationToken: cancellationToken);
@@ -74,7 +81,7 @@ public sealed class DownloadTicketHandler : MediatorRequestHandler<DownloadTicke
     {
         ResultOf<byte[]> result = await _documentGenerator.GenerateTicketDocumentAsync(ticket, request.VentaId, cancellationToken);
 
-        return result.MatchResultOf(
+        return result.Bind(
             onSuccess: (content) => CreateDownloadedTicket(ticket, content),
             onFailure: failure => failure);
     }

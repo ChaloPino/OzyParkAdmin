@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Servicios;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Servicios.Assigns;
@@ -15,14 +16,15 @@ public sealed class AssignGruposEtariosToServicioHandler : ServicioStateChangeab
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="servicioManager">El <see cref="ServicioManager"/>.</param>
-    public AssignGruposEtariosToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager)
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public AssignGruposEtariosToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager, ILogger<AssignGruposEtariosToServicioHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(servicioManager);
         _servicioManager = servicioManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignGruposEtariosToServicio request, CancellationToken cancellationToken) =>
-        await _servicioManager.AssignGruposEtariosAsync(request.ServicioId, request.GruposEtarios, cancellationToken);
+    protected override async Task<ResultOf<Servicio>> ExecuteChangeStateAsync(AssignGruposEtariosToServicio command, CancellationToken cancellationToken) =>
+        await _servicioManager.AssignGruposEtariosAsync(command.ServicioId, command.GruposEtarios, cancellationToken);
 }

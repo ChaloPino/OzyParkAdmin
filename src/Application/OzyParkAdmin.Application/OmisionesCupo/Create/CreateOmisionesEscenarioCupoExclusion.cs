@@ -1,7 +1,6 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.EscenariosCupo;
-using OzyParkAdmin.Domain.Shared;
 using System.Collections.Immutable;
 
 namespace OzyParkAdmin.Application.OmisionesCupo.Create;
@@ -17,4 +16,4 @@ public sealed record CreateOmisionesEscenarioCupoExclusion(
     ImmutableArray<EscenarioCupoInfo> EscenariosCupo,
     ImmutableArray<CanalVenta> CanalesVenta,
     DateOnly FechaDesde,
-    DateOnly FechaHasta) : Request<SuccessOrFailure>;
+    DateOnly FechaHasta) : ICommand;

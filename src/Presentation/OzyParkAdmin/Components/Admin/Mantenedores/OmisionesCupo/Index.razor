@@ -1,5 +1,7 @@
 ﻿@page "/Mantenedores/OmisionesCupos"
 @inject IMediator Mediator
+@inject DialogOptions DialogOptions
+@inject ISnackbar Snackbar
 <PageTitle>Omisiones de fechas</PageTitle>
 <MudText Typo="Typo.h4">Omisiones de fechas</MudText>
 
@@ -24,11 +26,12 @@
     <ToolBarContent>
         <MudSpacer />
         <SearchControl @bind-SearchText="searchText" />
-        @* <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddOmisionesAsync">Nuevas omisiones</MudButton>
-        <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Filled" Class="ml-3" Disabled="omisionesToDelete.Count == 0" OnClick="DeleteOmisionesAsync">Eliminar omisiones</MudButton> *@
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddOmisionesAsync">Nuevas omisiones</MudButton>
+        <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Filled" Class="ml-3" Disabled="omisionesToDelete.Count == 0" OnClick="DeleteOmisionesAsync">Eliminar omisiones</MudButton>
     </ToolBarContent>
 
     <Columns>
+        <SelectColumn Hideable="false" />
         <PropertyColumn Property="x => x.EscenarioCupo.Nombre" Hideable="false" Title="Escenario cupo">
             <CellTemplate>
                 <MudHighlighter Text="@context.Item.EscenarioCupo.Nombre" HighlightedText="@searchText" CaseSensitive="false" />
@@ -50,15 +53,10 @@
     </PagerContent>
 </MudDataGrid>
 
-@code {
-    private MudDataGrid<IgnoraEscenarioCupoExclusionViewModel> dataGrid = default!;
-    private HashSet<IgnoraEscenarioCupoExclusionViewModel> omisionesToDelete = [];
-    private bool loading;
-    private string? searchText;
-
-    private async Task<GridData<IgnoraEscenarioCupoExclusionViewModel>> SearchOmisionesAsync(GridState<IgnoraEscenarioCupoExclusionViewModel> state)
-    {
-        var result = await Mediator.SendRequest(state.ToSearch(searchText));
-        return result.ToGridData();
-    }
-}
+<CascadingValue Value="true" Name="IsNested">
+    <CreateOmisionesDialog DialogOptions="DialogOptions"
+                           @bind-IsOpen="createOpen"
+                           CanalesVenta="canalesVenta"
+                           EscenariosCupo="escenariosCupo"
+                           CommitChanges="OnSaveOmisionesAsync" />
+</CascadingValue>

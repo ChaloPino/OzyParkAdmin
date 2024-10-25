@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Productos;
 
 namespace OzyParkAdmin.Application.Productos.List;
@@ -8,4 +8,4 @@ namespace OzyParkAdmin.Application.Productos.List;
 /// </summary>
 /// <param name="FranquiciaId">El id de la franquicia al que pertencen los productos.</param>
 /// <param name="ExceptoProductoId">El id del producto que no tiene que aparecer en la lista.</param>
-public sealed record ListProductosParaPartes(int FranquiciaId, int ExceptoProductoId) : Request<ResultListOf<ProductoInfo>>;
+public sealed record ListProductosParaPartes(int FranquiciaId, int ExceptoProductoId) : IQueryListOf<ProductoInfo>;

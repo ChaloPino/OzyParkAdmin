@@ -1,6 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cajas;
-using OzyParkAdmin.Domain.Shared;
 using System.Security.Claims;
 
 namespace OzyParkAdmin.Application.Cajas.Dia;
@@ -13,4 +12,9 @@ namespace OzyParkAdmin.Application.Cajas.Dia;
 /// <param name="Comentario">El comentario al cierre del día.</param>
 /// <param name="MontoEfectivoParaCierre">El monto efectivo para el cierre.</param>
 /// <param name="MontoTransbankParaCierre">El monto de tarjetas de crédito y débito para el cierre.</param>
-public sealed record CerrarDia(Guid DiaId, ClaimsPrincipal User, string Comentario, decimal MontoEfectivoParaCierre, decimal MontoTransbankParaCierre) : Request<ResultOf<AperturaCajaInfo>>;
+public sealed record CerrarDia(
+    Guid DiaId,
+    ClaimsPrincipal User,
+    string Comentario,
+    decimal MontoEfectivoParaCierre,
+    decimal MontoTransbankParaCierre) : ICommand<AperturaCajaInfo>;

@@ -1,26 +1,5 @@
 ﻿@page "/Mantenedores/Servicios"
-@using System.Security.Claims
-@using OzyParkAdmin.Application
-@using OzyParkAdmin.Application.Cajas.List
-@using OzyParkAdmin.Application.CentrosCosto.List
-@using OzyParkAdmin.Application.Franquicias.List
-@using OzyParkAdmin.Application.Plantillas.List
-@using OzyParkAdmin.Application.Servicios
-@using OzyParkAdmin.Application.Servicios.Activar
-@using OzyParkAdmin.Application.Servicios.Desactivar
-@using OzyParkAdmin.Application.Servicios.Find
-@using OzyParkAdmin.Application.Servicios.List
-@using OzyParkAdmin.Application.Servicios.Search
-@using OzyParkAdmin.Application.Tramos.List
-@using OzyParkAdmin.Application.Zonas.List
-@using OzyParkAdmin.Domain.Cajas
-@using OzyParkAdmin.Domain.CentrosCosto
-@using OzyParkAdmin.Domain.Franquicias
-@using OzyParkAdmin.Domain.Plantillas
 @using OzyParkAdmin.Domain.Servicios
-@using OzyParkAdmin.Domain.Shared
-@using OzyParkAdmin.Domain.Tramos
-@using OzyParkAdmin.Domain.Zonas
 @inject IMediator Mediator
 @inject ISnackbar Snackbar
 @inject DialogOptions DialogOptions
@@ -29,7 +8,7 @@
 <MudText Typo="Typo.h4">Servicios</MudText>
 
 <MudDataGrid @ref="dataGrid" T="ServicioViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
-             ServerData="LoadServiciosAsync" SortMode="SortMode.Multiple"
+             ServerData="SearchServiciosAsync" SortMode="SortMode.Multiple"
              Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
              Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
@@ -68,25 +47,25 @@
                 <Grouping Title="Tipo servicio" GroupDefinition="context" T="ServicioViewModel" TValue="TipoServicio" />
             </GroupTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.TipoDistribucion.Nombre" Title="Tipo distribución">
+        <PropertyColumn Property="x => x.TipoDistribucion.Descripcion" Title="Tipo distribución">
             <CellTemplate>
-                <MudHighlighter Text="@context.Item.TipoDistribucion.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+                <MudHighlighter Text="@context.Item.TipoDistribucion.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
             <GroupTemplate>
                 <StringGrouping Title="Tipo distribución" GroupDefinition="context" />
             </GroupTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.TipoVigencia.Nombre" Title="Tipo vigencia" Hidden="true">
+        <PropertyColumn Property="x => x.TipoVigencia.Descripcion" Title="Tipo vigencia" Hidden="true">
             <CellTemplate>
-                <MudHighlighter Text="@context.Item.TipoVigencia.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+                <MudHighlighter Text="@context.Item.TipoVigencia.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
             <GroupTemplate>
                 <StringGrouping Title="Tipo vigencia" GroupDefinition="context" />
             </GroupTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.TipoControl.Nombre" Title="Tipo control" Hidden="true">
+        <PropertyColumn Property="x => x.TipoControl.Aka" Title="Tipo control" Hidden="true">
             <CellTemplate>
-                <MudHighlighter Text="@context.Item.TipoControl.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+                <MudHighlighter Text="@context.Item.TipoControl.Aka" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
             <GroupTemplate>
                 <StringGrouping Title="Tipo control" GroupDefinition="context" />
@@ -203,337 +182,6 @@
     <CentrosCostoDialog @bind-IsOpen="openCentrosCosto" CentrosCosto="centrosCosto" Servicio="currentServicio" CommitChanges="SaveCentrosCostoAsync" DialogOptions="DialogOptions" />
     <TramosDialog @bind-IsOpen="openTramos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SaveTramosAsync" DialogOptions="DialogOptions" />
     <PermisosDialog @bind-IsOpen="openPermisos" CentrosCosto="centrosCosto" Tramos="tramos" Servicio="currentServicio" CommitChanges="SavePermisosAsync" DialogOptions="DialogOptions" />
-    <ZonasDialog @bind-IsOpen="openZonas" Tramos="tramos" Zonas="zonas" Servicio="currentServicio" CommitChanges="SaveZonasAsync" DialogOptions="DialogOptions" />
     <GruposEtariosDialog @bind-IsOpen="openGruposEtarios" GruposEtarios="gruposEtarios" Servicio="currentServicio" CommitChanges="SaveGruposEtariosAsync" DialogOptions="DialogOptions" />
     <CajasDialog @bind-IsOpen="openCajas" Cajas="cajas" Servicio="currentServicio" CommitChanges="SaveCajasAsync" DialogOptions="DialogOptions" />
 </CascadingValue>
-@code {
-    private ClaimsPrincipal? user;
-    private MudDataGrid<ServicioViewModel> dataGrid = default!;
-    private ObservableGridData<ServicioViewModel>? currentServicios;
-    private string? searchText;
-    private List<FranquiciaInfo> franquicias = [];
-    private List<CentroCostoInfo> centrosCosto = [];
-    private List<TipoControlModel> tiposControl = [];
-    private List<TipoDistribucionModel> tiposDistribucion = [];
-    private List<TipoVigenciaModel> tiposVigencia = [];
-    private List<TramoModel> tramos = [];
-    private List<ZonaModel> zonas = [];
-    private List<GrupoEtarioModel> gruposEtarios = [];
-    private List<CajaModel> cajas = [];
-    private List<ServicioModel> servicios = [];
-    private List<Plantilla> plantillas = [];
-
-    private bool openEditing;
-    private bool openCentrosCosto;
-    private bool openTramos;
-    private bool openPermisos;
-    private bool openZonas;
-    private bool openGruposEtarios;
-    private bool openCajas;
-    private ServicioViewModel? currentServicio;
-
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
-    {
-        user = (await AuthenticationState).User;
-        await LoadReferencesAsync();
-    }
-
-    private async Task LoadReferencesAsync()
-    {
-        Task[] loadingTasks = 
-        [
-            LoadCentrosCostoAsync(), LoadFranquiciasAsync(), LoadTiposControlAsync(), 
-            LoadTiposDistribucionAsync(), LoadTiposVigenciaAsync(), LoadTramosAsync(),
-            LoadZonasAsync(), LoadGruposEtariosAsync(), LoadCajasAsync(), LoadPlantillasAsync()
-        ];
-
-        await Task.WhenAll(loadingTasks);
-    }
-
-    private async Task LoadCentrosCostoAsync()
-    {
-        ResultListOf<CentroCostoInfo> result = await Mediator.SendRequest(new ListCentrosCosto(user!));
-        centrosCosto = result.Items.ToList();
-    }
-
-    private async Task LoadFranquiciasAsync()
-    {
-        ResultListOf<FranquiciaInfo> result = await Mediator.SendRequest(new ListFranquicias(user!));
-        franquicias = result.Items.ToList();
-    }
-
-    private async Task LoadTiposControlAsync()
-    {
-        ResultListOf<TipoControl> result = await Mediator.SendRequest(new ListTiposControl());
-        tiposControl = result.Items.ToModel();
-    }
-
-    private async Task LoadTiposDistribucionAsync()
-    {
-        ResultListOf<TipoDistribucion> result = await Mediator.SendRequest(new ListTiposDistribucion());
-        tiposDistribucion = result.Items.ToModel();
-    }
-
-    private async Task LoadTiposVigenciaAsync()
-    {
-        ResultListOf<TipoVigencia> result = await Mediator.SendRequest(new ListTiposVigencia());
-        tiposVigencia = result.Items.ToModel();
-    }
-
-    private async Task LoadTramosAsync()
-    {
-        ResultListOf<TramoInfo> result = await Mediator.SendRequest(new ListTramos());
-        tramos = result.Items.ToModel();
-    }
-
-    private async Task LoadZonasAsync()
-    {
-        ResultListOf<ZonaInfo> result = await Mediator.SendRequest(new ListZonas());
-        zonas = result.Items.ToModel();
-    }
-
-    private async Task LoadGruposEtariosAsync()
-    {
-        ResultListOf<GrupoEtarioInfo> result = await Mediator.SendRequest(new ListGruposEtarios());
-        gruposEtarios = result.Items.ToModel();
-    }
-
-    private async Task LoadCajasAsync()
-    {
-        ResultListOf<CajaInfo> result = await Mediator.SendRequest(new ListCajas(user!));
-        cajas = result.Items.ToModel();
-    }
-
-    private async Task LoadPlantillasAsync()
-    {
-        ResultListOf<Plantilla> result = await Mediator.SendRequest(new ListPlantillas());
-        plantillas = result.Items.ToList();
-    }
-
-    private async Task LoadServiciosAsync(int franquiciaId)
-    {
-        ResultListOf<ServicioInfo> result = await Mediator.SendRequest(new ListServicios(franquiciaId));
-        servicios = result.Items.ToModel();
-    }
-
-    public async Task<GridData<ServicioViewModel>> LoadServiciosAsync(GridState<ServicioViewModel> state)
-    {
-        SearchServicios searchServicios = state.ToSearch(user!, searchText);
-        PagedList<ServicioFullInfo> servicios = await Mediator.SendRequest(searchServicios);
-        currentServicios = servicios.ToGridData(dataGrid);
-        return currentServicios;
-    }
-
-    private async Task FranquiciaChanged(CellContext<ServicioViewModel> context, int franquiciaId)
-    {
-        context.Item.FranquiciaId = franquiciaId;
-        await LoadServiciosAsync(franquiciaId);
-    }
-
-    private async Task AddServicioAsync()
-    {
-        currentServicio = new() 
-        { 
-            IsNew = true,
-            FranquiciaId = franquicias.First().Id,
-            CentroCosto = centrosCosto.First(),
-            TipoDistribucion = tiposDistribucion.First(),
-            TipoVigencia = tiposVigencia.First(),
-            TipoControl = tiposControl.First(),
-            PlantillaId = plantillas.First().Id,
-            PlantillaDigitalId = plantillas.First().Id,
-        };
-
-        CellContext<ServicioViewModel> context = new CellContext<ServicioViewModel>(dataGrid, currentServicio);
-        await ShowEditingAsync(context);
-    }
-
-    private async Task ShowEditingAsync(CellContext<ServicioViewModel> context)
-    {
-        await LoadServiciosAsync(context.Item.FranquiciaId);
-        currentServicio = context.Item.Copy();
-        openEditing = true;
-    } 
-
-    private async Task ShowCentrosCostoAsync(CellContext<ServicioViewModel> context)
-    {
-        if (await LoadServicioDetailAsync(context.Item))
-        {
-            currentServicio = context.Item;
-            openCentrosCosto = true;
-        }
-    }
-
-    private async Task ShowTramosAsync(CellContext<ServicioViewModel> context)
-    {
-        if (await LoadServicioDetailAsync(context.Item))
-        {
-            currentServicio = context.Item;
-            openTramos = true;
-        }
-    }
-
-    private async Task ShowPermisosAsync(CellContext<ServicioViewModel> context)
-    {
-        if (await LoadServicioDetailAsync(context.Item))
-        {
-            currentServicio = context.Item;
-            openPermisos = true;
-        }
-    } 
-
-    private async Task ShowZonasAsync(CellContext<ServicioViewModel> context)
-    {
-        if (await LoadServicioDetailAsync(context.Item))
-        {
-            currentServicio = context.Item;
-            openZonas = true;
-        }
-    }
-
-    private async Task ShowGruposEtariosAsync(CellContext<ServicioViewModel> context)
-    {
-        if (await LoadServicioDetailAsync(context.Item))
-        {
-            currentServicio = context.Item;
-            openGruposEtarios = true;
-        }
-    }
-
-    private async Task ShowCajasAsync(CellContext<ServicioViewModel> context)
-    {
-        if (await LoadServicioDetailAsync(context.Item))
-        {
-            currentServicio = context.Item;
-            openCajas = true;
-        }
-    }
-
-    private async Task<bool> LoadServicioDetailAsync(ServicioViewModel servicio)
-    {
-        if (!servicio.DetailLoaded)
-        {
-            ResultOf<ServicioFullInfo> result = await Mediator.SendRequest(new FindServicio(servicio.Id));
-
-            return result.Match(
-                onSuccess: info => LoadServicioInfo(servicio, info),
-                onFailure: failure => AddFailure(failure, "cargar el detalle del servicio"));
-        }
-
-        return true;
-    }
-
-    private bool LoadServicioInfo(ServicioViewModel servicio, ServicioFullInfo info)
-    {
-        servicio.DetailLoaded = true;
-        servicio.Cajas = info.Cajas.ToModel();
-        servicio.CentrosCosto = info.CentrosCosto.ToModel();
-        servicio.GruposEtarios = info.GruposEtarios.ToModel();
-        servicio.Permisos = info.Permisos.ToModel();
-        servicio.Tramos = info.Tramos.ToModel();
-        servicio.Zonas = info.Zonas.ToModel();
-        return true;
-    }
-
-    private async Task<bool> SaveServicioAsync(ServicioViewModel servicio)
-    {
-        IServicioStateChangeable changeStatus = servicio.IsNew
-            ? servicio.ToCreate()
-            : servicio.ToUpdate();
-
-        var result = await Mediator.SendRequest(changeStatus);
-        return UpdateServicio(servicio, result, servicio.IsNew ? "crear servicio" : "modificar servicio");
-    }
-
-    private async Task SaveEsActivoAsync(ServicioViewModel servicio, bool esActivo)
-    {
-        IServicioStateChangeable changeStatus = esActivo
-            ? new ActivarServicio(servicio.Id)
-            : new DesactivarServicio(servicio.Id);
-
-        var result = await Mediator.SendRequest(changeStatus);
-        UpdateServicio(servicio, result, esActivo ? "activar servicio" : "desactivar servicio");
-    }
-
-    private async Task<bool> SaveCentrosCostoAsync(ServicioViewModel servicio)
-    {
-        IServicioStateChangeable changeStatus = servicio.ToAssignCentrosCosto();
-        var result = await Mediator.SendRequest(changeStatus);
-        return UpdateServicio(servicio, result, "asignar centros de costo");
-    }
-
-    private async Task<bool> SaveTramosAsync(ServicioViewModel servicio)
-    {
-        IServicioStateChangeable changeStatus = servicio.ToAssignTramos();
-        var result = await Mediator.SendRequest(changeStatus);
-        return UpdateServicio(servicio, result, "asignar tramos");
-    }
-
-    private async Task<bool> SavePermisosAsync(ServicioViewModel servicio)
-    {
-        IServicioStateChangeable changeStatus = servicio.ToAssignPermisos();
-        var result = await Mediator.SendRequest(changeStatus);
-        return UpdateServicio(servicio, result, "asignar permisos");
-    }
-
-    private async Task<bool> SaveZonasAsync(ServicioViewModel servicio)
-    {
-        IServicioStateChangeable changeStatus = servicio.ToAssignZonas();
-        var result = await Mediator.SendRequest(changeStatus);
-        return UpdateServicio(servicio, result, "asignar zonas");
-    }
-
-    private async Task<bool> SaveGruposEtariosAsync(ServicioViewModel servicio)
-    {
-        IServicioStateChangeable changeStatus = servicio.ToAssignGruposEtarios();
-        var result = await Mediator.SendRequest(changeStatus);
-        return UpdateServicio(servicio, result, "asignar grupos etarios");
-    }
-
-    private async Task<bool> SaveCajasAsync(ServicioViewModel servicio)
-    {
-        IServicioStateChangeable changeStatus = servicio.ToAssignCajas();
-        var result = await Mediator.SendRequest(changeStatus);
-        return UpdateServicio(servicio, result, "asignar cajas");
-    }
-
-    private bool UpdateServicio(ServicioViewModel servicio, ResultOf<ServicioFullInfo> result, string action)
-    {
-        return result.Match(
-           onSuccess: (info) => UpdateServicio(servicio, info),
-           onFailure: (failure) => AddFailure(failure, action)
-       );
-    }
-
-    private bool UpdateServicio(ServicioViewModel servicio, ServicioFullInfo info)
-    {
-        bool isNew = servicio.IsNew;
-        servicio.Update(info);
-
-        if (isNew)
-        {
-            currentServicios?.Add(servicio);
-            return true;
-        }
-
-        ServicioViewModel? persistent = currentServicios?.Find(servicio);
-
-        if (persistent is not null)
-        {
-            persistent.Update(servicio);
-            return true;
-        }
-
-        return false;
-    }
-
-    private bool AddFailure(Failure failure, string action)
-    {
-        Snackbar.AddFailure(failure, action);
-        return false;
-    }
-}

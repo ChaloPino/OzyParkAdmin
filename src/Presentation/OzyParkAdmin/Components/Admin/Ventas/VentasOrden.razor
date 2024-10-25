@@ -56,7 +56,15 @@
     {
         SearchVentasOrden searchVentasOrden = state.ToSearch(search);
         var result = await Mediator.SendRequest(searchVentasOrden);
-        return result.ToGridData();
+
+        return result.Match(
+            onSuccess: ventas => ventas.ToGridData(),
+            onFailure: failure =>
+            {
+                Snackbar.AddFailure(failure, "buscar ventas");
+                return new GridData<VentaOrdenInfo>();
+            }
+        );
     }
 
     private async Task DownloadTicketAsync(CellContext<TicketOrdenInfo> context, VentaOrdenInfo ventaOrden)

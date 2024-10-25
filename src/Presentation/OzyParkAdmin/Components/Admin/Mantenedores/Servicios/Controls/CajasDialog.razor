@@ -1,4 +1,5 @@
 ﻿@using System.Collections.ObjectModel
+@using OzyParkAdmin.Domain.Cajas
 @inject ServicioViewModelValidator ServicioValidator
 @inject CajaServicioModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
@@ -16,15 +17,15 @@
                                 <MudSelect @bind-Value="context.Item.Caja" Margin="Margin.Dense"
                                            Variant="Variant.Text" Style="margin-top:0"
                                            For="() => context.Item.Caja"
-                                           ToStringFunc="x => x?.Nombre" >
+                                           ToStringFunc="x => x?.Descripcion" >
                                     <ForIn Items="Cajas" Context="caja">
-                                        <MudSelectItem T="CajaModel" Value="caja" />
+                                        <MudSelectItem T="CajaInfo" Value="caja" />
                                     </ForIn>
                                 </MudSelect>
                             </MudForm>
                         </EditTemplate>
                         <CellTemplate>
-                            @context.Item.Caja?.Nombre
+                            @context.Item.Caja?.Descripcion
                         </CellTemplate>
                     </PropertyColumn>
                     <PropertyColumn Property="x => x.NoUsaZona" Title="Nombre del servicio">
@@ -48,76 +49,3 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    private MudForm form = default!;
-    private ObservableCollection<CajaServicioModel> cajasPorServicio = [];
-
-    [Parameter]
-    public DialogOptions? DialogOptions { get; set; }
-
-    [Parameter]
-    public bool IsOpen { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> IsOpenChanged { get; set; }
-
-    [Parameter]
-    public ServicioViewModel? Servicio { get; set; }
-
-    [Parameter]
-    public IEnumerable<CajaModel> Cajas { get; set; } = [];
-
-    [Parameter]
-    public Func<ServicioViewModel, Task<bool>>? CommitChanges { get; set; }
-
-    private async Task ChangeIsOpen(bool isOpen)
-    {
-        IsOpen = isOpen;
-        await IsOpenChanged.InvokeAsync(isOpen);
-    }
-
-    protected override void OnParametersSet()
-    {
-        if (Servicio is not null)
-        {
-            cajasPorServicio = new(Servicio.Cajas);
-        }
-    }
-
-    private void AddCentroCosto()
-    {
-        cajasPorServicio.Add(new CajaServicioModel());
-    }
-
-    private void RemoveCentroCosto(CajaServicioModel caja)
-    {
-        cajasPorServicio.Remove(caja);
-    }
-
-    private async Task CancelEditingItemAsync()
-    {
-        cajasPorServicio = [];
-        await ChangeIsOpen(false);
-    }
-
-    private async Task CommitItemChangesAsync()
-    {
-        if (Servicio is not null && CommitChanges is not null)
-        {
-            await form.Validate();
-
-            if (form.IsValid)
-            {
-                Servicio.Cajas = [.. cajasPorServicio];
-
-                bool result = await CommitChanges(Servicio);
-
-                if (result)
-                {
-                    await ChangeIsOpen(false);
-                }
-            }
-        }
-    }
-}

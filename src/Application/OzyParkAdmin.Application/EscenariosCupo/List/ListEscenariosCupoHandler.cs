@@ -1,18 +1,14 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Identity;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.EscenariosCupo;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OzyParkAdmin.Application.EscenariosCupo.List;
 
 /// <summary>
 /// El manejador de <see cref="ListEscenariosCupo"/>.
 /// </summary>
-public sealed class ListEscenariosCupoHandler : MediatorRequestHandler<ListEscenariosCupo, ResultListOf<EscenarioCupoInfo>>
+public sealed class ListEscenariosCupoHandler : QueryListOfHandler<ListEscenariosCupo, EscenarioCupoInfo>
 {
     private readonly IEscenarioCupoRepository _repository;
 
@@ -20,16 +16,18 @@ public sealed class ListEscenariosCupoHandler : MediatorRequestHandler<ListEscen
     /// Crea una nueva instancia de <see cref="ListEscenariosCupoHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="IEscenarioCupoRepository"/>.</param>
-    public ListEscenariosCupoHandler(IEscenarioCupoRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ListEscenariosCupoHandler(IEscenarioCupoRepository repository, ILogger<ListEscenariosCupoHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<EscenarioCupoInfo>> Handle(ListEscenariosCupo request, CancellationToken cancellationToken)
+    protected override async Task<List<EscenarioCupoInfo>> ExecuteListAsync(ListEscenariosCupo query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return await _repository.ListAsync(request.User.GetCentrosCosto(), cancellationToken);
+        ArgumentNullException.ThrowIfNull(query);
+        return await _repository.ListAsync(query.User.GetCentrosCosto(), cancellationToken);
     }
 }

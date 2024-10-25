@@ -1,10 +1,11 @@
 ﻿@using System.Collections.ObjectModel
+@using OzyParkAdmin.Domain.Servicios
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
         <MudSelect @bind-SelectedValues="gruposEtarios" Margin="Margin.Dense" MultiSelection="true"
-                   Label="Grupos etarios" ToStringFunc="x => x?.Nombre">
+                   Label="Grupos etarios" ToStringFunc="x => x?.Descripcion">
             <ForIn Items="GruposEtarios" Context="grupoEtario">
-                <MudSelectItem T="GrupoEtarioModel" Value="grupoEtario" />
+                <MudSelectItem T="GrupoEtarioInfo" Value="grupoEtario" />
             </ForIn>
         </MudSelect>
     </DialogContent>
@@ -13,59 +14,3 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    private IEnumerable<GrupoEtarioModel> gruposEtarios = [];
-
-    [Parameter]
-    public DialogOptions? DialogOptions { get; set; }
-
-    [Parameter]
-    public bool IsOpen { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> IsOpenChanged { get; set; }
-
-    [Parameter]
-    public ServicioViewModel? Servicio { get; set; }
-
-    [Parameter]
-    public IEnumerable<GrupoEtarioModel> GruposEtarios { get; set; } = [];
-
-    [Parameter]
-    public Func<ServicioViewModel, Task<bool>>? CommitChanges { get; set; }
-
-    private async Task ChangeIsOpen(bool isOpen)
-    {
-        IsOpen = isOpen;
-        await IsOpenChanged.InvokeAsync(isOpen);
-    }
-
-    protected override void OnParametersSet()
-    {
-        if (Servicio is not null)
-        {
-            gruposEtarios = new List<GrupoEtarioModel>(Servicio.GruposEtarios);
-        }
-    }
-
-    private async Task CancelEditingItemAsync()
-    {
-        gruposEtarios = [];
-        await ChangeIsOpen(false);
-    }
-
-    private async Task CommitItemChangesAsync()
-    {
-        if (Servicio is not null && CommitChanges is not null)
-        {
-            Servicio.GruposEtarios = [..gruposEtarios];
-            bool result = await CommitChanges(Servicio);
-
-            if (result)
-            {
-                await ChangeIsOpen(false);
-            }
-        }
-    }
-}

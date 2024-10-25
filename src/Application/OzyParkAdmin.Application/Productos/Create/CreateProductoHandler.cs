@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Application.Identity;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
@@ -17,39 +18,40 @@ public sealed class CreateProductoHandler : ProductoStateChangeableHandler<Creat
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="productoManager">El <see cref="ProductoManager"/>.</param>
-    public CreateProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager)
-        :base(context, StateAction.Create)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public CreateProductoHandler(IOzyParkAdminContext context, ProductoManager productoManager, ILogger<CreateProductoHandler> logger)
+        :base(context, logger, StateAction.Create)
     {
         ArgumentNullException.ThrowIfNull(productoManager);
         _productoManager = productoManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Producto>> ExecuteAsync(CreateProducto request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<Producto>> ExecuteChangeStateAsync(CreateProducto command, CancellationToken cancellationToken)
     {
-        Context.Attach(request.TipoProducto);
+        Context.Attach(command.TipoProducto);
 
-        if (request.Familia is not null)
+        if (command.Familia is not null)
         {
-            Context.Attach(request.Familia);
+            Context.Attach(command.Familia);
         }
 
         return await _productoManager.CreateProductoAsync(
-            request.Aka,
-            request.Sku,
-            request.Nombre,
-            request.FranquiciaId,
-            request.CentroCosto,
-            request.Categoria,
-            request.CategoriaDespliegue,
-            request.Imagen,
-            request.TipoProducto,
-            request.Familia,
-            request.Orden,
-            request.EsComplemento,
-            request.FechaAlta,
-            request.UsuarioModificacion.ToInfo(),
-            request.Complementos,
+            command.Aka,
+            command.Sku,
+            command.Nombre,
+            command.FranquiciaId,
+            command.CentroCosto,
+            command.Categoria,
+            command.CategoriaDespliegue,
+            command.Imagen,
+            command.TipoProducto,
+            command.Familia,
+            command.Orden,
+            command.EsComplemento,
+            command.FechaAlta,
+            command.UsuarioModificacion.ToInfo(),
+            command.Complementos,
             cancellationToken);
     }
 }

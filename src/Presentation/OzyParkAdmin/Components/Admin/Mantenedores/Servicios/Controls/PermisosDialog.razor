@@ -1,5 +1,6 @@
 ﻿@using System.Collections.ObjectModel
 @using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Tramos
 @inject ServicioViewModelValidator ServicioValidator
 @inject PermisoServicioModelValidator Validator
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
@@ -34,15 +35,15 @@
                                 <MudSelect @bind-Value="context.Item.Tramo" Margin="Margin.Dense"
                                            Variant="Variant.Text" Style="margin-top:0"
                                            For="() => context.Item.Tramo"
-                                           ToStringFunc="x => x?.Nombre">
+                                           ToStringFunc="x => x?.Descripcion">
                                     <ForIn Items="Tramos" Context="tramo">
-                                        <MudSelectItem T="TramoModel" Value="tramo" />
+                                        <MudSelectItem T="TramoInfo" Value="tramo" />
                                     </ForIn>
                                 </MudSelect>
                             </MudForm>
                         </EditTemplate>
                         <CellTemplate>
-                            @context.Item.Tramo?.Nombre
+                            @context.Item.Tramo?.Descripcion
                         </CellTemplate>
                     </PropertyColumn>
                     <TemplateColumn>
@@ -61,78 +62,3 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-    private MudForm form = default!;
-    private ObservableCollection<PermisoServicioModel> permisosPorServicio = [];
-
-    [Parameter]
-    public DialogOptions? DialogOptions { get; set; }
-
-    [Parameter]
-    public bool IsOpen { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> IsOpenChanged { get; set; }
-
-    [Parameter]
-    public ServicioViewModel? Servicio { get; set; }
-
-    [Parameter]
-    public IEnumerable<CentroCostoInfo> CentrosCosto { get; set; } = [];
-
-    [Parameter]
-    public IEnumerable<TramoModel> Tramos { get; set; } = [];
-
-    [Parameter]
-    public Func<ServicioViewModel, Task<bool>>? CommitChanges { get; set; }
-
-    private async Task ChangeIsOpen(bool isOpen)
-    {
-        IsOpen = isOpen;
-        await IsOpenChanged.InvokeAsync(isOpen);
-    }
-
-    protected override void OnParametersSet()
-    {
-        if (Servicio is not null)
-        {
-            permisosPorServicio = new(Servicio.Permisos);
-        }
-    }
-
-    private void AddCentroCosto()
-    {
-        permisosPorServicio.Add(new PermisoServicioModel());
-    }
-
-    private void RemoveCentroCosto(PermisoServicioModel permiso)
-    {
-        permisosPorServicio.Remove(permiso);
-    }
-
-    private async Task CancelEditingItemAsync()
-    {
-        permisosPorServicio = [];
-        await ChangeIsOpen(false);
-    }
-
-    private async Task CommitItemChangesAsync()
-    {
-        if (Servicio is not null && CommitChanges is not null)
-        {
-            await form.Validate();
-
-            if (form.IsValid)
-            {
-                Servicio.Permisos = [.. permisosPorServicio];
-                bool result = await CommitChanges(Servicio);
-
-                if (result)
-                {
-                    await ChangeIsOpen(false);
-                }
-            }
-        }
-    }
-}

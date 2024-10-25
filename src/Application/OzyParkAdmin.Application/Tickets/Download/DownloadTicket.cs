@@ -1,5 +1,4 @@
-﻿using MassTransit.Mediator;
-using OzyParkAdmin.Domain.Shared;
+﻿using OzyParkAdmin.Application.Shared;
 using System.Security.Claims;
 
 namespace OzyParkAdmin.Application.Tickets.Download;
@@ -10,4 +9,4 @@ namespace OzyParkAdmin.Application.Tickets.Download;
 /// <param name="TicketId">El id del ticket a descargar.</param>
 /// <param name="VentaId">El id de la venta.</param>
 /// <param name="User">El usuario que realiza la consulta.</param>
-public sealed record DownloadTicket(string TicketId, string VentaId, ClaimsPrincipal User) : Request<ResultOf<DownloadedTicket>>;
+public sealed record DownloadTicket(string TicketId, string VentaId, ClaimsPrincipal User) : ICommand<DownloadedTicket>;

@@ -6,24 +6,26 @@ namespace OzyParkAdmin.Shared;
 
 internal class ObservableGridData<T> : GridData<T>
 {
-    protected readonly ObservableCollection<T> _items;
+    public ObservableGridData()
+    {
+    }
 
     public ObservableGridData(IEnumerable<T> items, int totalItems, IMudStateHasChanged stateHasChanged)
     {
-        _items = new ObservableCollection<T>(items);
-        Items = _items;
+        ObservableCollection<T> observableItems = new ObservableCollection<T>(items);
+        Items = observableItems;
         TotalItems = totalItems;
-        _items.CollectionChanged += (s, e) => stateHasChanged.StateHasChanged();
+        observableItems.CollectionChanged += (s, e) => stateHasChanged.StateHasChanged();
     }
 
     public void Add(T item)
     {
-        _items.Add(item);
+        ((ObservableCollection<T>)Items).Add(item);
     }
 
     public virtual bool Remove(T item)
     {
-        return _items.Remove(item);
+        return ((ObservableCollection<T>)Items).Remove(item);
     }
 
     public virtual bool RemoveWhere(Func<T, bool> predicate)
@@ -32,7 +34,7 @@ internal class ObservableGridData<T> : GridData<T>
 
         if (item is not null)
         {
-            return _items.Remove(item);
+            return ((ObservableCollection<T>)Items).Remove(item);
         }
 
         return false;
@@ -40,12 +42,12 @@ internal class ObservableGridData<T> : GridData<T>
 
     public T? Find(T item)
     {
-        return _items.FirstOrDefault(x => EqualityComparer<T>.Default.Equals(x, item));
+        return ((ObservableCollection<T>)Items).FirstOrDefault(x => EqualityComparer<T>.Default.Equals(x, item));
     }
 
     public T? Find(Func<T, bool> predicate)
     {
-        return _items.FirstOrDefault(predicate);
+        return ((ObservableCollection<T>)Items).FirstOrDefault(predicate);
     }
 }
 
@@ -57,7 +59,7 @@ internal sealed class ObservableGridData<T, TKey>(IEnumerable<T> items, int tota
     {
         if (!base.Remove(item))
         {
-            T? currentItem = _items.FirstOrDefault(x => EqualityComparer<TKey>.Default.Equals(_keySelector(x), _keySelector(item)));
+            T? currentItem = ((ObservableCollection<T>)Items).FirstOrDefault(x => EqualityComparer<TKey>.Default.Equals(_keySelector(x), _keySelector(item)));
 
             if (currentItem is not null)
             {

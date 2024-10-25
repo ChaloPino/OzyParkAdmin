@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Servicios;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Servicios.Assigns;
@@ -15,8 +16,9 @@ public sealed class AssignCentrosCostoToServicioHandler : ServicioStateChangeabl
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="servicioManager">El <see cref="ServicioManager"/>.</param>
-    public AssignCentrosCostoToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager)
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public AssignCentrosCostoToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager, ILogger<AssignCentrosCostoToServicioHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(servicioManager);
@@ -24,6 +26,6 @@ public sealed class AssignCentrosCostoToServicioHandler : ServicioStateChangeabl
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignCentrosCostoToServicio request, CancellationToken cancellationToken) =>
-        await _servicioManager.AssignCentrosCostoAsync(request.ServicioId, request.CentrosCosto, cancellationToken);
+    protected override async Task<ResultOf<Servicio>> ExecuteChangeStateAsync(AssignCentrosCostoToServicio command, CancellationToken cancellationToken) =>
+        await _servicioManager.AssignCentrosCostoAsync(command.ServicioId, command.CentrosCosto, cancellationToken);
 }

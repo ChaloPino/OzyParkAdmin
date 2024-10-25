@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
 
 namespace OzyParkAdmin.Application.Servicios.List;
@@ -7,4 +7,4 @@ namespace OzyParkAdmin.Application.Servicios.List;
 /// Lista todos los servicios.
 /// </summary>
 /// <param name="FranquiciaId">El id de franquicia a la cual pertenecen los servicios que se buscan.</param>
-public sealed record ListServicios(int FranquiciaId) : Request<ResultListOf<ServicioInfo>>;
+public sealed record ListServicios(int FranquiciaId) : IQueryListOf<ServicioInfo>;

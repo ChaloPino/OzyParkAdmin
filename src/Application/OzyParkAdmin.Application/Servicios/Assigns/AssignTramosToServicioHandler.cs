@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Servicios;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.Servicios.Assigns;
@@ -15,14 +16,15 @@ public sealed class AssignTramosToServicioHandler : ServicioStateChangeableHandl
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="servicioManager">El <see cref="ServicioManager"/>.</param>
-    public AssignTramosToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager) 
-        : base(context)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public AssignTramosToServicioHandler(IOzyParkAdminContext context, ServicioManager servicioManager, ILogger<AssignTramosToServicioHandler> logger)
+        : base(context, logger)
     {
         ArgumentNullException.ThrowIfNull(servicioManager);
         _servicioManager = servicioManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<Servicio>> ExecuteAsync(AssignTramosToServicio request, CancellationToken cancellationToken) =>
-        await _servicioManager.AssignTramosAsync(request.ServicioId, request.Tramos, cancellationToken);
+    protected override async Task<ResultOf<Servicio>> ExecuteChangeStateAsync(AssignTramosToServicio command, CancellationToken cancellationToken) =>
+        await _servicioManager.AssignTramosAsync(command.ServicioId, command.Tramos, cancellationToken);
 }

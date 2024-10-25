@@ -1,16 +1,11 @@
-﻿@using OzyParkAdmin.Application.CanalesVenta.List
-@using OzyParkAdmin.Application.CentrosCosto.List
-@using OzyParkAdmin.Application.Cupos.Search
-@using OzyParkAdmin.Application.Servicios.List
-@using OzyParkAdmin.Application.Zonas.List
-@using OzyParkAdmin.Domain.CanalesVenta
+﻿@using OzyParkAdmin.Domain.CanalesVenta
 @using OzyParkAdmin.Domain.CentrosCosto
 @using OzyParkAdmin.Domain.Cupos
 @using OzyParkAdmin.Domain.Servicios
 @using OzyParkAdmin.Domain.Zonas
-@using System.Security.Claims
 @inject IMediator Mediator
 @inject CalendarioSearchModelValidator Validator
+@inject ISnackbar Snackbar
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
         <IfThen Condition="loading">
@@ -96,7 +91,7 @@
                 </MudForm>
             </MudItem>
             <MudItem xs="12">
-                <MudCalendar @ref="calendar" Items="events" ShowTodayButton="false" ShowWeek="true" ShowDay="false" ShowMonth="false" DateRangeChanged="OnDateChangesAsync" DayTimeInterval="CalendarTimeInterval.Minutes20">
+                <MudCalendar Items="events" ShowTodayButton="false" ShowWeek="true" ShowDay="false" ShowMonth="false" DateRangeChanged="OnDateChangesAsync" DayTimeInterval="CalendarTimeInterval.Minutes20">
                     <CellTemplate>
                         <div class="mud-cal-cell-template">
                             <MudBreakpointProvider>
@@ -128,128 +123,3 @@
         </MudGrid>
     </DialogContent>
 </MudDialog>
-@code {
-    private MudForm form = default!;
-    private MudCalendar calendar = default!;
-    private ClaimsPrincipal user = default!;
-    private List<CalendarItem> events = [];
-    private Dictionary<CalendarItem, CupoHoraInfo> cupoEvents = [];
-    private bool loading = false;
-    private CalendarioSearchModel search = new();
-    private List<CentroCostoInfo> centrosCosto = [];
-    private List<CanalVenta> canalesVenta = [];
-    private List<ServicioInfo> servicios = [];
-    private List<ZonaInfo> zonas = [];
-    private DateRange dateRange = default!;
-
-    [CascadingParameter]
-    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
-
-    [Parameter]
-    public bool IsOpen { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> IsOpenChanged { get; set; }
-
-    [Parameter]
-    public DialogOptions? DialogOptions { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        user = (await AuthenticationState).User;
-        dateRange = new CalendarDateRange(DateTime.Today, CalendarView.Week, DayOfWeek.Monday);
-    }
-
-    private async Task ChangeIsOpen(bool isOpen)
-    {
-        IsOpen = isOpen;
-
-        if (isOpen)
-        {
-            await InitializeAsync();
-        }
-
-        await IsOpenChanged.InvokeAsync(isOpen);
-    }
-
-    /// <summary>
-    /// Muestra el calendario.
-    /// </summary>
-    /// <returns>Una tarea que representa la operación asíncrona.</returns>
-    public Task ShowAsync() =>
-        ChangeIsOpen(true);
-
-    private async Task InitializeAsync()
-    {
-        loading = true;
-        Task[] tasks = [LoadCentrosCostoAsync(), LoadCanalesVentaAsync(), LoadZonasAsync()];
-        await Task.WhenAll(tasks);
-        loading = false;
-    }
-
-    private async Task LoadCentrosCostoAsync()
-    {
-        var result = await Mediator.SendRequest(new ListCentrosCosto(user));
-        centrosCosto = result.Items.ToList();
-    }
-
-    private async Task LoadCanalesVentaAsync()
-    {
-        var result = await Mediator.SendRequest(new ListCanalesVenta());
-        canalesVenta = result.Items.ToList();
-    }
-
-    private async Task LoadZonasAsync()
-    {
-        var result = await Mediator.SendRequest(new ListZonas());
-        zonas = result.Items.ToList();
-    }
-
-    private async Task CentroCostoChangedAsync(CentroCostoInfo centroCosto)
-    {
-        search.CentroCosto = centroCosto;
-        var result = await Mediator.SendRequest(new ListServiciosPorCentroCosto(centroCosto.Id));
-        servicios = result.Items.ToList();
-    }
-
-    private async Task SearchAsync()
-    {
-        await form.Validate();
-        if (form.IsValid)
-        {
-            loading = true;
-            var result = await Mediator.SendRequest(new SearchCalendario(
-                    search.CanalVenta,
-                    search.Alcance,
-                    search.Servicio,
-                    search.ZonaOrigen,
-                    dateRange.Start,
-                    dateRange.End
-                ));
-
-            cupoEvents.Clear();
-
-            events = result.Items.SelectMany(x => x.Horario, (fecha, horario) =>
-            {
-                var item = new CalendarItem
-                    {
-                        Start = fecha.Fecha.Date.Add(horario.HoraInicio),
-                        End = fecha.Fecha.Date.Add(horario.HoraFin),
-                        Text = horario.HayCupo ? $"Disponible ({horario.Disponible} de {horario.Total})" : "No disponible",
-                        AllDay = false,
-                    };
-
-                cupoEvents.Add(item, horario);
-                return item;
-            }).ToList();
-
-            loading = false;
-        }
-    }
-
-    private async Task OnDateChangesAsync(DateRange range)
-    {
-        dateRange = range;
-        await SearchAsync();
-    }
-}

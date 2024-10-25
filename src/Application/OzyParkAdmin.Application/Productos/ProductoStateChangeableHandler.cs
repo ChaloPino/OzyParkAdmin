@@ -1,4 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
 
@@ -8,7 +9,7 @@ namespace OzyParkAdmin.Application.Productos;
 /// El manejador base para todos los cambios de estado del <see cref="Producto"/>.
 /// </summary>
 /// <typeparam name="TState">El tipo de cambio de estado.</typeparam>
-public abstract class ProductoStateChangeableHandler<TState> : MediatorRequestHandler<TState, ResultOf<ProductoFullInfo>>
+public abstract class ProductoStateChangeableHandler<TState> : CommandHandler<TState, ProductoFullInfo>
     where TState : class, IProductoStateChangeable
 {
     private readonly StateAction _stateAction;
@@ -17,8 +18,10 @@ public abstract class ProductoStateChangeableHandler<TState> : MediatorRequestHa
     /// Crea una nueva instancia de <see cref="ProductoStateChangeableHandler{TState}"/>.
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
+    /// <param name="logger">El <see cref="ILogger"/>.</param>
     /// <param name="stateAction">La acción de cambio de estado que maneja este manejador.</param>
-    protected ProductoStateChangeableHandler(IOzyParkAdminContext context, StateAction stateAction = StateAction.Update)
+    protected ProductoStateChangeableHandler(IOzyParkAdminContext context, ILogger logger, StateAction stateAction = StateAction.Update)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         Context = context;
@@ -31,13 +34,13 @@ public abstract class ProductoStateChangeableHandler<TState> : MediatorRequestHa
     protected IOzyParkAdminContext Context { get; }
 
     /// <inheritdoc/>
-    protected sealed override async Task<ResultOf<ProductoFullInfo>> Handle(TState request, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<ProductoFullInfo>> ExecuteAsync(TState command, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(command);
 
-        ResultOf<Producto> result = await ExecuteAsync(request, cancellationToken);
+        ResultOf<Producto> result = await ExecuteChangeStateAsync(command, cancellationToken);
 
-        return await result.MatchResultOfAsync(
+        return await result.BindAsync(
                 onSuccess: SaveAsync,
                 onFailure: failure => failure,
                 cancellationToken: cancellationToken);
@@ -46,10 +49,10 @@ public abstract class ProductoStateChangeableHandler<TState> : MediatorRequestHa
     /// <summary>
     /// Ejecuta el cambio de estado del servicio.
     /// </summary>
-    /// <param name="request">El cambio de estado que se desea realizar en el servicio.</param>
+    /// <param name="command">El cambio de estado que se desea realizar en el servicio.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>El resultado del cambio de estado del servicio.</returns>
-    protected abstract Task<ResultOf<Producto>> ExecuteAsync(TState request, CancellationToken cancellationToken);
+    protected abstract Task<ResultOf<Producto>> ExecuteChangeStateAsync(TState command, CancellationToken cancellationToken);
 
     private async Task<ResultOf<ProductoFullInfo>> SaveAsync(Producto producto, CancellationToken cancellationToken)
     {

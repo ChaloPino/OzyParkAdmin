@@ -1,4 +1,5 @@
 ﻿using OzyParkAdmin.Domain.Reportes;
+using OzyParkAdmin.Domain.Shared;
 using System.Security.Claims;
 
 namespace OzyParkAdmin.Application.Reportes.Generate;
@@ -16,7 +17,7 @@ public interface IReportGenerator
     /// <param name="user">El usuario que solicita la generación del reporte.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>El resultado de la generación del reporte.</returns>
-    Task<ReportResult> GenerateHtmlReportAsync(string aka, ReportFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken);
+    Task<ResultOf<ReportGenerated>> GenerateHtmlReportAsync(string aka, ReportFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken);
 
     /// <summary>
     /// Genera el reporte para un formato de exportación.
@@ -27,5 +28,5 @@ public interface IReportGenerator
     /// <param name="user">El usuario que solicita la generación del reporte.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>El resultado de la generación del reporte en el formato <paramref name="format"/>.</returns>
-    Task<ReportResult> GenerateOhterFormatReportAsync(string aka, ActionType format, ReportFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken);
+    Task<ResultOf<ReportGenerated>> GenerateOhterFormatReportAsync(string aka, ActionType format, ReportFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken);
 }

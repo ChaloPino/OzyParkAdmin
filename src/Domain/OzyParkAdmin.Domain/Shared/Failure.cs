@@ -25,4 +25,19 @@ public readonly partial struct Failure
     /// A new instance of <see cref="Failure" /> casted from <see cref="ValidationError" />.
     /// </returns>
     public static implicit operator Failure(ValidationError[] _) => new(5, validation: new Validation([.._]));
+
+    /// <inheritdoc/>
+    public override string ToString()
+    {
+        return index switch
+        {
+            0 => unknown.ToString(),
+            1 => notFound.ToString(),
+            2 => conflict.ToString(),
+            3 => forbid.ToString(),
+            4 => unauthorized.ToString(),
+            5 => validation.ToString(),
+            _ => string.Empty,
+        };
+    }
 }

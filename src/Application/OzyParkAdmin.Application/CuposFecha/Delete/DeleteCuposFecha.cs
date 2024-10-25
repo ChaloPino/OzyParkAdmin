@@ -1,8 +1,7 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.Entidades;
 using OzyParkAdmin.Domain.EscenariosCupo;
-using OzyParkAdmin.Domain.Shared;
 using System.Collections.Immutable;
 
 namespace OzyParkAdmin.Application.CuposFecha.Delete;
@@ -26,4 +25,4 @@ public sealed record DeleteCuposFecha(
     ImmutableArray<DiaSemana> DiasSemana,
     TimeSpan HoraInicio,
     TimeSpan HoraTermino,
-    int IntervaloMinutos) : Request<SuccessOrFailure>;
+    int IntervaloMinutos) : ICommand;

@@ -1,4 +1,4 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Reportes;
 using System.Security.Claims;
 
@@ -11,4 +11,4 @@ namespace OzyParkAdmin.Application.Reportes.Generate;
 /// <param name="Format">El formato que se quiere genera.</param>
 /// <param name="Filter">Los filtros usados para generar el reporte.</param>
 /// <param name="User">El usuario que solicita la generación del reporte.</param>
-public sealed record GenerateOtherFormat(string Aka, ActionType Format, ReportFilter Filter, ClaimsPrincipal User): Request<ReportResult>;
+public sealed record GenerateOtherFormat(string Aka, ActionType Format, ReportFilter Filter, ClaimsPrincipal User): IQuery<ReportGenerated>;

@@ -1,4 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CategoriasProducto;
 
 namespace OzyParkAdmin.Application.CategoriasProducto.List;
@@ -6,7 +7,7 @@ namespace OzyParkAdmin.Application.CategoriasProducto.List;
 /// <summary>
 /// El manejador de <see cref="ListCategoriasProductoFinales"/>.
 /// </summary>
-public sealed class ListCategoriasProductoFinalesHandler : MediatorRequestHandler<ListCategoriasProductoFinales, ResultListOf<CategoriaProductoInfo>>
+public sealed class ListCategoriasProductoFinalesHandler : QueryListOfHandler<ListCategoriasProductoFinales, CategoriaProductoInfo>
 {
     private readonly ICategoriaProductoRepository _repository;
 
@@ -14,16 +15,19 @@ public sealed class ListCategoriasProductoFinalesHandler : MediatorRequestHandle
     /// Crea una nueva instnacia de <see cref="ListCategoriasProductoFinalesHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="ICategoriaProductoRepository"/>.</param>
-    public ListCategoriasProductoFinalesHandler(ICategoriaProductoRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public ListCategoriasProductoFinalesHandler(ICategoriaProductoRepository repository, ILogger<ListCategoriasProductoFinalesHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<CategoriaProductoInfo>> Handle(ListCategoriasProductoFinales request, CancellationToken cancellationToken)
+    /// <exception cref="NotImplementedException"></exception>
+    protected override async Task<List<CategoriaProductoInfo>> ExecuteListAsync(ListCategoriasProductoFinales query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return await _repository.ListByFranquiciaIdAsync(request.FranquiciaId, TipoCategoria.Finales, cancellationToken);
+        ArgumentNullException.ThrowIfNull(query);
+        return await _repository.ListByFranquiciaIdAsync(query.FranquiciaId, TipoCategoria.Finales, cancellationToken);
     }
 }

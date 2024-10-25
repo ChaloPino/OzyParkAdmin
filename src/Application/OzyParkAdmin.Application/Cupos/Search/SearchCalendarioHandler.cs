@@ -1,13 +1,13 @@
-﻿using MassTransit.Mediator;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cupos;
-using System.ComponentModel;
 
 namespace OzyParkAdmin.Application.Cupos.Search;
 
 /// <summary>
 /// El manejador de <see cref="SearchCalendario"/>.
 /// </summary>
-public sealed class SearchCalendarioHandler : MediatorRequestHandler<SearchCalendario, ResultListOf<CupoFechaInfo>>
+public sealed class SearchCalendarioHandler : QueryListOfHandler<SearchCalendario, CupoFechaInfo>
 {
     private readonly ICupoRepository _repository;
 
@@ -15,28 +15,30 @@ public sealed class SearchCalendarioHandler : MediatorRequestHandler<SearchCalen
     /// Crea una nueva instancia de <see cref="SearchCalendarioHandler"/>.
     /// </summary>
     /// <param name="repository">El <see cref="ICupoRepository"/>.</param>
-    public SearchCalendarioHandler(ICupoRepository repository)
+    /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
+    public SearchCalendarioHandler(ICupoRepository repository, ILogger<SearchCalendarioHandler> logger)
+        : base(logger)
     {
         ArgumentNullException.ThrowIfNull(repository);
         _repository = repository;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultListOf<CupoFechaInfo>> Handle(SearchCalendario request, CancellationToken cancellationToken)
+    protected override async Task<List<CupoFechaInfo>> ExecuteListAsync(SearchCalendario query, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(query);
 
-        DateTime inicio = request.Inicio ?? DateTime.Today;
+        DateTime inicio = query.Inicio ?? DateTime.Today;
         inicio = inicio.Date;
-        DateTime fin = request.Fin ?? inicio;
+        DateTime fin = query.Fin ?? inicio;
         fin = fin.Date;
 
 
         return await _repository.SearchCuposParaCalendarioAsync(
-            request.CanalVenta.Id,
-            request.Alcance.Valor,
-            request.Servicio.Id,
-            request.ZonaOrigen?.Id,
+            query.CanalVenta.Id,
+            query.Alcance.Valor,
+            query.Servicio.Id,
+            query.ZonaOrigen?.Id,
             inicio,
             (fin - inicio).Days,
             cancellationToken);

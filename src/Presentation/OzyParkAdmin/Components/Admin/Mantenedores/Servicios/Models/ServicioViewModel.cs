@@ -1,5 +1,4 @@
-﻿using OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
-using OzyParkAdmin.Domain.CentrosCosto;
+﻿using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.Servicios;
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
@@ -57,17 +56,17 @@ public sealed record ServicioViewModel
     /// <summary>
     /// El tipo de control del servicio.
     /// </summary>
-    public TipoControlModel TipoControl { get; set; } = default!;
+    public TipoControl TipoControl { get; set; } = default!;
 
     /// <summary>
     /// El tipo de distribución del servicio.
     /// </summary>
-    public TipoDistribucionModel TipoDistribucion { get; set; } = default!;
+    public TipoDistribucion TipoDistribucion { get; set; } = default!;
 
     /// <summary>
     /// El tipo de vigencia del servicio.
     /// </summary>
-    public TipoVigenciaModel TipoVigencia { get; set; } = default!;
+    public TipoVigencia TipoVigencia { get; set; } = default!;
 
     /// <summary>
     /// Si el servicio se controla con horas.
@@ -165,11 +164,6 @@ public sealed record ServicioViewModel
     public List<TramoServicioModel> Tramos { get; set; } = [];
 
     /// <summary>
-    /// Las zonas por tramo asociadas al servicio.
-    /// </summary>
-    public List<ZonaTramoModel> Zonas { get; set; } = [];
-
-    /// <summary>
     /// Los centros de costo asociados al servicio para reemplazar el nombre del servicio.
     /// </summary>
     public List<CentroCostoServicioModel> CentrosCosto { get; set; } = [];
@@ -177,7 +171,7 @@ public sealed record ServicioViewModel
     /// <summary>
     /// Los grupos etarios que pueden adquirir este servicio.
     /// </summary>
-    public List<GrupoEtarioModel> GruposEtarios { get; set; } = [];
+    public List<GrupoEtarioInfo> GruposEtarios { get; set; } = [];
 
     /// <summary>
     /// Las cajas que tienen permiso de vender este servicio.
@@ -199,7 +193,7 @@ public sealed record ServicioViewModel
     /// </summary>
     public bool DetailLoaded { get; set; }
 
-    internal string Vigencia => NumeroVigencia != 1 ? $"{NumeroVigencia} {TipoVigencia}s" : $"{NumeroVigencia} {TipoVigencia}";
+    internal string Vigencia => NumeroVigencia != 1 ? $"{NumeroVigencia} {TipoVigencia.ToVigencia()}s" : $"{NumeroVigencia} {TipoVigencia.ToVigencia()}";
 
     internal string Validez => NumeroValidez != 1 ? $"{NumeroValidez} días" : $"{NumeroValidez} día";
 
@@ -215,10 +209,10 @@ public sealed record ServicioViewModel
 
         Aka = servicio.Aka;
         Nombre = servicio.Nombre;
-        TipoControl = servicio.TipoControl.ToModel();
-        TipoDistribucion = servicio.TipoDistribucion.ToModel();
+        TipoControl = servicio.TipoControl;
+        TipoDistribucion = servicio.TipoDistribucion;
         TipoServicio = servicio.TipoServicio;
-        TipoVigencia = servicio.TipoVigencia.ToModel();
+        TipoVigencia = servicio.TipoVigencia;
         NumeroVigencia = servicio.NumeroVigencia;
         NumeroValidez = servicio.NumeroValidez;
         NumeroPaxMinimo = servicio.NumeroPaxMinimo;
@@ -239,9 +233,8 @@ public sealed record ServicioViewModel
         ServicioResponsableId = servicio.ServicioResponsableId;
         Tramos = servicio.Tramos.ToModel();
         CentrosCosto = servicio.CentrosCosto.ToModel();
-        GruposEtarios = servicio.GruposEtarios.ToModel();
+        GruposEtarios = [.. servicio.GruposEtarios];
         Cajas = servicio.Cajas.ToModel();
-        Zonas = servicio.Zonas.ToModel();
         Permisos = servicio.Permisos.ToModel();
         PlantillaId = servicio.PlantillaId;
         PlantillaDigitalId = servicio.PlantillaDigitalId;
@@ -282,7 +275,6 @@ public sealed record ServicioViewModel
         CentrosCosto = servicio.CentrosCosto;
         GruposEtarios = servicio.GruposEtarios;
         Cajas = servicio.Cajas;
-        Zonas = servicio.Zonas;
         Permisos = servicio.Permisos;
         PlantillaId = servicio.PlantillaId;
         PlantillaDigitalId = servicio.PlantillaDigitalId;
@@ -324,7 +316,6 @@ public sealed record ServicioViewModel
             CentrosCosto = CentrosCosto,
             GruposEtarios = GruposEtarios,
             Cajas = Cajas,
-            Zonas = Zonas,
             Permisos = Permisos,
             PlantillaId = PlantillaId,
             PlantillaDigitalId = PlantillaDigitalId,

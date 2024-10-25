@@ -1,0 +1,68 @@
+﻿@using OzyParkAdmin.Domain.CanalesVenta
+@using OzyParkAdmin.Domain.EscenariosCupo
+@inject OmisionesCupoExclusionModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <MudText Typo="Typo.h4" GutterBottom="true">Crear omisiones de fechas</MudText>
+        <IfThen Condition="omisionesCrear.Loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudForm @ref="form" Model="omisionesCrear" Validation="Validator.ValidateValue" ValidationDelay="0">
+
+            <MudGrid Spacing="3" Class="mt-4">
+                <MudItem xs="4">
+                    <MudDateRangePicker @bind-DateRange="omisionesCrear.RangoFechas"
+                                        Label="Rango de fechas"
+                                        Variant="Variant.Outlined"
+                                        Margin="Margin.Dense"
+                                        AutoClose="true"
+                                        For="() => omisionesCrear.RangoFechas.Start"
+                                        Editable="true"
+                                        MinDate="DateTime.Today"
+                                        ImmediateText="true" />
+                </MudItem>
+                <MudItem xs="4">
+                    <MudSelect @bind-SelectedValues="omisionesCrear.EscenariosCupo"
+                               SelectAll="true"
+                               SelectAllText="Seleccionar todos"
+                               Label="Escenarios cupo"
+                               MultiSelection="true"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x?.Nombre"
+                               MultiSelectionTextFunc="EscenariosCupoDescriptions"
+                               For="() => omisionesCrear.ValidationEscenariosCupo">
+                        <ForIn Items="EscenariosCupo" Context="escenarioCupo">
+                            <MudSelectItem T="EscenarioCupoInfo" Value="escenarioCupo" />
+                        </ForIn>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudSelect @bind-SelectedValues="omisionesCrear.CanalesVenta"
+                               SelectAll="true"
+                               SelectAllText="Seleccionar todos"
+                               Label="Canales de venta"
+                               MultiSelection="true"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x?.Nombre"
+                               MultiSelectionTextFunc="CanalesVentaDescriptions"
+                               For="() => omisionesCrear.ValidationCanalesVenta">
+                        <ForIn Items="CanalesVenta" Context="canalVenta">
+                            <MudSelectItem T="CanalVenta" Value="canalVenta" />
+                        </ForIn>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Disabled="omisionesCrear.Loading" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="omisionesCrear.Loading" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+

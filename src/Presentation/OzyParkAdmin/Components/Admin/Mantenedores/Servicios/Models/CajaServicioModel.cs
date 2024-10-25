@@ -1,4 +1,6 @@
-﻿namespace OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
+﻿using OzyParkAdmin.Domain.Cajas;
+
+namespace OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
 
 /// <summary>
 /// La caja asociada al servicio.
@@ -8,7 +10,7 @@ public sealed record CajaServicioModel
     /// <summary>
     /// La caja asociada al servicio.
     /// </summary>
-    public CajaModel Caja { get; set; } = default!;
+    public CajaInfo Caja { get; set; } = default!;
 
     /// <summary>
     /// Si no usa zona.

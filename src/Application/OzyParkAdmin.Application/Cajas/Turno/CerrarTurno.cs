@@ -1,6 +1,5 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Cajas;
-using OzyParkAdmin.Domain.Shared;
 using System.Collections.Immutable;
 using System.Security.Claims;
 
@@ -16,4 +15,11 @@ namespace OzyParkAdmin.Application.Cajas.Turno;
 /// <param name="RegularizacionMontoTransbank">El monto regularizado de transban.</param>
 /// <param name="Comentario">El comentario de cierre.</param>
 /// <param name="Movimientos">Los detalles de movimientos de la caja.</param>
-public sealed record CerrarTurno(Guid DiaId, Guid Id, ClaimsPrincipal User, decimal RegularizacionEfectivo, decimal RegularizacionMontoTransbank, string Comentario, ImmutableArray<DetalleTurnoInfo> Movimientos) : Request<ResultOf<TurnoCajaInfo>>;
+public sealed record CerrarTurno(
+    Guid DiaId,
+    Guid Id,
+    ClaimsPrincipal User,
+    decimal RegularizacionEfectivo,
+    decimal RegularizacionMontoTransbank,
+    string Comentario,
+    ImmutableArray<DetalleTurnoInfo> Movimientos) : ICommand<TurnoCajaInfo>;

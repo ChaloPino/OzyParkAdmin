@@ -31,6 +31,8 @@
         user = (await AuthenticationState).User;
         var result = await Mediator.SendRequest(new ListReportes(user));
 
-        groups = result.Items.ToList();
+        result.Switch(
+            onSuccess: items => groups = items,
+            onFailure: _ => {});
     }
 }

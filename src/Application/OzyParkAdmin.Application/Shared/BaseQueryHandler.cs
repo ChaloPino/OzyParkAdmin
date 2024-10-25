@@ -47,7 +47,9 @@ public abstract class BaseQueryHandler<TQuery, TResponse> : MediatorRequestHandl
         catch (Exception ex)
         {
             Guid ticket = Guid.NewGuid();
+            //Esto va al log correspondiente
             QueryLoggers.LogHandlingQueryException(Logger, QueryName, ticket, ex);
+            //Esto va a dar a Presentacion
             return new Unknown(ticket, [$"Error al procesar {QueryName}"]);
         }
     }

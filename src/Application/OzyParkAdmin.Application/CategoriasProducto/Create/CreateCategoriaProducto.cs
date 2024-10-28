@@ -1,8 +1,7 @@
-﻿using MassTransit.Mediator;
+﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
-using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Application.CategoriasProducto.Create;
 
@@ -38,5 +37,5 @@ public sealed record CreateCategoriaProducto(
         DateTime FechaCreacion,
         UsuarioInfo UsuarioModificacionInfo,
         DateTime UltimaModificacion
-    ) : Request<SuccessOrFailure>;
+    ) : ICommand;
 

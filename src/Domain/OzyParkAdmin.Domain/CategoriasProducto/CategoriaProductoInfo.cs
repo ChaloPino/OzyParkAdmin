@@ -29,16 +29,4 @@ public sealed class CategoriaProductoInfo //: IEquatable<CategoriaProductoInfo>
     /// Si la categoria de producto está activa.
     /// </summary>
     public bool EsActivo { get; init; }
-
-    ///// <inheritdoc/>
-    //public override bool Equals(object? obj) =>
-    //    obj is CategoriaProductoInfo other && Equals(other);
-
-    ///// <inheritdoc/>
-    //public bool Equals(CategoriaProductoInfo? other) =>
-    //    other is not null && Id.Equals(other.Id);
-
-    ///// <inheritdoc/>
-    //public override int GetHashCode() =>
-    //    Id.GetHashCode();
 }

@@ -1,6 +1,7 @@
 ﻿using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Domain.Shared;
+using System.Text;
 
 namespace OzyParkAdmin.Application.Shared;
 
@@ -48,10 +49,36 @@ public abstract class CommandHandler<TCommand, TResponse> : MediatorRequestHandl
         }
         catch (Exception ex)
         {
-            Guid ticket = Guid.NewGuid();
+            string ticket = RandomString(8, false);
             CommandLoggers.LogHandlingCommandException(Logger, CommandName, ticket, ex);
             return new Unknown(ticket, [$"Error al procesar {CommandName}"]);
         }
+    }
+
+    /// <summary>
+    /// Generates a random string with the given length
+    /// </summary>
+    /// <param name="size">Size of the string</param>
+    /// <param name="lowerCase">If true, generate lowercase string</param>
+    /// <returns>Random string</returns>
+    private string RandomString(int size, bool lowerCase)
+    {
+        StringBuilder builder = new StringBuilder();
+        Random random = new Random();
+        char ch;
+        int azar;
+        for (int i = 0; i < size; i++)
+        {
+            azar = Convert.ToInt32(Math.Floor(42 * random.NextDouble() + 48));
+            if (azar >= 65 || azar <= 57) //fuera entre 58 y 64
+            {
+                ch = Convert.ToChar(azar);
+                builder.Append(ch);
+            }
+        }
+        if (lowerCase)
+            return builder.ToString().ToLower();
+        return builder.ToString();
     }
 
     /// <summary>
@@ -131,7 +158,7 @@ public abstract class CommandHandler<TCommand> : MediatorRequestHandler<TCommand
         }
         catch (Exception ex)
         {
-            Guid ticket = Guid.NewGuid();
+            string ticket = ApplicationUtils.RandomString(8, false);
             CommandLoggers.LogHandlingCommandException(Logger, CommandName, ticket, ex);
             return new Unknown(ticket, [$"Error al procesar {CommandName}"]);
         }

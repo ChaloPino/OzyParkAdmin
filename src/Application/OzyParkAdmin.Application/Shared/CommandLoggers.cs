@@ -17,5 +17,5 @@ internal static partial class CommandLoggers
     public static partial void LogHandlingCommandError(ILogger logger, string commandName, Failure failure);
 
     [LoggerMessage(EventId = 2004, Level = LogLevel.Error, Message = "Hubo un problema al manejar el commando '{CommandName}'. Ticket relacionado: {Ticket}")]
-    public static partial void LogHandlingCommandException(ILogger logger, string commandName, Guid ticket, Exception exception);
+    public static partial void LogHandlingCommandException(ILogger logger, string commandName, string ticket, Exception exception);
 }

@@ -48,7 +48,10 @@ builder.Services.AddSingleton(new DialogOptions
     MaxWidth = MaxWidth.ExtraLarge,
 });
 
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(options =>
+{
+    options.SnackbarConfiguration.RequireInteraction = true; //Espera eternamente hasta que lo cierre.
+});
 builder.Services.AddMudExtensions();
 builder.Services.AddMudTranslations();
 builder.Services.AddBlazoredLocalStorage();

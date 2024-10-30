@@ -1,11 +1,14 @@
 ﻿using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.CatalogoImagenes;
+using OzyParkAdmin.Domain.EscenariosCupo;
+using OzyParkAdmin.Domain.OmisionesCupo;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
+using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Domain.CategoriasProducto;
 
 /// <summary>
-/// Define la categoría del producto.
+/// Define la Entidad categoría del producto.
 /// </summary>
 public sealed class CategoriaProducto
 {
@@ -110,4 +113,45 @@ public sealed class CategoriaProducto
 
     internal string ToNombreCompleto() =>
         Padre is not null ? $"{Padre.ToNombreCompleto()} > {Nombre}" : Nombre;
+
+
+    internal static ResultOf<CategoriaProducto> Create(
+        int id,
+        int franquiciaId,
+        string aka,
+        string nombre,
+        CategoriaProducto padre,
+        bool esFinal,
+        CatalogoImagen imagen,
+        int orden,
+        bool esTop,
+        short nivel,
+        bool primeroProductos,
+        Usuario usuarioCreacion,
+        DateTime fechaCreacion,
+        Usuario usuarioModificacion,
+        DateTime ultimaModificacion)
+    {
+
+        CategoriaProducto categoriaProducto = new CategoriaProducto
+        {
+            Id = id,
+            FranquiciaId = franquiciaId,
+            Aka = aka,
+            Nombre = nombre,
+            Padre = padre,
+            EsFinal = esFinal,
+            Imagen = imagen,
+            Orden = orden,
+            EsTop = esTop,
+            Nivel = nivel,
+            PrimeroProductos = primeroProductos,
+            UsuarioCreacion = usuarioCreacion,
+            FechaCreacion = fechaCreacion,
+            UsuarioModificacion = usuarioModificacion,
+            UltimaModificacion = ultimaModificacion,
+        };
+        return categoriaProducto;
+
+    }
 }

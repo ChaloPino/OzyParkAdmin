@@ -1,5 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
+using OzyParkAdmin.Domain.EscenariosCupo;
+using OzyParkAdmin.Domain.OmisionesCupo;
+using OzyParkAdmin.Domain.Productos;
+using OzyParkAdmin.Domain.Seguridad.Usuarios;
+using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Infrastructure.Shared;
 using System.Diagnostics;
 
@@ -38,5 +44,73 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
             .ToListAsync(cancellationToken);
 
         return categorias.ToInfo();
+    }
+
+    /// <inheritdoc/>
+    public async Task<int> MaxIdAsync(CancellationToken cancellationToken)
+    {
+        int? id = await EntitySet.MaxAsync(x => (int?)x.Id, cancellationToken);
+        return id ?? 0;
+    }
+
+    /// <inheritdoc/>
+    public async Task<PagedList<CategoriaProductoFullInfo>> SearchCategoriaProductoAsync(string? searchText, FilterExpressionCollection<CategoriaProducto> filterExpressions, SortExpressionCollection<CategoriaProducto> sortExpressions, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(filterExpressions);
+        ArgumentNullException.ThrowIfNull(sortExpressions);
+
+        //Ojo que AsNoTracking tiene un problema de recursividad. Por ejemplo para el Caso del "NombreComleto" que se conforma en forma recursiva.
+        IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery();
+
+        if (searchText is not null)
+        {
+            query = query.Where(x =>
+                x.Aka.Contains(searchText) ||
+                x.Nombre.Contains(searchText) ||
+                x.UsuarioCreacion.FriendlyName.Contains(searchText) ||
+                x.UsuarioModificacion.FriendlyName.Contains(searchText));
+        }
+
+        query = filterExpressions.Where(query);
+
+        int totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
+
+        //TODO: ver como resolver traer el "mombreCompleto"
+        var items = await sortExpressions.Sort(query).Skip(page * pageSize).Take(pageSize).Select(x => new CategoriaProductoFullInfo
+        {
+            Id = x.Id,
+            FranquiciaId = x.FranquiciaId,
+            Aka = x.Aka,
+            Nombre = x.Nombre,
+            EsActivo = x.EsActivo,
+            Padre = x.Padre != null ? new CategoriaProductoInfo { Id = x.Padre.Id, Aka = x.Padre.Aka, Nombre = x.Padre.Nombre, EsActivo = x.Padre.EsActivo, NombreCompleto = x.Padre.Nombre } : null,
+            EsFinal = x.EsFinal,
+            Imagen = new CatalogoImagenInfo { Aka = x.Imagen.Aka, Base64 = x.Imagen.Base64, MimeType = x.Imagen.MimeType, Tipo = x.Imagen.Tipo },
+            Orden = x.Orden,
+            EsTop = x.EsTop,
+            Nivel = x.Nivel,
+            PrimeroProductos = x.PrimeroProductos,
+            UsuarioCreacion = new UsuarioInfo { Id = x.UsuarioCreacion.Id, UserName = x.UsuarioCreacion.UserName, FriendlyName = x.UsuarioCreacion.FriendlyName },
+            UltimaModificacion = x.UltimaModificacion,
+            CajasAsignadas = x.CajasAsignadas,
+            CanalesVenta = x.CanalesVenta,
+            Hijos = x.Hijos.Select(s => new CategoriaProductoInfo
+            {
+                Id = s.Id,
+                Aka = s.Aka,
+                Nombre = s.Nombre,
+                EsActivo = s.EsActivo,
+                NombreCompleto = s.Nombre
+            }),
+        }).ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        return new PagedList<CategoriaProductoFullInfo>
+        {
+            CurrentPage = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            Items = items,
+        };
+
     }
 }

@@ -81,7 +81,7 @@ public readonly record struct Validation(ImmutableArray<ValidationError> Errors)
 /// </summary>
 /// <param name="Ticket">El ticket asociado para revisar el log.</param>
 /// <param name="Errors">El listado de errores desconocidos.</param>
-public readonly record struct Unknown(Guid Ticket, ImmutableArray<string> Errors)
+public readonly record struct Unknown(string Ticket, ImmutableArray<string> Errors)
 {
     /// <inheritdoc/>
     public override string ToString()
@@ -100,7 +100,7 @@ public readonly record struct Unknown(Guid Ticket, ImmutableArray<string> Errors
     private bool PrintMembers(StringBuilder builder)
     {
         builder.Append("Ticket = ");
-        builder.Append(Ticket.ToString());
+        builder.Append(Ticket);
         builder.Append(", Errors = [ ");
 
         for (int i = 0; i < Errors.Length; i++)

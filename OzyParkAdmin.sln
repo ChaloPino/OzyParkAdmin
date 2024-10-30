@@ -24,21 +24,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A98512D5-849
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OzyParkAdmin.Domain", "src\Domain\OzyParkAdmin.Domain\OzyParkAdmin.Domain.csproj", "{B44178D9-6CAE-4292-87A5-5CBB1AB25A75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin", "src\Presentation\OzyParkAdmin\OzyParkAdmin.csproj", "{458FEDD6-0707-4183-9E15-D2AA3CB0993C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OzyParkAdmin", "src\Presentation\OzyParkAdmin\OzyParkAdmin.csproj", "{458FEDD6-0707-4183-9E15-D2AA3CB0993C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.Infrastructure", "src\Infrastructure\OzyParkAdmin.Infrastructure\OzyParkAdmin.Infrastructure.csproj", "{9EEC7A83-843F-40B4-8185-A7133601D8ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OzyParkAdmin.Infrastructure", "src\Infrastructure\OzyParkAdmin.Infrastructure\OzyParkAdmin.Infrastructure.csproj", "{9EEC7A83-843F-40B4-8185-A7133601D8ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.Application", "src\Application\OzyParkAdmin.Application\OzyParkAdmin.Application.csproj", "{AEB75335-71FA-42F7-85B2-7D24D12CE86D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OzyParkAdmin.Application", "src\Application\OzyParkAdmin.Application\OzyParkAdmin.Application.csproj", "{AEB75335-71FA-42F7-85B2-7D24D12CE86D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.UnionType.Generator", "src\BuildingBlocks\OzyParkAdmin.UnionType.Generator\OzyParkAdmin.UnionType.Generator.csproj", "{8128BB81-A0B2-42BF-8DBB-10B9A4456062}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OzyParkAdmin.UnionType.Generator", "src\BuildingBlocks\OzyParkAdmin.UnionType.Generator\OzyParkAdmin.UnionType.Generator.csproj", "{8128BB81-A0B2-42BF-8DBB-10B9A4456062}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5BEA5D19-8F12-40B9-8538-54F4FC429945}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingBlocks", "{C0D5BC8F-D05D-42C3-BF0F-C04EEA02CDB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.UnionType.Generator.Tests", "test\BuildingBlocks\OzyParkAdmin.UnionType.Generator.Tests\OzyParkAdmin.UnionType.Generator.Tests.csproj", "{B5315748-D702-4142-AC9C-377B7B08D0D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OzyParkAdmin.UnionType.Generator.Tests", "test\BuildingBlocks\OzyParkAdmin.UnionType.Generator.Tests\OzyParkAdmin.UnionType.Generator.Tests.csproj", "{B5315748-D702-4142-AC9C-377B7B08D0D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OzyParkAdmin.ChartJs", "src\BuildingBlocks\OzyParkAdmin.ChartJs\OzyParkAdmin.ChartJs.csproj", "{875C297F-7E4E-4AA5-B37B-A66B36BFF235}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OzyParkAdmin.ChartJs", "src\BuildingBlocks\OzyParkAdmin.ChartJs\OzyParkAdmin.ChartJs.csproj", "{875C297F-7E4E-4AA5-B37B-A66B36BFF235}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -116,22 +116,18 @@ public partial class ProductoEditDialog
     /// <summary>
     /// Prepara el producto asignando los nhombre completos de categoría y categoría despliegue.
     /// </summary>
-    /// <remarks>
-    /// La busqueda se hace en la clase <see cref="CategoriaProductoInfo" /> el método <see cref="CategoriaProductoInfo.Equals(CategoriaProductoInfo?)" />.
-    /// </remarks>
     private void PrepareProducto()
     {
-        int categoriaId = categorias.IndexOf(Producto!.Categoria);
-        int categoriaDespliegueId = categorias.IndexOf(Producto!.CategoriaDespliegue);
-
-        if (categoriaId >= 0)
+        string? nombreCompleto = categorias.Where(w => w.Id == Producto!.Categoria.Id).Select(s => s.NombreCompleto).FirstOrDefault();
+        if (!string.IsNullOrEmpty(nombreCompleto))
         {
-            Producto.Categoria.NombreCompleto = categorias[categoriaId].NombreCompleto;
+            Producto.Categoria.NombreCompleto = nombreCompleto;
         }
 
-        if (categoriaDespliegueId >= 0)
+        string? nombreCompletoDespliegue = categorias.Where(w => w.Id == Producto!.CategoriaDespliegue.Id).Select(s => s.NombreCompleto).FirstOrDefault();
+        if (!string.IsNullOrEmpty(nombreCompletoDespliegue))
         {
-            Producto.CategoriaDespliegue.NombreCompleto = categorias[categoriaDespliegueId].NombreCompleto;
+            Producto.CategoriaDespliegue.NombreCompleto = nombreCompletoDespliegue;
         }
     }
 

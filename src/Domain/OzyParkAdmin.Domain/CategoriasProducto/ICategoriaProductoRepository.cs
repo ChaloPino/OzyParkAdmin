@@ -1,4 +1,7 @@
 ﻿
+using OzyParkAdmin.Domain.Productos;
+using OzyParkAdmin.Domain.Shared;
+
 namespace OzyParkAdmin.Domain.CategoriasProducto;
 
 /// <summary>
@@ -22,4 +25,23 @@ public interface ICategoriaProductoRepository
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>La lista de <see cref="CategoriaProductoInfo"/>.</returns>
     Task<List<CategoriaProductoInfo>> ListByFranquiciaIdAsync(int franquiciaId, TipoCategoria tipoCategoria, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Obtiene el Valor de ID mayor en Categoria de Productos
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<int> MaxIdAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Busqueda de la Categorias de Productos
+    /// </summary>
+    /// <param name="searchText">El texto de búsqueda.</param>
+    /// <param name="filterExpressions">Las expresiones de filtrado.</param>
+    /// <param name="sortExpressions">Las expresiones de ordenamiento.</param>
+    /// <param name="page">La página actual.</param>
+    /// <param name="pageSize">El tamaño de la página actual.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>La lista paginada de <see cref="CategoriaProductoFullInfo"/> que coinciden con los criterios de búsqueda.</returns>
+    Task<PagedList<CategoriaProductoFullInfo>> SearchCategoriaProductoAsync(string? searchText, FilterExpressionCollection<CategoriaProducto> filterExpressions, SortExpressionCollection<CategoriaProducto> sortExpressions, int page, int pageSize, CancellationToken cancellationToken);
 }

@@ -14,7 +14,13 @@
             }
             else
             {
-                @Body
+                <MudCard Elevation="2" Class="pa-16">
+                    <MudCardMedia Image="logo.png" Height="100" Style="background-size:contain;" Class="mb-2" />
+                    <MudDivider DividerType="DividerType.FullWidth" />
+                    <MudCardContent>
+                        @Body
+                    </MudCardContent>
+                </MudCard>
             }
         </MudContainer>
     </MudMainContent>

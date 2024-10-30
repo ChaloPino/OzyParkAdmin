@@ -19,7 +19,7 @@ public abstract class ProductoStateChangeableHandler<TState> : CommandHandler<TS
     /// </summary>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/>.</param>
     /// <param name="logger">El <see cref="ILogger"/>.</param>
-    /// <param name="stateAction">La acción de cambio de estado que maneja este manejador.</param>
+    /// <param name="stateAction">La acción de cambio de estado que maneja este manejador. Valor por defecto es el update.</param>
     protected ProductoStateChangeableHandler(IOzyParkAdminContext context, ILogger logger, StateAction stateAction = StateAction.Update)
         : base(logger)
     {

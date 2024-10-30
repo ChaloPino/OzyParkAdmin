@@ -3,11 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.Franquicias;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Infrastructure.Shared;
 using System.Data;
+using System.Threading;
 
 namespace OzyParkAdmin.Infrastructure.Productos;
 
@@ -19,6 +21,10 @@ public sealed class ProductoRepository(OzyParkAdminContext context) : Repository
     /// <inheritdoc/>
     public async Task<bool> ExistAkaAsync(int productoId, int franquiciaId, string? aka, CancellationToken cancellationToken) =>
         await EntitySet.AnyAsync(x => x.FranquiciaId == franquiciaId && x.Aka == aka && x.Id != productoId, cancellationToken);
+
+    /// <inheritdoc/>
+    public async Task<bool> ExistSkuAsync(int productoId, int franquiciaId, string? sku, CancellationToken cancellationToken) =>
+        await EntitySet.AnyAsync(x => x.FranquiciaId == franquiciaId && x.Sku == sku && x.Id != productoId, cancellationToken);
 
     /// <inheritdoc/>
     public async Task<Producto?> FindByIdAsync(int id, CancellationToken cancellationToken) =>

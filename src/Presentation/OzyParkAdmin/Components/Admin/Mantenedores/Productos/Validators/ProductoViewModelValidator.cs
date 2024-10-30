@@ -26,12 +26,13 @@ public sealed class ProductoViewModelValidator : BaseValidator<ProductoViewModel
 
         RuleFor(x => x.Sku)
             .NotEmpty()
-            .MaximumLength(20);
+            .MaximumLength(20)
+            .CustomAsync(ValidateDuplicateSkuAsync);
 
         RuleFor(x => x.Aka)
             .NotEmpty()
             .MaximumLength(50)
-            .CustomAsync(ValidateDuplicateAsync);
+            .CustomAsync(ValidateDuplicateAkaAsync);
 
         RuleFor(x => x.FranquiciaId)
             .NotEmpty();
@@ -62,9 +63,19 @@ public sealed class ProductoViewModelValidator : BaseValidator<ProductoViewModel
             .SetValidator(new ProductoParteModelValidator());
     }
 
-    private async Task ValidateDuplicateAsync(string aka, ValidationContext<ProductoViewModel> context, CancellationToken cancellationToken)
+    private async Task ValidateDuplicateAkaAsync(string aka, ValidationContext<ProductoViewModel> context, CancellationToken cancellationToken)
     {
         var validateAka = new ValidateProductoAka(context.InstanceToValidate.Id, context.InstanceToValidate.FranquiciaId, aka);
+        SuccessOrFailure result = await _mediator.SendRequest(validateAka, cancellationToken);
+
+        result.Switch(
+            onSuccess: _ => { },
+            onFailure: failure => context.AddFailure(failure));
+    }
+
+    private async Task ValidateDuplicateSkuAsync(string sku, ValidationContext<ProductoViewModel> context, CancellationToken cancellationToken)
+    {
+        var validateAka = new ValidateProductoSku(context.InstanceToValidate.Id, context.InstanceToValidate.FranquiciaId, sku);
         SuccessOrFailure result = await _mediator.SendRequest(validateAka, cancellationToken);
 
         result.Switch(

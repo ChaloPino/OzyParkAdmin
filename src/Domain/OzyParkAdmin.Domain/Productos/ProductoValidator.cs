@@ -35,4 +35,21 @@ public sealed class ProductoValidator : IBusinessLogic
             ? new ValidationError(nameof(Producto.Aka), $"Ya existe un producto con el aka '{aka}'.")
             : new Success();
     }
+
+    /// <summary>
+    /// Valida el sku del producto.
+    /// </summary>
+    /// <param name="productoId">El id del producto a validar.</param>
+    /// <param name="franquiciaId">El id de la franquicia.</param>
+    /// <param name="sku">El sku del producto.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>El resultado de la validación del sku.</returns>
+    public async Task<SuccessOrFailure> ValidateSkuAsync(int productoId, int franquiciaId, string? sku, CancellationToken cancellationToken)
+    {
+        bool exist = await _repository.ExistSkuAsync(productoId, franquiciaId, sku, cancellationToken);
+
+        return exist
+            ? new ValidationError(nameof(Producto.Sku), $"Ya existe un producto con el sku '{sku}'.")
+            : new Success();
+    }
 }

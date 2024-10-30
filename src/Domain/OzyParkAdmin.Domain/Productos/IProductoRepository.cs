@@ -18,6 +18,16 @@ public interface IProductoRepository
     Task<bool> ExistAkaAsync(int productoId, int franquiciaId, string? aka, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Revisa si es que existe un producto con el mismo sku.
+    /// </summary>
+    /// <param name="productoId">El id del producto que se está revisado.</param>
+    /// <param name="franquiciaId">El id de la franquicia.</param>
+    /// <param name="sku">El sku a buscar.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns><c>true</c> si existe un producto con el mismo sku; en caso contrario, <c>false</c>.</returns>
+    Task<bool> ExistSkuAsync(int productoId, int franquiciaId, string? sku, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Busca un producto por su aka.
     /// </summary>
     /// <param name="franquiciaId">El id de la franquicia.</param>

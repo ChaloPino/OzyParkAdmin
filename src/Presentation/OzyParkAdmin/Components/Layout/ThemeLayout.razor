@@ -1,12 +1,13 @@
 ﻿@using OzyParkAdmin.Infrastructure.Layout
+@using System.ComponentModel
 @inherits LayoutComponentBase
 @layout MainLayout
 @implements IDisposable
 @inject LayoutService LayoutService
-
+@inject ThemeOzyPark Theme
 @Body
 
-<MudThemeProvider @ref="themeProvider" IsDarkMode="LayoutService.IsDarkMode" IsDarkModeChanged="LayoutService.SetDarkMode" />
+<MudThemeProvider @ref="themeProvider" Theme="Theme.ThemeManager.Theme" IsDarkMode="LayoutService.IsDarkMode" IsDarkModeChanged="LayoutService.SetDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -17,6 +18,7 @@
     protected override void OnInitialized()
     {
         LayoutService.MajorUpdateOccurred += OnMajorUpdateOccurred;
+        Theme.PropertyChanged += OnThemeManagerChanged;
         base.OnInitialized();
     }
 
@@ -49,5 +51,10 @@
     public void Dispose()
     {
         LayoutService.MajorUpdateOccurred -= OnMajorUpdateOccurred;
+    }
+
+    private void OnThemeManagerChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
     }
 }

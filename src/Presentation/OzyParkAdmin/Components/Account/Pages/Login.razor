@@ -12,33 +12,30 @@
 
 <PageTitle>Incio de sesión</PageTitle>
 
-<MudPaper Elevation="5" Class="pa-16">
-    <MudGrid Justify="Justify.Center">
-        <MudItem>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
+<MudGrid Justify="Justify.Center">
+    <MudItem>
+        <StatusMessage Message="@errorMessage" />
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+            <DataAnnotationsValidator />
 
-                <MudText Typo="Typo.h4" Align="Align.Center">Iniciar sesión</MudText>
-                <MudDivider Class="d-flex flex-grow-1" DividerType="DividerType.Middle" />
+            <MudText Typo="Typo.h4" Align="Align.Center">Iniciar sesión</MudText>
 
-                <MudStaticTextField @bind-Value="Input.UserName" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.People" autocomplete="username"
-                                    Class="pb-2" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Cuenta" For="() => Input.UserName" />
+            <MudStaticTextField @bind-Value="Input.UserName" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.People" autocomplete="username"
+                                Class="pb-2" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Cuenta" For="() => Input.UserName" />
 
-                <MudStaticTextField @bind-Value="Input.Password" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.VisibilityOff" AdornmentClickFunction="ShowPassword"
-                                    autocomplete="current-password" Class="pb-2" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Contraseña" 
-                                    InputType="InputType.Password" For="() => Input.Password" />
+            <MudStaticTextField @bind-Value="Input.Password" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.VisibilityOff" AdornmentClickFunction="ShowPassword"
+                                autocomplete="current-password" Class="pb-2" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Contraseña" 
+                                InputType="InputType.Password" For="() => Input.Password" />
                 
-                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
-                    <MudStaticSwitch @bind-Value="Input.RememberMe" Color="Color.Primary" Label="Recordarme" Typo="Typo.body2" />
-                    <MudLink Href="Account/ForgotPassword" Typo="Typo.body2" Color="Color.Primary"><b>Olvidé mi contraseña</b></MudLink>
-                </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                <MudStaticSwitch @bind-Value="Input.RememberMe" Color="Color.Primary" Label="Recordarme" Typo="Typo.body2" />
+                <MudLink Href="Account/ForgotPassword" Typo="Typo.body2" Color="Color.Primary"><b>Olvidé mi contraseña</b></MudLink>
+            </MudStack>
 
-                <MudStaticButton Class="my-4" FormAction="FormAction.Submit" Color="Color.Primary" Variant="Variant.Filled" FullWidth="true">Iniciar sesión</MudStaticButton>
-            </EditForm>
-        </MudItem>
-    </MudGrid>
-</MudPaper>
+            <MudStaticButton Class="my-4" FormAction="FormAction.Submit" Color="Color.Primary" Variant="Variant.Filled" FullWidth="true">Iniciar sesión</MudStaticButton>
+        </EditForm>
+    </MudItem>
+</MudGrid>
 
 @code {
     private string? errorMessage;

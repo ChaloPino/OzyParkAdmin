@@ -121,4 +121,18 @@ public class SortExpressionCollection<T>
 
         return orderedSource;
     }
+
+    /// <summary>
+    /// Crea un <see cref="SortExpressionCollection{T}"/> con un criterio de ordenamiento por defecto.
+    /// </summary>
+    /// <typeparam name="TProperty">El tipo de la propiedad a ordena.</typeparam>
+    /// <param name="keySelector">La expressión para conseguir la propiedad para el ordenamiento.</param>
+    /// <param name="descending">Si se ordena de forma descendente.</param>
+    /// <returns>El <see cref="SortExpressionCollection{T}"/> con un criterio de ordenamiento por defecto.</returns>
+    public static SortExpressionCollection<T> CreateDefault<TProperty>(Expression<Func<T, TProperty?>> keySelector, bool descending)
+    {
+        var sortExpressions = new SortExpressionCollection<T>();
+        sortExpressions.Add(keySelector, descending);
+        return sortExpressions;
+    }
 }

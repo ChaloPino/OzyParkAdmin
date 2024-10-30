@@ -23,14 +23,14 @@ public abstract class BaseValidator<T> : AbstractValidator<T>
     /// </summary>
     public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
     {
-        if (propertyName.StartsWith(ValidationMemberPrefix, StringComparison.Ordinal))
-        {
-            propertyName = propertyName.Substring(ValidationMemberPrefix.Length);
-        }
-
         if (propertyName.StartsWith("Item."))
         {
             propertyName = propertyName.Substring(ItemMemberPrefix.Length);
+        }
+
+        if (propertyName.StartsWith(ValidationMemberPrefix, StringComparison.Ordinal))
+        {
+            propertyName = propertyName.Substring(ValidationMemberPrefix.Length);
         }
 
         var result = await ValidateAsync(ValidationContext<T>.CreateWithOptions((T)model, x => x.IncludeProperties(propertyName)));

@@ -7,9 +7,9 @@
 <MudText Typo="Typo.h4">Productos</MudText>
 
 <MudDataGrid @ref="dataGrid" T="ProductoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
-             ServerData="SearchProductosAsync" SortMode="SortMode.Multiple" 
-             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
-             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+ServerData="SearchProductosAsync" SortMode="SortMode.Multiple" 
+Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
         <MudSpacer />
         <SearchControl @bind-SearchText="searchText" />
@@ -122,7 +122,7 @@
             </GroupTemplate>
             <CellTemplate>
                 <StateControl State="@context.Item.EsActivo" CanChangeStatus="true" TrueLabel="Habilitado" FalseLabel="Deshabilitado"
-                              StateChanged="async (esActivo) => await SaveEsActivoAsync(context.Item, esActivo)" />
+                StateChanged="async (esActivo) => await SaveEsActivoAsync(context.Item, esActivo)" />
             </CellTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.EnInventario" Editable="false" Title="Inventario">
@@ -134,9 +134,9 @@
             </GroupTemplate>
             <CellTemplate>
                 <StateControl State="@context.Item.EnInventario" CanChangeStatus="context.Item.TipoProducto.ControlaInventario"
-                              TrueIcon="@Icons.Material.Filled.Lock" TrueLabel="Bloqueado" TrueColor="Color.Error"
-                              FalseIcon="@Icons.Material.Outlined.LockOpen" FalseLabel="Desbloqueado" FalseColor="Color.Success"
-                              StateChanged="async (enInventario) => await SaveEnInventarioAsync(context.Item, enInventario)" />
+                TrueIcon="@Icons.Material.Filled.Lock" TrueLabel="Bloqueado" TrueColor="Color.Error"
+                FalseIcon="@Icons.Material.Outlined.LockOpen" FalseLabel="Desbloqueado" FalseColor="Color.Success"
+                StateChanged="async (enInventario) => await SaveEnInventarioAsync(context.Item, enInventario)" />
             </CellTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.FechaSistema" Title="Fecha creación" Hidden="true">

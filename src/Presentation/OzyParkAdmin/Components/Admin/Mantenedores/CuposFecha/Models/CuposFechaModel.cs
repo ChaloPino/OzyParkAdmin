@@ -60,7 +60,7 @@ public sealed class CuposFechaModel
     /// </summary>
     public int IntervaloMinutos { get; set; } = 20;
 
-    internal CanalVenta? ValidationCanalVenta => CanalesVenta.FirstOrDefault();
+    internal CanalVenta? ValidationCanalesVenta => CanalesVenta.FirstOrDefault();
 
     internal DiaSemana? ValidationDiaSemana => DiasSemana.FirstOrDefault();
 

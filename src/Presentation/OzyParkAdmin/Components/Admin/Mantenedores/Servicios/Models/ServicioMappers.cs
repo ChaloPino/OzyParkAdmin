@@ -8,6 +8,7 @@ using OzyParkAdmin.Application.Servicios.Update;
 using OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
 using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Domain.Tramos;
@@ -58,7 +59,9 @@ internal static class ServicioMappers
 
     private static SortExpressionCollection<Servicio> ToSortExpressions(this GridState<ServicioViewModel> state)
     {
-        SortExpressionCollection<Servicio> sortExpressions = new();
+        SortExpressionCollection<Servicio> sortExpressions = state.SortDefinitions.Count == 0
+             ? SortExpressionCollection<Servicio>.CreateDefault(x => x.Nombre, false)
+             : new SortExpressionCollection<Servicio>();
 
         foreach (var sortDefinition in state.SortDefinitions)
         {

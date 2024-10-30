@@ -58,7 +58,9 @@ internal static class ProductoMapper
 
     private static SortExpressionCollection<Producto> ToSortExpressions(this GridState<ProductoViewModel> state)
     {
-        SortExpressionCollection<Producto> sortExpressions = new();
+        SortExpressionCollection<Producto> sortExpressions = state.SortDefinitions.Count == 0
+             ? SortExpressionCollection<Producto>.CreateDefault(x => x.Sku, false)
+             : new SortExpressionCollection<Producto>();
 
         foreach (var sortDefinition in state.SortDefinitions)
         {

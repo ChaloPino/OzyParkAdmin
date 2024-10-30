@@ -33,6 +33,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
     <PackageReference Include="MudBlazor" />
     <PackageReference Include="MudBlazor.Extensions" />
+    <PackageReference Include="MudBlazor.ThemeManager" />
     <PackageReference Include="MudBlazor.Translations" />
     <PackageReference Include="Nextended.Blazor" />
     <PackageReference Include="Nextended.Core" />
@@ -50,7 +51,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Admin\Bodegas\" />
+    <Folder Include="Components\Admin\GestionInventario\" />
     <Folder Include="Components\Admin\CajaControl\Coordenadas\" />
     <Folder Include="Components\Admin\CajaControl\CoordenadasEmergencia\" />
   </ItemGroup>

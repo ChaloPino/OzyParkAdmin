@@ -1,0 +1,34 @@
+﻿@page "/Mantenedores/CategoriasProducto"
+@using OzyParkAdmin.Domain.CategoriasProducto
+@inject IMediator Mediator
+@inject ISnackbar Snackbar
+@inject DialogOptions DialogOptions
+
+<PageTitle>Categoria de Productos</PageTitle>
+<MudText Typo="Typo.h4">Categoria de Productos</MudText>
+
+<MudDataGrid @ref="dataGrid" T="CategoriaProductoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
+             ServerData="SearchCategoriaServiciosAsync" SortMode="SortMode.Multiple"
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+    <ToolBarContent>
+        <MudSpacer />
+        <SearchControl @bind-SearchText="searchText" />
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCategoriaProductoAsync">Nueva Categoria</MudButton>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false" Hideable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Aka" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Nombre" Groupable="false" Title="Nombre">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="CategoriaProductoViewModel" />
+    </PagerContent>
+</MudDataGrid>

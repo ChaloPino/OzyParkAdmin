@@ -1,13 +1,14 @@
 ﻿using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.CatalogoImagenes;
+using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 
-namespace OzyParkAdmin.Domain.CategoriasProducto;
+namespace OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto.Models;
 
 /// <summary>
-/// Contiene la informacion completa de una Categoria de Producto
+/// El view model de la Categoria Servicio
 /// </summary>
-public sealed record CategoriaProductoFullInfo
+public sealed class CategoriaProductoViewModel
 {
     /// <summary>
     /// El id de la categoría del producto.

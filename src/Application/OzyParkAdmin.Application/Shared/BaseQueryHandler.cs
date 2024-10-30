@@ -1,6 +1,7 @@
 ﻿using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Domain.Shared;
+using System.Text;
 
 namespace OzyParkAdmin.Application.Shared;
 
@@ -46,7 +47,7 @@ public abstract class BaseQueryHandler<TQuery, TResponse> : MediatorRequestHandl
         }
         catch (Exception ex)
         {
-            Guid ticket = Guid.NewGuid();
+            string ticket = ApplicationUtils.RandomString(8, false);
             //Esto va al log correspondiente
             QueryLoggers.LogHandlingQueryException(Logger, QueryName, ticket, ex);
             //Esto va a dar a Presentacion

@@ -59,6 +59,7 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
         ArgumentNullException.ThrowIfNull(filterExpressions);
         ArgumentNullException.ThrowIfNull(sortExpressions);
 
+        //Ojo que AsNoTracking tiene un problema de recursividad. Por ejemplo para el Caso del "NombreComleto" que se conforma en forma recursiva.
         IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery();
 
         if (searchText is not null)

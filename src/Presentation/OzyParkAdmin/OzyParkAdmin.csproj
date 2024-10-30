@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <UserSecretsId>aspnet-OzyParkAdmin-1b38ffc0-63e0-4bbb-b881-329c75169e96</UserSecretsId>

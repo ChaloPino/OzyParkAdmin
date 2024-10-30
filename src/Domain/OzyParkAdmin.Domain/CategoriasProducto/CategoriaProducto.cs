@@ -8,7 +8,7 @@ using OzyParkAdmin.Domain.Shared;
 namespace OzyParkAdmin.Domain.CategoriasProducto;
 
 /// <summary>
-/// Define la categoría del producto.
+/// Define la Entidad categoría del producto.
 /// </summary>
 public sealed class CategoriaProducto
 {

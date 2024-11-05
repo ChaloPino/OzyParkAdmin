@@ -17,18 +17,74 @@
         <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCategoriaProductoAsync">Nueva Categoria</MudButton>
     </ToolBarContent>
     <Columns>
+        <HierarchyColumn T="CategoriaProductoViewModel" Hideable="false" />
+        <PropertyColumn Property="x => x.NombreCompleto" Groupable="false" Title="Nombre Completo" Sortable="false"></PropertyColumn>
         <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false" Hideable="false">
             <CellTemplate>
                 <MudHighlighter Text="@context.Item.Aka" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Nombre" Groupable="false" Title="Nombre">
+        <PropertyColumn Property="x => x.Nombre" Groupable="false" Title="Nombre" Hideable="false">
             <CellTemplate>
                 <MudHighlighter Text="@context.Item.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
         </PropertyColumn>
+        <PropertyColumn Property="x => x.Orden" Title="Orden"></PropertyColumn>
+        <PropertyColumn Property="x => x.Nivel" Title="Nivel"></PropertyColumn>
+        <PropertyColumn Property="x => x.EsFinal" Title="Es Final">
+            <CellTemplate>
+                <StateControl State="@context.Item.EsFinal" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.EsActivo" Editable="false" Title="Estado">
+            <CellTemplate>
+                <StateControl State="@context.Item.EsActivo" CanChangeStatus="true" TrueLabel="Habilitado" FalseLabel="Deshabilitado"
+                              StateChanged="async (esActivo) => await SaveEsActivoAsync(context.Item, esActivo)" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.UsuarioCreacion.UserName" Groupable="false" Title="Usuario Creacion">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.UsuarioCreacion.UserName" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.FechaCreacion" Title="Fecha Creacion"></PropertyColumn>
+        <PropertyColumn Property="x => x.UsuarioModificacion.UserName" Groupable="false" Title="Ultima Modificación">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.UsuarioModificacion.UserName" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.UltimaModificacion" Title="Ultima Modificación"></PropertyColumn>
+        <PropertyColumn Property="x => x.Padre.Nombre" Title="Categoria Padre" Hidden="true" Grouping="true"></PropertyColumn>
+        <PropertyColumn Property="x => x.EsTop" Title="Es Top" Hidden="true">
+            <CellTemplate>
+                <StateControl State="@context.Item.EsTop" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.PrimeroProductos" Title="Primero Productos" Hidden="true">
+            <CellTemplate>
+                <StateControl State="@context.Item.PrimeroProductos" />
+            </CellTemplate>
+        </PropertyColumn>
     </Columns>
+    <ChildRowContent>
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">@context.Item.Nombre</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <div class="mud-card-media">
+                <MudImage Src="@context.Item.Imagen.Data" Height="200" Width="200" Alt="@context.Item.Imagen.Aka" />
+            </div>
+        </MudCard>
+    </ChildRowContent>
     <PagerContent>
         <MudDataGridPager T="CategoriaProductoViewModel" />
     </PagerContent>
 </MudDataGrid>
+
+<CascadingValue Value="true" Name="IsNested">
+    <CategoriaProductoEditDialog @bind-IsOpen="openEditing" CategoriaProducto="currentCategoriaProducto"
+                        CommitChanges="SaveCategoriaProductoAsync" DialogOptions="DialogOptions" />
+
+</CascadingValue>

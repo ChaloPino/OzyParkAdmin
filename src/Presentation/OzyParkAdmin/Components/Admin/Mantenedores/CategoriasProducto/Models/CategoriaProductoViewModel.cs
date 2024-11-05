@@ -38,7 +38,7 @@ public sealed class CategoriaProductoViewModel
     /// <summary>
     /// La categoría de producto padre.
     /// </summary>
-    public CategoriaProductoInfo? Padre { get; set; }
+    public CategoriaProductoInfo Padre { get; set; }
 
     /// <summary>
     /// Si la categoría de producto es final y no tiene hijos.
@@ -48,7 +48,7 @@ public sealed class CategoriaProductoViewModel
     /// <summary>
     /// La imágen asociada a la categoría de producto.
     /// </summary>
-    public CatalogoImagenInfo Imagen { get; set; } = default!;
+    public CatalogoImagenModel Imagen { get; set; } = default!;
 
     /// <summary>
     /// El orden de despliegue de la categoría de producto.
@@ -105,6 +105,20 @@ public sealed class CategoriaProductoViewModel
     /// </summary>
     public IEnumerable<CategoriaProductoInfo> Hijos { get; set; } = [];
 
-    //>internal string ToNombreCompleto() =>
-    //>    Padre is not null ? $"{Padre.ToNombreCompleto()} > {Nombre}" : Nombre;
+    /// <summary>
+    /// Nombre Completo de la categoria que incluye a sus padres y ancestros.
+    /// </summary>
+    public string NombreCompleto { get; set; } = string.Empty;
+
+    #region Para Uso del Modal Edit/New
+    /// <summary>
+    /// Si es una categoriaes nueva.
+    /// </summary>
+    public bool IsNew { get; set; }
+
+    /// <summary>
+    /// Indica si se esta cargando en el Modal
+    /// </summary>
+    internal bool Loading { get; set; }
+    #endregion
 }

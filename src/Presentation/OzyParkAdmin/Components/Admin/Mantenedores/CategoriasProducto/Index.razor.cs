@@ -8,6 +8,10 @@ using System.Security.Claims;
 using OzyParkAdmin.Application.CategoriasProducto.Search;
 using OzyParkAdmin.Shared;
 using OzyParkAdmin.Domain.Shared;
+using OzyParkAdmin.Application.Productos.Activar;
+using OzyParkAdmin.Application.Productos.Desactivar;
+using OzyParkAdmin.Application.Productos;
+using OzyParkAdmin.Components.Admin.Mantenedores.Productos.Models;
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto;
 
@@ -21,6 +25,9 @@ public partial class Index
     private ObservableGridData<CategoriaProductoViewModel> currentCategoriasProducto = new();
     private string? searchText;
 
+    private bool openEditing;
+    private CategoriaProductoViewModel? currentCategoriaProducto;
+
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
@@ -32,6 +39,12 @@ public partial class Index
             onSuccess: categorias => currentCategoriasProducto = categorias.ToGridData(dataGrid),
             onFailure: failure => AddFailure(failure, "buscar Categoria de Productos"));
 
+        if (state.SortDefinitions.Any() && dataGrid is not null)
+        {
+            //Si aplicaron algún ordenamiento ya no tiene sentido que se agrupe, ya que practicamente quedan agrupados con un solo item.
+            dataGrid.Groupable = false;
+        }
+
         return currentCategoriasProducto;
     }
 
@@ -42,6 +55,35 @@ public partial class Index
     }
     private async Task AddCategoriaProductoAsync()
     {
+        currentCategoriaProducto = new CategoriaProductoViewModel() { IsNew = true };
+        CellContext<CategoriaProductoViewModel> context = new(dataGrid, currentCategoriaProducto);
+        await ShowEditingAsync(context);
+    }
+
+    private async Task ShowEditingAsync(CellContext<CategoriaProductoViewModel> context)
+    {
+        currentCategoriaProducto = dataGrid.CloneStrategy.CloneObject(context.Item);
+
+        if (currentCategoriaProducto is not null)
+        {
+            //await LoadCategoriasAsync(currentCategoriaProducto.FranquiciaId);
+            openEditing = true;
+        }
+    }
+
+    private async Task<bool> SaveCategoriaProductoAsync(CategoriaProductoViewModel categoriaProducto)
+    {
         throw new NotImplementedException();
+    }
+    private async Task SaveEsActivoAsync(CategoriaProductoViewModel producto, bool esActivo)
+    {
+        throw new NotImplementedException();
+
+        //>IProductoStateChangeable changeStatus = esActivo
+        //>    ? new ActivarProducto(producto.Id)
+        //>    : new DesactivarProducto(producto.Id);
+        //>
+        //>var result = await Mediator.SendRequest(changeStatus);
+        //>UpdateProducto(producto, result, esActivo ? "activar producto" : "desactivar producto");
     }
 }

@@ -93,6 +93,7 @@ internal static class UsarioMappers
             FriendlyName = usuario.FriendlyName,
             Rut = usuario.Rut,
             Email = usuario.Email,
+            EmailConfirmed = usuario.EmailConfirmed,
             IsLockedout = usuario.IsLockedout,
             Roles = usuario.Roles.ToModel(),
             CentrosCosto = usuario.CentrosCosto,
@@ -106,8 +107,16 @@ internal static class UsarioMappers
         new() { Id = rol.Id, Nombre = rol.Name };
 
 
-    public static CreateUser ToCreate(this UsuarioViewModel model) =>
-        new(model.UserName, model.FriendlyName, model.Rut, model.Email, [.. model.Roles.Select(x => x.Nombre)], [.. model.CentrosCosto.Select(x => x.Id)], [.. model.Franquicias.Select(x => x.Id)]);
+    public static CreateUser ToCreate(this UsuarioViewModel model, string confirmationLink) =>
+        new(
+            model.UserName,
+            model.FriendlyName,
+            model.Rut,
+            model.Email,
+            [.. model.Roles.Select(x => x.Nombre)],
+            [.. model.CentrosCosto.Select(x => x.Id)],
+            [.. model.Franquicias.Select(x => x.Id)],
+            confirmationLink);
 
     public static UpdateUser ToUpdate(this UsuarioViewModel model) =>
         new(model.Id, model.UserName, model.FriendlyName, model.Rut, model.Email, [.. model.Roles.Select(x => x.Nombre)], [.. model.CentrosCosto.Select(x => x.Id)], [.. model.Franquicias.Select(x => x.Id)]);

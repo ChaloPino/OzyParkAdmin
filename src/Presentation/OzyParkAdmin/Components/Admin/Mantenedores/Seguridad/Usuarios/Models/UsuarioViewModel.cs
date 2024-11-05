@@ -55,6 +55,11 @@ public sealed record UsuarioViewModel
     }
 
     /// <summary>
+    /// Si el correo electrónico está confirmado.
+    /// </summary>
+    public bool EmailConfirmed { get; set; }
+
+    /// <summary>
     /// La lista de roles.
     /// </summary>
     public IEnumerable<UsuarioRolModel> Roles { get; set; } = [];

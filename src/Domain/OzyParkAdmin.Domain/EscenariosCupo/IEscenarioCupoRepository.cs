@@ -21,7 +21,6 @@ public interface IEscenarioCupoRepository
     /// <param name="ids">Los ids de escenarios de cupos a buscar.</param>
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>La lista de escenarios de cupo.</returns>
-    /// <returns></returns>
     Task<IEnumerable<EscenarioCupo>> FindByIdsAsync(int[] ids, CancellationToken cancellationToken);
 
     /// <summary>

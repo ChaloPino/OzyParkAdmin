@@ -30,6 +30,11 @@ public sealed record UsuarioFullInfo
     public string? Email { get; set; }
 
     /// <summary>
+    /// Si el correo electrónico está confirmado.
+    /// </summary>
+    public bool EmailConfirmed { get; set; }
+
+    /// <summary>
     /// El rut del usuario.
     /// </summary>
     public string? Rut { get; set; }

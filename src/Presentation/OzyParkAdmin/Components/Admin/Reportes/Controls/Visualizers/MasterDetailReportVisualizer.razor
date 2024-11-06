@@ -21,16 +21,18 @@
                         <IfThenElse Condition="MasterTable!.IsTabular">
                             <Then>
                                 <MudSimpleTable Dense="true" Striped="true" Bordered="true">
-                                    <ForIn Items="MasterTable!.Columns">
-                                        <MudTr>
-                                            <MudTh>@context.Header</MudTh>
-                                            <MudTd Class="@(GetCellClass(context, MasterTable!.Data[0]))" Style="@(GetCellStyle(context, MasterTable!.Data[0]))">@Format(context, MasterTable!.Data[0][context])</MudTd>
-                                        </MudTr>
-                                    </ForIn>
+                                    <tbody>
+                                        <ForIn Items="MasterTable!.Columns">
+                                            <tr>
+                                                <th>@context.Header</th>
+                                                <td class="@(GetCellClass(context, MasterTable!.Data[0]))" style="@(GetCellStyle(context, MasterTable!.Data[0]))">@Format(context, MasterTable!.Data[0][context])</td>
+                                            </tr>
+                                        </ForIn>
+                                    </tbody>
                                 </MudSimpleTable>
                             </Then>
                             <Else>
-                                <MudTable Dense="true" Items="MasterTable!.Data" Striped="true" Bordered="true" FixedHeader="true">
+                                <MudTable Dense="true" Items="MasterTable!.Data" Striped="true" Bordered="true" FixedHeader="true" Breakpoint="Breakpoint.None">
                                     <HeaderContent>
                                         <ForIn Items="MasterTable!.Columns">
                                             <MudTh>@context.Header</MudTh>
@@ -70,16 +72,18 @@
                     <IfThenElse Condition="detail.IsTabular">
                         <Then>
                             <MudSimpleTable Dense="true" Striped="true" Bordered="true">
+                                <tbody>
                                 <ForIn Items="detail.Columns">
                                     <MudTr>
-                                        <MudTh>@context.Header</MudTh>
-                                        <MudTd Class="@(GetCellClass(context, detail.Data[0]))" Style="@(GetCellStyle(context, detail.Data[0]))">@Format(context, detail.Data[0][context])</MudTd>
+                                        <th>@context.Header</th>
+                                        <td class="@(GetCellClass(context, detail.Data[0]))" style="@(GetCellStyle(context, detail.Data[0]))">@Format(context, detail.Data[0][context])</td>
                                     </MudTr>
                                 </ForIn>
+                                </tbody>
                             </MudSimpleTable>
                         </Then>
                         <Else>
-                            <MudTable Dense="true" Items="detail.Data" Striped="true" Bordered="true">
+                            <MudTable Dense="true" Items="detail.Data" Striped="true" Bordered="true" Breakpoint="Breakpoint.None">
                                 <HeaderContent>
                                     <ForIn Items="detail.Columns">
                                         <MudTh>@context.Header</MudTh>

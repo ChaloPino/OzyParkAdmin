@@ -10,7 +10,7 @@ internal static partial class QueryLoggers
     [LoggerMessage(EventId = 1001, Level = LogLevel.Information, Message = "Se manejó exitosamente la consulta '{QueryName}'")]
     public static partial void LogQueryHandled(ILogger logger, string queryName);
 
-    [LoggerMessage(EventId = 1002, Level = LogLevel.Debug, Message = "Detalle del manejo de la consulta '{QueryName}': {Response}")]
+    [LoggerMessage(EventId = 1002, Level = LogLevel.Debug, Message = "Detalle del manejo de la consulta '{QueryName}': {@Response}")]
     public static partial void LogQueryHandledDetail(ILogger logger, string queryName, object response);
 
     [LoggerMessage(EventId = 1003, Level = LogLevel.Error, Message = "Hubo un problema al manejar la consulta '{QueryName}': {Failure}")]

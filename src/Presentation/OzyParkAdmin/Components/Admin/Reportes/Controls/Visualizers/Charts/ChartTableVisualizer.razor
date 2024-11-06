@@ -1,6 +1,6 @@
 ﻿@using OzyParkAdmin.Application.Reportes
 @inherits ReportVisualizerBase
-<MudTable T="DataInfo" Items="Data" Elevation="0" Dense="true" Striped="true" Bordered="true" Hover="true" FixedHeader="true" Height="@Height">
+<MudTable T="DataInfo" Items="Data" Elevation="0" Dense="true" Striped="true" Bordered="true" Hover="true" FixedHeader="true" Height="@Height" Breakpoint="Breakpoint.None">
     <HeaderContent>
         <ForIn Items="Columns" Context="column">
             <MudTh>@column.Header</MudTh>

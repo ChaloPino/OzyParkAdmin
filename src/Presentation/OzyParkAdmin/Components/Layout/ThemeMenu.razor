@@ -2,11 +2,13 @@
 @inject LayoutService LayoutService
 
 <MudTooltip Text="@ThemeText">
-    <MudMenu Color="Color.Inherit" Icon="@ThemeIcon"
-             AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomLeft">
+    <MudMenu Color="Color.Inherit" 
+             Icon="@ThemeIcon"
+             AnchorOrigin="Origin.BottomCenter"
+             TransformOrigin="Origin.BottomLeft">
+        <MudMenuItem Icon="@Icons.Material.Rounded.AutoMode" Disabled="LayoutService.CurrentModeIsSystem" OnClick="() => LayoutService.ChangeDarkLightModel(DarkLightMode.System)">Sistema</MudMenuItem>
         <MudMenuItem Icon="@Icons.Material.Outlined.DarkMode" Disabled="LayoutService.CurrentModeIsDark" OnClick="() => LayoutService.ChangeDarkLightModel(DarkLightMode.Dark)">Modo obscuro</MudMenuItem>
         <MudMenuItem Icon="@Icons.Material.Filled.LightMode" Disabled="LayoutService.CurrentModeIsLight" OnClick="() => LayoutService.ChangeDarkLightModel(DarkLightMode.Light)">Modo claro</MudMenuItem>
-        <MudMenuItem Icon="@Icons.Material.Rounded.AutoMode" Disabled="LayoutService.CurrentModeIsSystem" OnClick="() => LayoutService.ChangeDarkLightModel(DarkLightMode.System)">Sistema</MudMenuItem>
     </MudMenu>
 </MudTooltip>
 

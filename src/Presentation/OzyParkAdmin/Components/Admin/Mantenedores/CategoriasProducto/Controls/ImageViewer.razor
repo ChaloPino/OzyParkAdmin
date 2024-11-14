@@ -1,0 +1,61 @@
+﻿@using OzyParkAdmin.Infrastructure.CatalogoImagenes
+@inject ImagenService ImagenService
+@inject CatalogoImagenModelValidator Validator
+
+<MudForm Model="Imagen" Validation="Validator.ValidateValue">
+    <MudStack Style="width:100%" Class="@Class">
+        <MudText Typo="Typo.h6">@Title</MudText>
+        <MudPaper Elevation="2">
+            <MudToolBar Dense="true">
+                <MudTooltip Text="@(_mantenerProporcion ? "Mantiene proporción" : "No mantiene proporción")">
+                    <MudToggleIconButton @bind-Toggled="_mantenerProporcion" Icon="@Icons.Material.Outlined.ImageAspectRatio" ToggledIcon="@Icons.Material.Outlined.AspectRatio" />
+                </MudTooltip>
+                <MudDivider Vertical="true" FlexItem="true" Class="mr-4" />
+                <MudNumericField T="int" Label="Ancho" Value="_ancho" Variant="Variant.Text" ValueChanged="AnchoChanged" Margin="Margin.Dense" Immediate="true" Adornment="Adornment.End" AdornmentText="px" Class="mr-4" />
+                <MudNumericField T="int" Label="Ancho" Value="_alto" Variant="Variant.Text" ValueChanged="AltoChanged" Margin="Margin.Dense" Immediate="true" Adornment="Adornment.End" AdornmentText="px" />
+                <MudDivider Vertical="true" FlexItem="true" Class="ml-4" />
+                <MudTooltip Text="Restaurar tamaño">
+                    <MudIconButton Icon="@Icons.Material.Outlined.PhotoSizeSelectActual" Color="Color.Inherit" OnClick="Reset" />
+                </MudTooltip>
+            </MudToolBar>
+        </MudPaper>
+
+        <MudFileUpload T="IBrowserFile" @ref="fileUpload"
+                       Files="Imagen.File" FilesChanged="SetFile"
+                       For="() => Imagen.File" SuppressOnChangeWhenInvalid="true"
+                       InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
+                       InputStyle="opacity:0"
+                       @ondrop="@ClearDragClass"
+                       @ondragenter="@SetDragClass"
+                       @ondragleave="@ClearDragClass"
+                       @ondragend="@ClearDragClass">
+            <ActivatorContent>
+                <MudPaper Outlined="true" Class="@_dragClass">
+                    <IfThenElse Condition="string.IsNullOrEmpty(Imagen.Base64)">
+                        <Then>
+                            <MudText Typo="Typo.h6">
+                                Arrastre el archivo aquí o haga clic
+                            </MudText>
+                        </Then>
+                        <Else>
+                            <MudText Typo="Typo.h6">
+                                Arrastre el archivo aquí o haga clic para cambiar la imagen
+                            </MudText>
+                            <MudImage Src="@Imagen.Data" Elevation="2" Alt="@Imagen.Aka" />
+                        </Else>
+                    </IfThenElse>
+                </MudPaper>
+            </ActivatorContent>
+        </MudFileUpload>
+        <MudToolBar Gutters="false" Class="relative d-flex justify-space-between align-center gap-x-4">
+            <MudTextField @bind-Value="Imagen.Aka" Variant="Variant.Outlined" Margin="Margin.Dense"
+                          Label="Nombre Imagen" For="() => Imagen.Aka" Immediate="true" Disabled="!Imagen.CanEditAka" />
+            <MudButton Color="Color.Primary"
+                       OnClick="@OpenFilePickerAsync"
+                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                       Variant="Variant.Filled">
+                Abrir archivos
+            </MudButton>
+        </MudToolBar>
+    </MudStack>
+</MudForm>

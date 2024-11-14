@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto.Models;
+using OzyParkAdmin.Domain.CategoriasProducto;
+using OzyParkAdmin.Domain.Franquicias;
 using OzyParkAdmin.Domain.Productos;
+using System.Runtime.CompilerServices;
 using static MudBlazor.CategoryTypes;
 
 
@@ -10,12 +13,19 @@ namespace OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto.Controls
 
 public partial class CategoriaProductoEditDialog
 {
+    private const int OneInt = 1;
+    private const int MaxInt = int.MaxValue;
+
+    private MudForm form = default!;
+    private List<CategoriaProductoInfo> categorias = [];
+
     /// <summary>
     /// La Categoria a editar.
     /// </summary>
     [Parameter]
     public CategoriaProductoViewModel CategoriaProducto { get; set; } = new();
 
+    #region Parametros básicos para interactuar con el Modal 
     /// <summary>
     /// Función para guardar los cambios.
     /// </summary>
@@ -50,6 +60,20 @@ public partial class CategoriaProductoEditDialog
         IsOpen = isOpen;
         await IsOpenChanged.InvokeAsync(isOpen);
     }
+    #endregion
+
+
+    /// <summary>
+    /// Las franquicias para llenar el MudSelect del Modal Vienen como parametro del index.razor.
+    /// </summary>
+    [Parameter]
+    public List<FranquiciaInfo> Franquicias { get; set; } = [];
+
+    /// <summary>
+    /// Función para cargar las categorías.
+    /// </summary>
+    [Parameter]
+    public Func<int, Task<List<CategoriaProductoInfo>>> LoadCategorias { get; set; } = (_) => Task.FromResult(new List<CategoriaProductoInfo>());
 
     /// <summary>
     /// Al inicio se ejecuta esto para verificar si debe o no mostar el modal y hacer carga de datos si se necesitara
@@ -60,8 +84,21 @@ public partial class CategoriaProductoEditDialog
         if (IsOpen && CategoriaProducto?.IsNew == false && !CategoriaProducto.Loading)
         {
             CategoriaProducto.Loading = true;
-            //Aca hacer carga de datos o preprar informacion que se desplegara en el form
+            await OnLoadCategoriasAsync(CategoriaProducto.FranquiciaId);
+            PrepareCategoriaProducto();
             CategoriaProducto.Loading = false;
+        }
+    }
+
+    /// <summary>
+    /// Carga el Nombre completo del producto que se esta editando
+    /// </summary>
+    private void PrepareCategoriaProducto() 
+    {
+        string? nombreCompleto = categorias.Where(w => w.Id == CategoriaProducto!.Padre.Id).Select(s => s.NombreCompleto).FirstOrDefault();
+        if (!string.IsNullOrEmpty(nombreCompleto))
+        {
+            CategoriaProducto.Padre.NombreCompleto = nombreCompleto;
         }
     }
 
@@ -80,12 +117,7 @@ public partial class CategoriaProductoEditDialog
     /// </summary>
     private void Clean()
     {
-        /*
         categorias = [];
-        complementos = [];
-        _complementosSelecionados = [];
-        _complementosProducto = [];
-        */
     }
     /// <summary>
     /// Realizar validaciones y persistir los datos del formulario
@@ -93,8 +125,7 @@ public partial class CategoriaProductoEditDialog
     /// <returns></returns>
     private async Task CommitItemChangesAsync()
     {
-        throw new NotImplementedException();
-        /*
+
         await form.Validate();
 
         if (!form.IsValid)
@@ -102,10 +133,9 @@ public partial class CategoriaProductoEditDialog
             return;
         }
 
-        if (Producto is not null && CommitChanges is not null)
+        if (CategoriaProducto is not null && CommitChanges is not null)
         {
-            Producto.Complementos = [.. _complementosProducto];
-            bool result = await CommitChanges(Producto);
+            bool result = await CommitChanges(CategoriaProducto);
 
             if (result)
             {
@@ -113,6 +143,26 @@ public partial class CategoriaProductoEditDialog
                 Clean();
             }
         }
-        */
+    }
+
+    private string GetFranquicia(int franquiciaId)
+    {
+        return Franquicias.Find(x => x.Id == franquiciaId)?.Nombre ?? "Seleccione franquicia";
+    }
+
+    private async Task FranquiciaChanged(int franquiciaId)
+    {
+        CategoriaProducto.FranquiciaId = franquiciaId;
+        CategoriaProducto.Loading = true;
+        await OnLoadCategoriasAsync(franquiciaId);
+        CategoriaProducto.Loading = false;
+    }
+
+    private async Task OnLoadCategoriasAsync(int franquiciaId)
+    {
+        if (LoadCategorias is not null)
+        {
+            categorias = await LoadCategorias(franquiciaId);
+        }
     }
 }

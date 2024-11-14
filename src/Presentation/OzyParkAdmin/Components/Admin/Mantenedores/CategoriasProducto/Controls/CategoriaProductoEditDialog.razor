@@ -1,11 +1,46 @@
-﻿<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+﻿@using OzyParkAdmin.Domain.CategoriasProducto
+@inject CategoriaProductoViewModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
         <IfThen Condition="CategoriaProducto.Loading">
             <Then>
                 <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
             </Then>
         </IfThen>
-        Esta página no hace nada... nada! nada!!
+        <MudForm Model="CategoriaProducto" @ref="form" Validation="Validator.ValidateValue" ValidationDelay="0">
+            <MudStack Row="true" Class="mt-4">
+                <MudSelect T="int" Value="CategoriaProducto.FranquiciaId" ValueChanged="FranquiciaChanged" Variant="Variant.Outlined" Margin="Margin.Dense"
+                       Label="Franquicia" Required="true" ToStringFunc="GetFranquicia"
+                       Disabled="!CategoriaProducto.IsNew" For="() => CategoriaProducto.FranquiciaId">
+                <ForIn Items="Franquicias" Context="franquicia">
+                    <MudSelectItem T="int" Value="franquicia.Id"></MudSelectItem>
+                </ForIn>
+                </MudSelect>
+                <MudTextField @bind-Value="CategoriaProducto.Aka" Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Label="Aka" For="() => CategoriaProducto.Aka" />
+                <MudTextField @bind-Value="CategoriaProducto.Nombre" Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Label="Nombre" For="() => CategoriaProducto.Nombre" />
+            </MudStack>
+            <MudStack Row="true" Class="mt-4">
+                <MudSelect @bind-Value="CategoriaProducto.Padre" Variant="Variant.Outlined" Margin="Margin.Dense"
+                           Label="Categoria Padre" ToStringFunc="(x) => x?.NombreCompleto" Dense="true"
+                           For="() => CategoriaProducto.Padre" >
+                <ForIn Items="categorias" Context="categoria">
+                    <MudSelectItem T="CategoriaProductoInfo" Value="categoria"></MudSelectItem>
+                </ForIn>
+                </MudSelect>
+                <MudSwitch @bind-Value="CategoriaProducto.EsFinal" Label="Es Final" Color="Color.Primary" Class="mt-4" />
+                <MudNumericField @bind-Value="CategoriaProducto.Orden" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                Label="Orden" For="() => CategoriaProducto.Orden"
+                                Min="OneInt" Max="MaxInt" />
+                <MudSwitch @bind-Value="CategoriaProducto.EsTop" Label="Es Top" Color="Color.Primary" Class="mt-4" />
+                <MudNumericField T="Int16" @bind-Value="CategoriaProducto.Nivel" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                 Label="Nivel" For="() => CategoriaProducto.Nivel"
+                                 Min="1" Max="Int16.MaxValue" />
+                <MudSwitch @bind-Value="CategoriaProducto.PrimeroProductos" Label="Mostrar productos primero" Color="Color.Primary" Class="mt-4" />
+            </MudStack>
+            <ImageViewer Imagen="CategoriaProducto.Imagen" Class="mt-4" />
+        </MudForm>
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>

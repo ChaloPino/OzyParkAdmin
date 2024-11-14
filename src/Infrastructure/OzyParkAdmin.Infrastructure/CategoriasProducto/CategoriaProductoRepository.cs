@@ -20,6 +20,7 @@ namespace OzyParkAdmin.Infrastructure.CategoriasProducto;
 /// <param name="context">El <see cref="OzyParkAdminContext"/>.</param>
 public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : Repository<CategoriaProducto>(context), ICategoriaProductoRepository
 {
+
     /// <inheritdoc/>
     public async Task<CategoriaProducto?> FindByIdAsync(int id, CancellationToken cancellationToken) =>
         await EntitySet.AsSplitQuery().FirstOrDefaultAsync(x => x.Id == id, cancellationToken).ConfigureAwait(false);
@@ -115,5 +116,11 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
             Items = items,
         };
 
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> ExistAkaAsync(int categoriaProductoId, int franquiciaId, string? aka, CancellationToken cancellationToken)
+    {
+        return await EntitySet.AnyAsync(x => x.FranquiciaId == franquiciaId && x.Aka == aka && x.Id != categoriaProductoId, cancellationToken);
     }
 }

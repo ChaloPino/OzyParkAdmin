@@ -13,12 +13,12 @@ public sealed class CategoriaProductoViewModel
     /// <summary>
     /// El id de la categoría del producto.
     /// </summary>
-    public int Id { get; init; }
+    public int Id { get; set; }
 
     /// <summary>
     /// El id de la franquicia.
     /// </summary>
-    public int FranquiciaId { get; init; }
+    public int FranquiciaId { get; set; }
 
     /// <summary>
     /// El aka de la categoria de producto.
@@ -48,7 +48,7 @@ public sealed class CategoriaProductoViewModel
     /// <summary>
     /// La imágen asociada a la categoría de producto.
     /// </summary>
-    public CatalogoImagenModel Imagen { get; set; } = default!;
+    public CatalogoImagenModel Imagen { get; set; } = new();
 
     /// <summary>
     /// El orden de despliegue de la categoría de producto.
@@ -121,4 +121,58 @@ public sealed class CategoriaProductoViewModel
     /// </summary>
     internal bool Loading { get; set; }
     #endregion
+
+
+    /// <summary>
+    /// Transforma este objetco de FullInfo a ViewModel
+    /// </summary>
+    /// <param name="fullInfo"></param>
+    internal void Save(CategoriaProductoFullInfo fullInfo)
+    {
+        Aka = fullInfo.Aka;
+        CajasAsignadas = fullInfo.CajasAsignadas;
+        CanalesVenta = fullInfo.CanalesVenta;
+        EsActivo = fullInfo.EsActivo;
+        EsFinal = fullInfo.EsFinal;
+        EsTop = fullInfo.EsTop;
+        FechaCreacion = fullInfo.FechaCreacion;
+        FranquiciaId = fullInfo.FranquiciaId;
+        Hijos = fullInfo.Hijos;
+        Id = fullInfo.Id;
+        Imagen = fullInfo.Imagen.ToModel();
+        Nivel = fullInfo.Nivel;
+        Nombre = fullInfo.Nombre;
+        NombreCompleto = fullInfo.NombreCompleto;
+        Orden = fullInfo.Orden;
+        Padre = fullInfo.Padre.ToModelPadre();
+        PrimeroProductos = fullInfo.PrimeroProductos;
+        UltimaModificacion = fullInfo.UltimaModificacion;
+        UsuarioCreacion = fullInfo.UsuarioCreacion;
+        UsuarioModificacion = fullInfo.UsuarioModificacion;
+    }
+
+    internal void Update(CategoriaProductoViewModel categoriaProducto)
+    {
+        Aka = categoriaProducto.Aka;
+        CajasAsignadas = categoriaProducto.CajasAsignadas;
+        CanalesVenta = categoriaProducto.CanalesVenta;
+        EsActivo = categoriaProducto.EsActivo;
+        EsFinal = categoriaProducto.EsFinal;
+        EsTop = categoriaProducto.EsTop;
+        FechaCreacion = categoriaProducto.FechaCreacion;
+        FranquiciaId = categoriaProducto.FranquiciaId;
+        Hijos = categoriaProducto.Hijos;
+        Id = categoriaProducto.Id;
+        Imagen = categoriaProducto.Imagen;
+        Nivel = categoriaProducto.Nivel;
+        Nombre = categoriaProducto.Nombre;
+        NombreCompleto = categoriaProducto.NombreCompleto;
+        Orden = categoriaProducto.Orden;
+        Padre = categoriaProducto.Padre;
+        PrimeroProductos = categoriaProducto.PrimeroProductos;
+        UltimaModificacion = categoriaProducto.UltimaModificacion;
+        UsuarioCreacion = categoriaProducto.UsuarioCreacion;
+        UsuarioModificacion = categoriaProducto.UsuarioModificacion;
+    }
+
 }

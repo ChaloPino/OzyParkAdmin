@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using OzyParkAdmin.Components.Admin.Mantenedores.Productos.Models;
+using OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto.Models;
 
-namespace OzyParkAdmin.Components.Admin.Mantenedores.Productos.Controls;
+namespace OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto.Controls;
 
-/// <summary>
-/// El visualizador de imágenes.
-/// </summary>
 public partial class ImageViewer
 {
     private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mud-width-full mud-height-full";
@@ -31,7 +28,7 @@ public partial class ImageViewer
     /// El tipo del catálogo de imagen.
     /// </summary>
     [Parameter]
-    public string TipoCatalogo { get; set; } = "Productos";
+    public string TipoCatalogo { get; set; } = "Categorias";
 
     /// <summary>
     /// La clase de estilo.
@@ -114,4 +111,5 @@ public partial class ImageViewer
 
         await Resize();
     }
+
 }

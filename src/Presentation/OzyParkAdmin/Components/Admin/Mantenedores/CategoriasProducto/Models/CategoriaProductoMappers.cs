@@ -1,11 +1,10 @@
 ﻿using MudBlazor;
 using MudBlazor.Interfaces;
+using OzyParkAdmin.Application.CategoriasProducto.Create;
 using OzyParkAdmin.Application.CategoriasProducto.Search;
-using OzyParkAdmin.Components.Admin.Mantenedores.Productos.Models;
-using OzyParkAdmin.Components.Admin.Mantenedores.Servicios.Models;
+using OzyParkAdmin.Application.CategoriasProducto.Update;
 using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
-using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Shared;
 using System.Diagnostics;
@@ -142,4 +141,40 @@ internal static class CategoriaProductoMappers
         }
         return padre;
     }
+
+    public static CreateCategoriaProducto ToCreate(this CategoriaProductoViewModel categoriaProducto, ClaimsPrincipal user) =>
+    new(
+        categoriaProducto.FranquiciaId,
+        categoriaProducto.Aka,
+        categoriaProducto.Nombre,
+        categoriaProducto.Padre,
+        categoriaProducto.EsFinal,
+        categoriaProducto.Imagen.ToInfo(),
+        categoriaProducto.Orden,
+        categoriaProducto.EsTop,
+        categoriaProducto.Nivel,
+        categoriaProducto.PrimeroProductos,
+        user,
+        DateTime.Now,
+        user,
+        DateTime.Now);
+
+    public static UpdateCategoriaProducto ToUpdate(this CategoriaProductoViewModel categoriaProducto, ClaimsPrincipal user) =>
+    new(
+        categoriaProducto.Id,
+        categoriaProducto.FranquiciaId,
+        categoriaProducto.Aka,
+        categoriaProducto.Nombre,
+        categoriaProducto.Padre,
+        categoriaProducto.EsFinal,
+        categoriaProducto.Imagen.ToInfo(),
+        categoriaProducto.Orden,
+        categoriaProducto.EsTop,
+        categoriaProducto.Nivel,
+        categoriaProducto.PrimeroProductos,
+        user,
+        DateTime.Now);
+
+    private static CatalogoImagenInfo ToInfo(this CatalogoImagenModel imagen) =>
+        new() { Aka = imagen.Aka, Base64 = imagen.Base64, MimeType = imagen.MimeType, Tipo = imagen.Tipo };
 }

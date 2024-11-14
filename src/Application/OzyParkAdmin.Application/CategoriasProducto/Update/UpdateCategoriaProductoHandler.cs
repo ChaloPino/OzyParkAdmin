@@ -1,28 +1,32 @@
 ﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.CategoriasProducto.Create;
 using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CategoriasProducto;
-using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-
-namespace OzyParkAdmin.Application.CategoriasProducto.Create;
+namespace OzyParkAdmin.Application.CategoriasProducto.Update;
 
 /// <summary>
-/// El manejador de <see cref="CreateCategoriaProducto"/>
+/// El manejador de <see cref="UpdateCategoriaProductoHandler"/>
 /// </summary>
-public sealed class CreateCategoriaProductoHandler : CommandHandler<CreateCategoriaProducto, CategoriaProductoFullInfo>
+public sealed class UpdateCategoriaProductoHandler : CommandHandler<UpdateCategoriaProducto, CategoriaProductoFullInfo>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly CategoriaProductoManager _categoriaProductoManager;
 
     /// <summary>
-    /// Crea una nueva instancia de <see cref="CreateCategoriaProducto"/>
+    /// Modifica una instancia de <see cref="CreateCategoriaProducto"/>
     /// </summary>
     /// <param name="categoriaProductoManager">El <see cref="CategoriaProductoManager"/></param>
     /// <param name="context">El <see cref="IOzyParkAdminContext"/></param>
     /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
-    public CreateCategoriaProductoHandler(CategoriaProductoManager categoriaProductoManager, IOzyParkAdminContext context, ILogger<CreateCategoriaProductoHandler> logger)
+    public UpdateCategoriaProductoHandler(CategoriaProductoManager categoriaProductoManager, IOzyParkAdminContext context, ILogger<CreateCategoriaProductoHandler> logger)
         : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -33,11 +37,12 @@ public sealed class CreateCategoriaProductoHandler : CommandHandler<CreateCatego
     }
 
     /// <inheritdoc/>
-    protected override async Task<ResultOf<CategoriaProductoFullInfo>> ExecuteAsync(CreateCategoriaProducto command, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<CategoriaProductoFullInfo>> ExecuteAsync(UpdateCategoriaProducto command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var result = await _categoriaProductoManager.CreateAsync(
+        var result = await _categoriaProductoManager.UpdateAsync(
+            command.Id,
             command.FranquiciaId,
             command.Aka,
             command.Nombre,
@@ -48,21 +53,17 @@ public sealed class CreateCategoriaProductoHandler : CommandHandler<CreateCatego
             command.EsTop,
             command.Nivel,
             command.PrimeroProductos,
-            command.UsuarioCreacion.ToInfo(),
-            command.FechaCreacion,
             command.UsuarioModificacion.ToInfo(),
-            command.UltimaModificacion, 
+            command.UltimaModificacion,
             cancellationToken);
 
         return await result.MatchAsync(
             onSuccess: SaveAsync,
             onFailure: failure => failure);
     }
-
-
     private async Task<ResultOf<CategoriaProductoFullInfo>> SaveAsync(CategoriaProducto categoriaProducto, CancellationToken cancellationToken)
     {
-        await _context.AddAsync(categoriaProducto, cancellationToken);
+        _context.Update(categoriaProducto);
         await _context.SaveChangesAsync(cancellationToken);
 
         return categoriaProducto.ToFullInfo();

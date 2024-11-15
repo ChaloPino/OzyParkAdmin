@@ -3,7 +3,7 @@
 /// <summary>
 /// Contiene la información de una categoria de producto.
 /// </summary>
-public sealed class CategoriaProductoInfo //: IEquatable<CategoriaProductoInfo>
+public sealed class CategoriaProductoInfo
 {
     /// <summary>
     /// El id de la categoría de producto.

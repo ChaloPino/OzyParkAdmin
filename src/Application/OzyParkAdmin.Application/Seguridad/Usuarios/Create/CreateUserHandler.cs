@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
@@ -11,17 +12,21 @@ namespace OzyParkAdmin.Application.Seguridad.Usuarios.Create;
 public sealed class CreateUserHandler : CommandHandler<CreateUser, UsuarioFullInfo>
 {
     private readonly UsuarioService _usuarioCreator;
+    private readonly IUserEmailSender _emailSender;
 
     /// <summary>
     /// Crea una nueva instancia de <see cref="CreateUserHandler"/>.
     /// </summary>
     /// <param name="usuarioService">El <see cref="UsuarioService"/>.</param>
+    /// <param name="emailSender">El <see cref="IUserEmailSender"/>.</param>
     /// <param name="logger">El <see cref="ILogger{TCategoryName}"/>.</param>
-    public CreateUserHandler(UsuarioService usuarioService, ILogger<CreateUserHandler> logger)
+    public CreateUserHandler(UsuarioService usuarioService, IUserEmailSender emailSender, ILogger<CreateUserHandler> logger)
         : base(logger)
     {
         ArgumentNullException.ThrowIfNull(usuarioService);
+        ArgumentNullException.ThrowIfNull(emailSender);
         _usuarioCreator = usuarioService;
+        _emailSender = emailSender;
     }
 
     /// <inheritdoc/>
@@ -41,15 +46,16 @@ public sealed class CreateUserHandler : CommandHandler<CreateUser, UsuarioFullIn
             cancellationToken);
 
         // Aplica otra lógica de aplicación
-        // En este caso enviar correo electr
+        // En este caso enviar correo electrónicos
         return await result.MatchAsync(
-            onSuccess: SendEmailUsuarioAsync,
+            onSuccess: (usuario, token) => SendEmailUsuarioAsync(usuario, command.ConfirmationLink, token),
             onFailure: _ => _,
             cancellationToken: cancellationToken);
     }
 
-    private async Task<ResultOf<UsuarioFullInfo>> SendEmailUsuarioAsync(UsuarioFullInfo usuario, CancellationToken cancellationToken)
+    private async Task<ResultOf<UsuarioFullInfo>> SendEmailUsuarioAsync(UsuarioFullInfo usuarioInfo, string confirmationLink, CancellationToken cancellationToken)
     {
-        return await Task.FromResult(usuario);
+        await _emailSender.SendEmailConfirmationToken(usuarioInfo.UserName, confirmationLink, cancellationToken);
+        return usuarioInfo;
     }
 }

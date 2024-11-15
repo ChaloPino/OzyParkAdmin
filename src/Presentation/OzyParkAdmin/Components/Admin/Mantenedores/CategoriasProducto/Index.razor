@@ -8,7 +8,7 @@
 <MudText Typo="Typo.h4">Categoria de Productos</MudText>
 
 <MudDataGrid @ref="dataGrid" T="CategoriaProductoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
-             ServerData="SearchCategoriaServiciosAsync" SortMode="SortMode.Multiple"
+             ServerData="SearchCategoriaServiciosAsync" SortMode="SortMode.Multiple" Dense="true"
              Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
              Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
@@ -17,18 +17,128 @@
         <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddCategoriaProductoAsync">Nueva Categoria</MudButton>
     </ToolBarContent>
     <Columns>
+        <HierarchyColumn T="CategoriaProductoViewModel" Hideable="false" />
+        <PropertyColumn Property="x => x.NombreCompleto" Groupable="false" Title="Nombre Completo" Sortable="false"></PropertyColumn>
         <PropertyColumn Property="x => x.Aka" Title="Aka" Groupable="false" Hideable="false">
             <CellTemplate>
                 <MudHighlighter Text="@context.Item.Aka" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Nombre" Groupable="false" Title="Nombre">
+        <PropertyColumn Property="x => x.Nombre" Groupable="false" Title="Nombre" Hideable="false">
             <CellTemplate>
                 <MudHighlighter Text="@context.Item.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
         </PropertyColumn>
+        <PropertyColumn Property="x => x.Orden" Title="Orden" Hidden="true"></PropertyColumn>
+        <PropertyColumn Property="x => x.Nivel" Title="Nivel" Hidden="true"></PropertyColumn>
+        <PropertyColumn Property="x => x.EsFinal" Title="Es Final">
+            <CellTemplate>
+                <StateControl State="@context.Item.EsFinal" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.EsActivo" Editable="false" Title="Estado">
+            <CellTemplate>
+                <StateControl State="@context.Item.EsActivo" CanChangeStatus="true" TrueLabel="Habilitado" FalseLabel="Deshabilitado"
+                              StateChanged="async (esActivo) => await SaveEsActivoAsync(context.Item, esActivo)" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.UsuarioCreacion.UserName" Groupable="false" Title="Usuario Creacion" Hidden="true">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.UsuarioCreacion.UserName" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.FechaCreacion" Title="Fecha Creacion" Hidden="true"></PropertyColumn>
+        <PropertyColumn Property="x => x.UsuarioModificacion.UserName" Groupable="false" Title="Usuario Modificación">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.UsuarioModificacion.UserName" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.UltimaModificacion" Format="dd-MM-yyyy" Title="Ultima Modificación"></PropertyColumn>
+        <PropertyColumn Property="x => x.Padre.Nombre" Title="Categoria Padre" Hidden="true" Grouping="true"></PropertyColumn>
+        <PropertyColumn Property="x => x.EsTop" Title="Es Top" Hidden="true">
+            <CellTemplate>
+                <StateControl State="@context.Item.EsTop" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.PrimeroProductos" Title="Primero Productos" Hidden="true">
+            <CellTemplate>
+                <StateControl State="@context.Item.PrimeroProductos" />
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn Hideable="false" Groupable="false" Filterable="false" Sortable="false">
+            <CellTemplate>
+                <div class="d-flex justify-end">
+                    <MudTooltip Text="Editar">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEditingAsync(context)" />
+                    </MudTooltip>
+                    <MudTooltip Text="Asignar Canales de Venta">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.AutoAwesomeMotion" OnClick="async () => await ShowCanalesVentaAsync(context)" />
+                    </MudTooltip>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
     </Columns>
+    <ChildRowContent>
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">@context.Item.Nombre</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <div class="mud-card-media">
+                <MudImage Src="@context.Item.Imagen.Data" Height="200" Width="200" Alt="@context.Item.Imagen.Aka" />
+            </div>
+            <MudCardContent>
+                <MudSimpleTable Style="max-width: 50%;">
+                    <tr>
+                        <th style="text-align: start;">Nombre</th>
+                        <td>@context.Item.Nombre</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Aka</th>
+                        <td>@context.Item.Aka</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Nombre Completo</th>
+                        <td>@context.Item.NombreCompleto</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Orden</th>
+                        <td>@context.Item.Orden</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Nivel</th>
+                        <td>@context.Item.Nivel</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Usuario Creación</th>
+                        <td>@context.Item.UsuarioCreacion.UserName</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Fecha Creación</th>
+                        <td>@context.Item.FechaCreacion</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Usuario Modificación</th>
+                        <td>@context.Item.UsuarioModificacion.UserName</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: start;">Fecha Modificación</th>
+                        <td>@context.Item.UltimaModificacion</td>
+                    </tr>
+                </MudSimpleTable>
+            </MudCardContent>
+        </MudCard>
+    </ChildRowContent>
     <PagerContent>
         <MudDataGridPager T="CategoriaProductoViewModel" />
     </PagerContent>
 </MudDataGrid>
+
+<CascadingValue Value="true" Name="IsNested">
+    <CategoriaProductoEditDialog @bind-IsOpen="openEditing" CategoriaProducto="currentCategoriaProducto" Franquicias="franquicias"
+                                 LoadCategorias="LoadCategoriasAsync"
+                                 CommitChanges="SaveCategoriaProductoAsync" DialogOptions="DialogOptions" />
+    <CanalesVentaDialog @bind-IsOpen="openCanalesVenta" />
+
+</CascadingValue>

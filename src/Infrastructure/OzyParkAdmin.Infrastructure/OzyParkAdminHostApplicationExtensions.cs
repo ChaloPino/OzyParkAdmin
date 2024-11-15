@@ -27,6 +27,9 @@ using OzyParkAdmin.Domain.Franquicias;
 using System.Data.Common;
 using OzyParkAdmin.Infrastructure.Shared;
 using OzyParkAdmin.Domain.Shared;
+using Polly.Extensions.Http;
+using Polly.Timeout;
+using Polly;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -65,7 +68,19 @@ public static class OzyParkAdminHostApplicationExtensions
                    .RequireAuthenticatedUser()
                    .AddRequirements(new PermissionRequirement())));
 
-        builder.Services.AddSingleton<IEmailSender<Usuario>, IdentityNoOpEmailSender>();
+        builder.Services.AddSingleton<IEmailSender<Usuario>, IdentityEmailSender>();
+
+        var retryPolicy = HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .Or<TimeoutRejectedException>()
+            .RetryAsync(3);
+
+        var timeoutPolicity = Policy.TimeoutAsync<HttpResponseMessage>(10);
+
+        builder.Services.AddHttpClient<IEmailSender<Usuario>, IdentityEmailSender>(client =>
+            client.BaseAddress = new(builder.Configuration.GetConnectionString("NotificationAddress")!))
+            .AddPolicyHandler(retryPolicy)
+            .AddPolicyHandler(timeoutPolicity);
 
         builder.Services.AddMediator(configure => 
             configure.AddConsumers(typeof(IOzyParkAdminContext).Assembly));

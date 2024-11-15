@@ -1,7 +1,5 @@
-﻿using MassTransit.Mediator;
-using Microsoft.Extensions.Logging;
-using OzyParkAdmin.Application.OmisionesCupo.Create;
-using OzyParkAdmin.Application.Productos.Create;
+﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.Productos;
@@ -13,7 +11,7 @@ namespace OzyParkAdmin.Application.CategoriasProducto.Create;
 /// <summary>
 /// El manejador de <see cref="CreateCategoriaProducto"/>
 /// </summary>
-public sealed class CreateCategoriaProductoHandler : CommandHandler<CreateCategoriaProducto>
+public sealed class CreateCategoriaProductoHandler : CommandHandler<CreateCategoriaProducto, CategoriaProductoFullInfo>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly CategoriaProductoManager _categoriaProductoManager;
@@ -35,7 +33,7 @@ public sealed class CreateCategoriaProductoHandler : CommandHandler<CreateCatego
     }
 
     /// <inheritdoc/>
-    protected override async Task<SuccessOrFailure> ExecuteAsync(CreateCategoriaProducto command, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<CategoriaProductoFullInfo>> ExecuteAsync(CreateCategoriaProducto command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
@@ -50,9 +48,9 @@ public sealed class CreateCategoriaProductoHandler : CommandHandler<CreateCatego
             command.EsTop,
             command.Nivel,
             command.PrimeroProductos,
-            command.UsuarioCreacionInfo,
+            command.UsuarioCreacion.ToInfo(),
             command.FechaCreacion,
-            command.UsuarioModificacionInfo,
+            command.UsuarioModificacion.ToInfo(),
             command.UltimaModificacion, 
             cancellationToken);
 
@@ -62,11 +60,11 @@ public sealed class CreateCategoriaProductoHandler : CommandHandler<CreateCatego
     }
 
 
-    private async Task<SuccessOrFailure> SaveAsync(CategoriaProducto categoriaProducto, CancellationToken cancellationToken)
+    private async Task<ResultOf<CategoriaProductoFullInfo>> SaveAsync(CategoriaProducto categoriaProducto, CancellationToken cancellationToken)
     {
         await _context.AddAsync(categoriaProducto, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return new Success();
+        return categoriaProducto.ToFullInfo();
     }
 }

@@ -14,7 +14,7 @@ public interface IUsuarioRepository
     /// <param name="searchText">El texto de búsqueda.</param>
     /// <param name="centrosCosto">Una lista de centros de costos.</param>
     /// <param name="roles">Una lista de roles.</param>
-    /// <param name="filterExpressions"´>Las expresiones de filtrado.</param>
+    /// <param name="filterExpressions">Las expresiones de filtrado.</param>
     /// <param name="sortExpressions">La expresiones de ordenamiento.</param>
     /// <param name="page">La página actual.</param>
     /// <param name="pageSize">El tamaño de la página.</param>

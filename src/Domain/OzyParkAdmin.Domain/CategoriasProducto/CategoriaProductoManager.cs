@@ -3,7 +3,6 @@ using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace OzyParkAdmin.Domain.CategoriasProducto;
 
@@ -110,9 +109,80 @@ public sealed class CategoriaProductoManager : IBusinessLogic
                 usuarioModificacion,
                 ultimaModificacion
             );
-
     }
 
+    /// <summary>
+    /// Modifica una nueva Categoria de Producto
+    /// </summary>
+    /// <param name="Id"></param>
+    /// <param name="franquiciaId"></param>
+    /// <param name="aka"></param>
+    /// <param name="nombre"></param>
+    /// <param name="padreInfo"></param>
+    /// <param name="esFinal"></param>
+    /// <param name="imagenInfo"></param>
+    /// <param name="orden"></param>
+    /// <param name="esTop"></param>
+    /// <param name="nivel"></param>
+    /// <param name="primeroProductos"></param>
+    /// <param name="usuarioModificacionInfo"></param>
+    /// <param name="ultimaModificacion"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<ResultOf<CategoriaProducto>> UpdateAsync(
+        int id,
+        int franquiciaId,
+        string aka,
+        string nombre,
+        CategoriaProductoInfo padreInfo,
+        bool esFinal,
+        CatalogoImagenInfo imagenInfo,
+        int orden,
+        bool esTop,
+        short nivel,
+        bool primeroProductos,
+        UsuarioInfo usuarioModificacionInfo,
+        DateTime ultimaModificacion,
+        CancellationToken cancellationToken)
+    {
+
+        CategoriaProducto? categoriaProducto = await _categoriaProductoRepository.FindByIdAsync(id, cancellationToken);
+
+        if (categoriaProducto is null)
+        {
+            return new NotFound();
+        }
+
+        CategoriaProducto? categoriaProductoPadre = await _categoriaProductoRepository.FindByIdAsync(padreInfo.Id, cancellationToken);
+        if (categoriaProductoPadre is null)
+        {
+            return new ValidationError(nameof(Producto.Categoria), "No existe la categoría padre");
+        }
+
+        CatalogoImagen catalogoImagen = await _catalogoImagenService.FindOrCreateAsync(imagenInfo, cancellationToken);
+
+        Usuario? usuarioModificacion = await _usuarioRepository.FindByIdAsync(usuarioModificacionInfo.Id, cancellationToken);
+
+        if (usuarioModificacion is null)
+        {
+            return new ValidationError(nameof(Producto.UsuarioModificacion), "No existe el usuario (UsuarioModificacion).");
+        }
+
+        return categoriaProducto.Update(
+                aka,
+                nombre,
+                categoriaProductoPadre,
+                esFinal,
+                catalogoImagen,
+                orden,
+                esTop,
+                nivel,
+                primeroProductos,
+                usuarioModificacion,
+                ultimaModificacion
+            );
+
+    }
     private async Task<int> GenerateIdAysnc(CancellationToken cancellationToken)
     {
         int id = await _categoriaProductoRepository.MaxIdAsync(cancellationToken);

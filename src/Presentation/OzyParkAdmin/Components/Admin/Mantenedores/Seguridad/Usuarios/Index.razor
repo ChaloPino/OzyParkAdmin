@@ -18,17 +18,19 @@
 @inject IMediator Mediator
 @inject ISnackbar Snackbar
 @inject DialogOptions DialogOptions
+@inject NavigationManager NavigationManager
 <PageTitle>Usuarios</PageTitle>
 <MudText Typo="Typo.h4">Usuarios</MudText>
 
 <MudDataGrid @ref="dataGrid" T="UsuarioViewModel" ReadOnly="false" Striped="true" Hover="true"
-             ServerData="SearchUsuariosAsync" SortMode="SortMode.Multiple" 
+             Loading="loading"
+             ServerData="SearchUsuariosAsync" SortMode="SortMode.Multiple"
              Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu"
              EditMode="DataGridEditMode.Form" EditTrigger="DataGridEditTrigger.Manual" EditDialogOptions="DialogOptions"
              CanceledEditingItem="CancelEditing" CommittedItemChanges="SaveUsuarioAsync">
     <ToolBarContent>
         <MudSpacer />
-        <SearchControl @bind-SearchText="searchText" /> 
+        <SearchControl @bind-SearchText="searchText" />
         <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddUsuarioAsync">Nuevo usuario</MudButton>
     </ToolBarContent>
     <Columns>
@@ -82,9 +84,9 @@
         <PropertyColumn Property="x => x.IsLockedout" Title="Estado">
             <CellTemplate>
                 <StateControl State="context.Item.IsLockedout" StateChanged="async (lockout) => await ChangeStatusAsync(context, lockout)"
-                              TrueIcon="@Icons.Material.Filled.Lock" TrueColor="Color.Error" TrueLabel="Bloqueado"  
+                              TrueIcon="@Icons.Material.Filled.Lock" TrueColor="Color.Error" TrueLabel="Bloqueado"
                               FalseIcon="@Icons.Material.Outlined.LockOpen" FalseColor="Color.Success" FalseLabel="Desbloqueado"
-                              CanChangeStatus="true"/>
+                              CanChangeStatus="true" />
             </CellTemplate>
             <FilterTemplate>
                 <StateFilter FilterContext="context" TrueLabel="Bloqueado" FalseLabel="Desbloqueado" />
@@ -92,7 +94,18 @@
         </PropertyColumn>
         <TemplateColumn>
             <CellTemplate>
-                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="context.Actions.StartEditingItemAsync" />
+                <div class="d-flex justify-end">
+                    <MudTooltip Text="Editar">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="context.Actions.StartEditingItemAsync" />
+                    </MudTooltip>
+                    <IfThen Condition="!context.Item.EmailConfirmed">
+                        <Then>
+                            <MudTooltip Text="Enviar confirmación de correo">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Send" OnClick="() => SendConfirmationAsync(context.Item)" />
+                            </MudTooltip>
+                        </Then>
+                    </IfThen>
+                </div>
             </CellTemplate>
         </TemplateColumn>
     </Columns>

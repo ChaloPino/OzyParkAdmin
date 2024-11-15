@@ -1,7 +1,7 @@
 ﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
-using OzyParkAdmin.Domain.Seguridad.Usuarios;
+using System.Security.Claims;
 
 namespace OzyParkAdmin.Application.CategoriasProducto.Create;
 
@@ -18,9 +18,9 @@ namespace OzyParkAdmin.Application.CategoriasProducto.Create;
 /// <param name="EsTop"></param>
 /// <param name="Nivel"></param>
 /// <param name="PrimeroProductos"></param>
-/// <param name="UsuarioCreacionInfo"></param>
+/// <param name="UsuarioCreacion"></param>
 /// <param name="FechaCreacion"></param>
-/// <param name="UsuarioModificacionInfo"></param>
+/// <param name="UsuarioModificacion"></param>
 /// <param name="UltimaModificacion"></param>
 public sealed record CreateCategoriaProducto(
         int FranquiciaId,
@@ -33,9 +33,9 @@ public sealed record CreateCategoriaProducto(
         bool EsTop,
         short Nivel,
         bool PrimeroProductos,
-        UsuarioInfo UsuarioCreacionInfo,
+        ClaimsPrincipal UsuarioCreacion,
         DateTime FechaCreacion,
-        UsuarioInfo UsuarioModificacionInfo,
+        ClaimsPrincipal UsuarioModificacion,
         DateTime UltimaModificacion
-    ) : ICommand;
+    ) : ICommand<CategoriaProductoFullInfo>;
 

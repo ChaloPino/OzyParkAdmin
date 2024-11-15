@@ -16,6 +16,7 @@ using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Shared;
 using System.Security.Claims;
+using OzyParkAdmin.Application.Seguridad.Usuarios.Confirmation;
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.Seguridad.Usuarios;
 
@@ -31,6 +32,7 @@ public partial class Index
     private List<CentroCostoInfo> centrosCosto = [];
     private List<UsuarioRolModel> roles = [];
     private ObservableGridData<UsuarioViewModel> currentUsers = new();
+    private bool loading;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -100,7 +102,7 @@ public partial class Index
     private async Task SaveUsuarioAsync(UsuarioViewModel usuario)
     {
         IUserChangeable changeStatus = usuario.IsNew
-            ? usuario.ToCreate()
+            ? usuario.ToCreate(NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri)
             : usuario.ToUpdate();
 
         var result = await Mediator.SendRequest(changeStatus);
@@ -137,9 +139,25 @@ public partial class Index
 
         currentUser.FriendlyName = usuario.FriendlyName;
         currentUser.Email = usuario.Email;
+        currentUser.EmailConfirmed = usuario.EmailConfirmed;
         currentUser.IsLockedout = usuario.IsLockedout;
         currentUser.Roles = usuario.Roles.ToModel();
         currentUser.CentrosCosto = usuario.CentrosCosto;
         currentUser.Franquicias = usuario.Franquicias;
+    }
+
+    private async Task SendConfirmationAsync(UsuarioViewModel usuario)
+    {
+        loading = true;
+        var result = await Mediator.SendRequest(new ConfirmEmail(usuario.UserName, NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri));
+        result.Switch(
+            onSuccess: _ => AddSuccess(),
+            onFailure: failure => Snackbar.AddFailure(failure, "confirmar correo electrónico"));
+        loading = false;
+    }
+
+    private void AddSuccess()
+    {
+        Snackbar.Add("Se envió el correo para confirmar el correo electrónico", Severity.Info);
     }
 }

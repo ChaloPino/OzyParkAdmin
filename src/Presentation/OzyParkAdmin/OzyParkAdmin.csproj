@@ -57,6 +57,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Components\Admin\Mantenedores\EscenariosCupo\Controls\EscenarioCupoCreateDialog.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageVersion Update="Roslynator.Analyzers" Version="4.12.6" />
   </ItemGroup>
 

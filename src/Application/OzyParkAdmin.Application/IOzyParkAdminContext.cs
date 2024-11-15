@@ -1,6 +1,4 @@
-﻿using OzyParkAdmin.Domain.CuposFecha;
-
-namespace OzyParkAdmin.Application;
+﻿namespace OzyParkAdmin.Application;
 
 /// <summary>
 /// Representa el contexto de OzyParkAdmin.
@@ -285,4 +283,8 @@ public interface IOzyParkAdminContext
     /// </returns>
     Task BulkUpdateAsync<TEntity>(IEnumerable<TEntity> entities, CancellationToken cancellationToken)
         where TEntity : class;
+
+    Task BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+    Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 }

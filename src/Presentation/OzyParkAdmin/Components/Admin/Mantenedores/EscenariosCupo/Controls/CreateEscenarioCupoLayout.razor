@@ -1,0 +1,80 @@
+﻿@using MudBlazor
+@using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models
+@using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Validators
+@using OzyParkAdmin.Domain.CentrosCosto
+@using OzyParkAdmin.Domain.Zonas
+
+<MudForm @ref="form" Model="escenarioCupo" Validation="Validator.ValidateValue" ValidationDelay="0">
+    <MudGrid Spacing="1" Class="mt-4">
+        <MudItem xs="4">
+            <MudTextField @bind-Value="escenarioCupo.Nombre" Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Required="true" RequiredError="El nombre es requerido."
+                          Dense="true" Label="Nombre"></MudTextField>
+        </MudItem>
+        <MudItem xs="4">
+            <MudNumericField @bind-Value="escenarioCupo.MinutosAntes"
+                             Label="Holgura en minutos"
+                             Min="0" Max="int.MaxValue"
+                             Variant="Variant.Outlined"
+                             Margin="Margin.Dense"
+                             Immediate="true" />
+        </MudItem>
+    </MudGrid>
+    <MudGrid Spacing="1" Class="mt-4">
+        <MudItem xs="4">
+            <MudSelect @bind-Value="escenarioCupo.CentroCosto"
+                       Required="true" RequiredError="El Centro de Costo es requerido."
+                       Label="Centros de costo"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       ToStringFunc="x => x?.Descripcion">
+                <ForIn Items="CentrosCostos" Context="centroCosto">
+                    <MudSelectItem T="CentroCostoInfo" Value="centroCosto" />
+                </ForIn>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="4">
+            <MudSelect @bind-Value="escenarioCupo.Zona"
+                       Label="Zonas"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       Clearable="true"
+                       ToStringFunc="x => x?.Descripcion">
+                <MudSelectItem T="ZonaInfo" Value="@(null)">Sin Zona</MudSelectItem>
+                <ForIn Items="Zonas" Context="zona">
+                    <MudSelectItem T="ZonaInfo" Value="zona" />
+                </ForIn>
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+    <MudGrid Spacing="1" Class="mt-4">
+        <MudItem xs="4">
+            <MudSwitch Color="Color.Primary" @bind-Value="escenarioCupo.EsHoraInicio" T="bool">Controla hora de inicio</MudSwitch>
+        </MudItem>
+    </MudGrid>
+</MudForm>
+
+@code {
+    private MudForm form = default!;
+
+    [Parameter]
+    public EscenarioCupoValidator Validator { get; set; } = default!;
+
+    [Parameter]
+    public EscenarioCupoModel escenarioCupo { get; set; } = new();
+
+    [Parameter]
+    public List<CentroCostoInfo> CentrosCostos { get; set; } = new();
+
+    [Parameter]
+    public List<ZonaInfo> Zonas { get; set; } = new();
+
+    public async Task<bool> ValidateForm()
+    {
+        await form.Validate();
+        return form.IsValid;
+    }
+}

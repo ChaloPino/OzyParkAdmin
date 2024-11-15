@@ -33,6 +33,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OzyParkAdmin.UnionType.Generator", "src\BuildingBlocks\OzyParkAdmin.UnionType.Generator\OzyParkAdmin.UnionType.Generator.csproj", "{8128BB81-A0B2-42BF-8DBB-10B9A4456062}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5BEA5D19-8F12-40B9-8538-54F4FC429945}"
+	ProjectSection(SolutionItems) = preProject
+		EscenarioCupoPersistenceTests.cs = EscenarioCupoPersistenceTests.cs
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingBlocks", "{C0D5BC8F-D05D-42C3-BF0F-C04EEA02CDB9}"
 EndProject

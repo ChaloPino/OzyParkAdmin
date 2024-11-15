@@ -1,0 +1,81 @@
+﻿@page "/Mantenedores/EscenariosCupo"
+@using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Controls
+@inject IMediator Mediator
+@inject ISnackbar Snackbar
+@inject DialogOptions DialogOptions
+@inject IDialogService DialogService
+
+<PageTitle>Escenarios Cupos</PageTitle>
+<MudText Typo="Typo.h4">Escenarios Cupos</MudText>
+
+<MudDataGrid @ref="dataGrid" T="EscenariosCupo.Models.EscenarioCupoModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
+             ServerData="SearchEscenariosCupoAsync" SortMode="SortMode.Multiple" MultiSelection="true" Loading="loading"
+             @bind-SelectedItems="escenariosCupoToDelete"
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+    <ToolBarContent>
+        <MudSpacer />
+        <SearchControl @bind-SearchText="searchText" />
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddEscenarioCupo">Nuevo Escenario Cupo</MudButton>
+        <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Filled" Class="ml-3" Disabled="escenariosCupoToDelete.Count == 0" OnClick="DeleteEscenarioCupo">Eliminar Escenarios Cupos</MudButton>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="EscenariosCupo.Models.EscenarioCupoModel" Hideable="false" />
+        <PropertyColumn Property="x => x.Nombre" Title="Nombre">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.CentroCosto.Descripcion" Title="Centro de costo">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.CentroCosto.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Centro de costo de cupo" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Zona != null" Title="Zona">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Zona?.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.EsHoraInicio" Title="Controla hora de inicio" Hideable="false">
+            <CellTemplate>
+                <StateControl State="@context.Item.EsHoraInicio" CanChangeStatus="true" TrueLabel="Si" FalseLabel="No"
+                              StateChanged="async (esActivo) => await ChangeControlaHolgura(context.Item)" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.MinutosAntes" Title="Holgura en minutos" Hideable="false">
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.EsActivo" Title="Estado" Hideable="false">
+            <CellTemplate>
+                <StateControl State="@context.Item.EsActivo" CanChangeStatus="true" TrueLabel="Habilitado" FalseLabel="Deshabilitado"
+                              StateChanged="async (esActivo) => await ChangeStatusAsync(context.Item)" />
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn Hideable="false" Groupable="false" Filterable="false" Sortable="false">
+            <CellTemplate>
+                <div class="d-flex justify-end">
+                    <MudTooltip Text="Editar">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEditingAsync(context)" />
+                    </MudTooltip>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="EscenariosCupo.Models.EscenarioCupoModel" />
+    </PagerContent>
+</MudDataGrid>
+
+<CascadingValue Value="true" Name="IsNested">
+
+
+    <EscenarioCupoEditorDialog @bind-IsOpen="openEditing" CentrosCostos="centrosCosto" Zonas="zonas" Servicios="servicios" SelectedEscenarioCupo="currentEscenarioCupo"
+                               CommitChanges="UpdateEscenarioCupoAsync" DialogOptions="DialogOptions" ViewModel="viewModel" />
+
+    <EscenarioCupoCreateDialog @bind-IsOpen="openCreating" CentrosCostos="centrosCosto" Zonas="zonas" ViewModel="viewModel" Servicios="servicios"
+                               CommitChanges="SaveEscenarioCupoAsync" DialogOptions="DialogOptions" />
+
+
+</CascadingValue>

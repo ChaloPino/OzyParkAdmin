@@ -1,5 +1,6 @@
 ﻿using MudBlazor;
 using MudBlazor.Interfaces;
+using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models;
 using System.Collections.ObjectModel;
 
 namespace OzyParkAdmin.Shared;
@@ -48,6 +49,11 @@ internal class ObservableGridData<T> : GridData<T>
     public T? Find(Func<T, bool> predicate)
     {
         return ((ObservableCollection<T>)Items).FirstOrDefault(predicate);
+    }
+
+    public static implicit operator ObservableGridData<T>(EscenarioCupoModel v)
+    {
+        throw new NotImplementedException();
     }
 }
 

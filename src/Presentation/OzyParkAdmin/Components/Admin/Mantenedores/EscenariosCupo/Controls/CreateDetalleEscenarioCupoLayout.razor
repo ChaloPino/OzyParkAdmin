@@ -1,0 +1,269 @@
+﻿@using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models
+@using OzyParkAdmin.Domain.DetallesEscenariosCupos
+@using OzyParkAdmin.Domain.Servicios
+@using MudBlazor
+
+<MudGrid Spacing="1" Class="mt-4">
+    <MudItem xs="4">
+        <MudSelect @bind-SelectedValues="ServiciosSeleccionados"
+                   Disabled="IsEditMode"
+                   SelectAll="true"
+                   SelectAllText="Seleccionar todos"
+                   Label="Servicios"
+                   MultiSelection="true"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Dense="true"
+                   ToStringFunc="x => x?.Nombre"
+                   MultiSelectionTextFunc="ServiciosVentaDescriptions"
+                   Required="true"
+                   @onchange="OnDetalleChanged">
+            @foreach (var servicio in Servicios)
+            {
+                <MudSelectItem T="ServicioInfo" Value="servicio">@servicio.Nombre</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+
+    <MudItem xs="4">
+        <MudTimePicker @bind-Time="detalle.HoraMaximaVenta" Variant="Variant.Outlined" Margin="Margin.Dense" Required="true"
+                       Label="Hora máxima venta" For="() => detalle.HoraMaximaVenta" ImmediateText="true" @onchange="OnDetalleChanged" />
+    </MudItem>
+
+    <MudItem xs="4">
+        <MudTimePicker @bind-Time="detalle.HoraMaximaRevalidacion" Variant="Variant.Outlined" Margin="Margin.Dense" Required="true"
+                       Label="Hora máxima revalidación" For="() => detalle.HoraMaximaRevalidacion" ImmediateText="true" @onchange="OnDetalleChanged" />
+    </MudItem>
+
+    <MudItem xs="4">
+        <MudNumericField @bind-Value="detalle.TopeDiario"
+                         Label="Tope Diario"
+                         Min="0" Max="int.MaxValue"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense"
+                         @onchange="OnDetalleChanged" />
+    </MudItem>
+
+    <MudItem xs="4">
+        <MudSwitch Label="Usa tope en cupo" @bind-Checked="detalle.UsaTopeEnCupo" T="bool" Color="Color.Primary" Class="ml-5 mt-2" @onchange="OnDetalleChanged" />
+    </MudItem>
+
+    <MudItem xs="4">
+        <MudSwitch Label="Usa sobre cupo" @bind-Checked="detalle.UsaSobreCupo" T="bool" Color="Color.Primary" Class="ml-5 mt-2" @onchange="OnDetalleChanged" />
+    </MudItem>
+</MudGrid>
+
+<MudGrid Spacing="1" Class="mt-4">
+    <MudItem xs="3">
+        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(IsEditMode ? GuardarCambiosAsync : AgregarDetalle)" Disabled="!EsDetalleValido">
+            <MudIcon Icon="@Icons.Material.Filled.Add" /> @(IsEditMode ? "Guardar cambios" : "Agregar detalle")
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="CancelarEdicion" Disabled="!IsEditMode">
+            <MudIcon Icon="@Icons.Material.Filled.Close" /> Cancelar edición
+        </MudButton>
+    </MudItem>
+</MudGrid>
+
+<MudDivider Class="mt-5 mb-5" />
+
+<MudGrid Class="mt-4">
+    <MudItem xs="12" Class="d-flex justify-end">
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="EliminarSeleccionados" Disabled="DetallesSeleccionados.Count == 0">
+            <MudIcon Icon="@Icons.Material.Filled.Delete" /> Eliminar seleccionados
+        </MudButton>
+    </MudItem>
+</MudGrid>
+
+<MudTable Items="Detalles" Class="mt-4" @bind-SelectedItems="DetallesSeleccionados" MultiSelection="true" T="DetalleEscenarioCupoInfo">
+    <HeaderContent>
+        <MudTh>Servicio</MudTh>
+        <MudTh>Tope diario</MudTh>
+        <MudTh>Usa tope en cupo</MudTh>
+        <MudTh>Usa sobre cupo</MudTh>
+        <MudTh>Hora máxima venta</MudTh>
+        <MudTh>Hora máxima revalidación</MudTh>
+        <MudTh>Acciones</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Servicio.Nombre</MudTd>
+        <MudTd>@context.TopeDiario</MudTd>
+        <MudTd>@(context.UsaTopeEnCupo ? "Sí" : "No")</MudTd>
+        <MudTd>@(context.UsaSobreCupo ? "Sí" : "No")</MudTd>
+        <MudTd>@(context.HoraMaximaVenta.HasValue ? context.HoraMaximaVenta.Value.ToString(@"hh\:mm") : "-")</MudTd>
+        <MudTd>@(context.HoraMaximaRevalidacion.HasValue ? context.HoraMaximaRevalidacion.Value.ToString(@"hh\:mm") : "-")</MudTd>
+        <MudTd>
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditarDetalle(context)" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => EliminarDetalle(context)" />
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+
+
+@code {
+    [Inject] ISnackbar Snackbar { get; set; } = default!;
+
+    private DetalleEscenarioCupoInfo detalle = new();
+
+    private bool IsEditMode { get; set; }
+
+    private DetalleEscenarioCupoInfo? DetalleEnEdicion { get; set; }
+
+    [Parameter]
+    public EscenarioCupoModel? EscenarioSeleccionado { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnDetalleAgregado { get; set; }
+
+    [Parameter]
+    public List<DetalleEscenarioCupoInfo> Detalles { get; set; } = new();
+
+    [Parameter]
+    public IEnumerable<ServicioInfo> Servicios { get; set; } = default!;
+
+    private IEnumerable<ServicioInfo> ServiciosSeleccionados { get; set; } = new List<ServicioInfo>();
+
+    private HashSet<DetalleEscenarioCupoInfo> DetallesSeleccionados { get; set; } = new();
+
+    private bool TodosSeleccionados =>
+        DetallesSeleccionados.Count > 0 && DetallesSeleccionados.Count == Detalles.Count;
+
+    private bool EsIndeterminado =>
+        DetallesSeleccionados.Count > 0 && DetallesSeleccionados.Count < Detalles.Count;
+
+    private void AlternarSeleccion(DetalleEscenarioCupoInfo detalle, bool seleccionado)
+    {
+        if (seleccionado)
+        {
+            DetallesSeleccionados.Add(detalle);
+        }
+        else
+        {
+            DetallesSeleccionados.Remove(detalle);
+        }
+
+        StateHasChanged();
+    }
+
+    private void AlternarSeleccionTodos()
+    {
+        if (TodosSeleccionados)
+        {
+            DetallesSeleccionados.Clear();
+        }
+        else
+        {
+            DetallesSeleccionados = new HashSet<DetalleEscenarioCupoInfo>(Detalles);
+        }
+
+        StateHasChanged();
+    }
+
+
+    private static string ServiciosVentaDescriptions(List<string?>? servicios) => servicios switch
+    {
+        null => "Seleccione Servicios",
+        { Count: 0 } => "Seleccione Servicios",
+        { Count: 1 } => servicios[0] ?? string.Empty,
+        _ => $"{servicios.Count} servicios seleccionados",
+    };
+
+    private bool EsDetalleValido =>
+        ServiciosSeleccionados.Any() &&
+        detalle.TopeDiario > 0 &&
+        detalle.HoraMaximaVenta.HasValue &&
+        detalle.HoraMaximaRevalidacion.HasValue;
+
+    private void OnDetalleChanged() => StateHasChanged();
+
+    private void AgregarDetalle()
+    {
+        var duplicados = new List<string>();
+        foreach (var servicio in ServiciosSeleccionados)
+        {
+            if (!Detalles.Any(d => d.ServicioId == servicio.Id))
+            {
+                Detalles.Add(new DetalleEscenarioCupoInfo
+                    {
+                        EscenarioCupoId = EscenarioSeleccionado?.Id ?? 0,
+                        Servicio = servicio,
+                        ServicioId = servicio.Id,
+                        TopeDiario = detalle.TopeDiario,
+                        UsaTopeEnCupo = detalle.UsaTopeEnCupo,
+                        UsaSobreCupo = detalle.UsaSobreCupo,
+                        HoraMaximaRevalidacion = detalle.HoraMaximaRevalidacion,
+                        HoraMaximaVenta = detalle.HoraMaximaVenta
+                    });
+            }
+            else
+            {
+                duplicados.Add(servicio.Nombre);
+            }
+        }
+
+        if (duplicados.Any())
+        {
+            Snackbar.Add($"Los siguientes servicios ya existen: {string.Join(", ", duplicados)}", Severity.Warning);
+        }
+
+        OnDetalleAgregado.InvokeAsync();
+        detalle = new DetalleEscenarioCupoInfo();
+        ServiciosSeleccionados = Enumerable.Empty<ServicioInfo>();
+    }
+
+    private void EditarDetalle(DetalleEscenarioCupoInfo detalleAEditar)
+    {
+        DetalleEnEdicion = detalleAEditar;
+        detalle = new DetalleEscenarioCupoInfo
+            {
+                ServicioId = detalleAEditar.ServicioId,
+                TopeDiario = detalleAEditar.TopeDiario,
+                UsaTopeEnCupo = detalleAEditar.UsaTopeEnCupo,
+                UsaSobreCupo = detalleAEditar.UsaSobreCupo,
+                HoraMaximaVenta = detalleAEditar.HoraMaximaVenta,
+                HoraMaximaRevalidacion = detalleAEditar.HoraMaximaRevalidacion
+            };
+        ServiciosSeleccionados = Servicios.Where(s => s.Id == detalleAEditar.ServicioId).ToList();
+        IsEditMode = true;
+    }
+
+    private void GuardarCambiosAsync()
+    {
+        if (DetalleEnEdicion is not null)
+        {
+            DetalleEnEdicion.TopeDiario = detalle.TopeDiario;
+            DetalleEnEdicion.UsaTopeEnCupo = detalle.UsaTopeEnCupo;
+            DetalleEnEdicion.UsaSobreCupo = detalle.UsaSobreCupo;
+            DetalleEnEdicion.HoraMaximaVenta = detalle.HoraMaximaVenta;
+            DetalleEnEdicion.HoraMaximaRevalidacion = detalle.HoraMaximaRevalidacion;
+
+            Snackbar.Add("Detalle actualizado correctamente.", Severity.Success);
+        }
+
+        CancelarEdicion();
+    }
+
+    private void CancelarEdicion()
+    {
+        detalle = new DetalleEscenarioCupoInfo();
+        ServiciosSeleccionados = Enumerable.Empty<ServicioInfo>();
+        IsEditMode = false;
+    }
+
+    private void EliminarDetalle(DetalleEscenarioCupoInfo detalleAEliminar)
+    {
+        Detalles.Remove(detalleAEliminar);
+        Snackbar.Add("Detalle eliminado correctamente.", Severity.Info);
+    }
+
+    private void EliminarSeleccionados()
+    {
+        foreach (var detalle in DetallesSeleccionados.ToList())
+        {
+            Detalles.Remove(detalle);
+        }
+
+        DetallesSeleccionados.Clear();
+        Snackbar.Add("Detalles seleccionados eliminados correctamente.", Severity.Info);
+    }
+}

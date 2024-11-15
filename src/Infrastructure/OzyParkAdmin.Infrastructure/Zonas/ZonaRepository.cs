@@ -14,6 +14,10 @@ namespace OzyParkAdmin.Infrastructure.Zonas;
 public sealed class ZonaRepository(OzyParkAdminContext context) : Repository<Zona>(context), IZonaRepository
 {
     /// <inheritdoc/>
+    public async Task<Zona?> FindByIdAsync(int zonaId, CancellationToken cancellationToken)
+   => await EntitySet.Where(x => x.Id == zonaId).FirstOrDefaultAsync(cancellationToken);
+
+    /// <inheritdoc/>
     public async Task<IEnumerable<Zona>> FindByIdsAsync(int[] zonaIds, CancellationToken cancellationToken) =>
         await EntitySet.Where(x => zonaIds.Contains(x.Id)).ToListAsync(cancellationToken);
 

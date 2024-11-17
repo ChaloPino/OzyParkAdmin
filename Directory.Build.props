@@ -3,8 +3,8 @@
   <PropertyGroup Label="NuspecSettings">
     <Company>Bmore</Company>
     <Authors>$(Company)</Authors>
-    <Copyright>Copyright © $(Company) $([System.DateTime]::Now.Year)</Copyright>
-    <Trademark>$(Company)™</Trademark>
+    <Copyright>Copyright ï¿½ $(Company) $([System.DateTime]::Now.Year)</Copyright>
+    <Trademark>$(Company)ï¿½</Trademark>
     <Product>$(Company) Projects</Product>
   </PropertyGroup>
 

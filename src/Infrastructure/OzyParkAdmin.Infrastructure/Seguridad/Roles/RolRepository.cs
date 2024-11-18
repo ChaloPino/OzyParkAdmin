@@ -23,7 +23,7 @@ public class RolRepository(OzyParkAdminContext context) : Repository<Rol>(contex
     /// <inheritdoc/>
     public async Task<List<Rol>> ListChildRolesAsync(string[] roleNames, CancellationToken cancellationToken)
     {
-        IEnumerable<Rol> roles = await EntitySet.AsNoTracking().AsSplitQuery().Include(x => x.ChildRoles).Where(x => roleNames.Contains(x.Name)).ToListAsync(cancellationToken);
-        return roles.SelectMany(x => x.ChildRoles).DistinctBy(x => x.Name, StringComparer.OrdinalIgnoreCase).OrderBy(x => x.Name).ToList();
+        IEnumerable<Rol> roles = await EntitySet.AsNoTracking().AsSplitQuery().Include(x => x.ChildRoles).Where(x => Enumerable.Contains(roleNames, x.Name)).ToListAsync(cancellationToken);
+        return [.. roles.SelectMany(x => x.ChildRoles).DistinctBy(x => x.Name, StringComparer.OrdinalIgnoreCase).OrderBy(x => x.Name)];
     }
 }

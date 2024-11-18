@@ -61,8 +61,8 @@ internal static class ProductoMapper
         //se ordena por defecto por x.Categoria.Nombre dado que se agrupa por el nombre de la categoria,
         //sino aparece algunas categorias con menos productos a los que realmente tiene
         SortExpressionCollection<Producto> sortExpressions = state.SortDefinitions.Count == 0
-             ? SortExpressionCollection<Producto>.CreateDefault(x => x.Categoria.Nombre, false)
-             : new SortExpressionCollection<Producto>();
+             ? SortExpressionCollection<Producto>.CreateDefault(x => x.Sku, false)
+             : new();
 
         foreach (var sortDefinition in state.SortDefinitions)
         {

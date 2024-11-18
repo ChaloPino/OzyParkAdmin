@@ -60,8 +60,8 @@ internal static class ServicioMappers
     private static SortExpressionCollection<Servicio> ToSortExpressions(this GridState<ServicioViewModel> state)
     {
         SortExpressionCollection<Servicio> sortExpressions = state.SortDefinitions.Count == 0
-             ? SortExpressionCollection<Servicio>.CreateDefault(x => x.Nombre, false)
-             : new SortExpressionCollection<Servicio>();
+             ? SortExpressionCollection<Servicio>.CreateDefault(x => x.Aka, false)
+             : new();
 
         foreach (var sortDefinition in state.SortDefinitions)
         {

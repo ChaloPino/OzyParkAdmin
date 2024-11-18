@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MudBlazor;
+using Nextended.Core.Extensions;
 using OzyParkAdmin.Application.OmisionesCupo.Create;
 using OzyParkAdmin.Application.OmisionesCupo.Delete;
 using OzyParkAdmin.Application.OmisionesCupo.Search;
@@ -39,7 +40,9 @@ internal static class IgnoraEscenarioCupoExclusionMappers
 
     private static SortExpressionCollection<IgnoraEscenarioCupoExclusion> ToSortExpressions(this GridState<IgnoraEscenarioCupoExclusionViewModel> state)
     {
-        SortExpressionCollection<IgnoraEscenarioCupoExclusion> sortExpressions = new();
+        SortExpressionCollection<IgnoraEscenarioCupoExclusion> sortExpressions = state.SortDefinitions.Count == 0
+            ? SortExpressionCollection<IgnoraEscenarioCupoExclusion>.CreateDefault(x => x.EscenarioCupo.Nombre, false)
+            : new();
 
         foreach (SortDefinition<IgnoraEscenarioCupoExclusionViewModel> sortDefinition in state.SortDefinitions)
         {

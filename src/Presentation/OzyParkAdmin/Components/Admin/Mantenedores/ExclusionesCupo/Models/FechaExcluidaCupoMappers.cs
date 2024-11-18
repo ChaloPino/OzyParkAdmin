@@ -41,7 +41,9 @@ internal static class FechaExcluidaCupoMappers
 
     private static SortExpressionCollection<FechaExcluidaCupo> ToSortExpressions(this GridState<FechaExcluidaCupoViewModel> state)
     {
-        SortExpressionCollection<FechaExcluidaCupo> sortExpressions = new();
+        SortExpressionCollection<FechaExcluidaCupo> sortExpressions = state.SortDefinitions.Count == 0
+            ? SortExpressionCollection<FechaExcluidaCupo>.CreateDefault(x => x.CentroCosto.Descripcion, false)
+            : new();
 
         foreach (SortDefinition<FechaExcluidaCupoViewModel> sortDefinition in state.SortDefinitions)
         {

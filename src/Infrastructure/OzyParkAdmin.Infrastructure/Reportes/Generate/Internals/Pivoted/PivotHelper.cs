@@ -64,7 +64,7 @@ internal static class PivotHelper
             ? CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames
             : CultureInfo.CurrentCulture.DateTimeFormat.MonthNames;
 
-        return isAscending ? names : names.Reverse().ToArray();
+        return isAscending ? names : Enumerable.Reverse(names).ToArray();
     }
 
     public static object[] GetDimensionList(PivotedMember pivotedMember, DataTable dataTable, bool ordered)

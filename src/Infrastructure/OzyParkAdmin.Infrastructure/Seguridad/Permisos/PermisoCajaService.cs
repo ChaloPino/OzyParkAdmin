@@ -31,7 +31,7 @@ public sealed class PermisoCajaService : IInfrastructure
     {
         string[] roles = user.GetRoles();
         List<PermisoRolCaja> permisos = await _context.Set<PermisoRolCaja>()
-            .Where(x => roles.Contains(x.Rol.Name))
+            .Where(x => Enumerable.Contains(roles, x.Rol.Name))
             .ToListAsync(cancellationToken);
 
         CajaAcciones acciones = CajaAcciones.None;

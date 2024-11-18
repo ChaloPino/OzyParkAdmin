@@ -35,6 +35,7 @@ public static class UsuarioExtensions
             FriendlyName = usuario.FriendlyName,
             Rut = usuario.Rut,
             Email = usuario.Email,
+            EmailConfirmed = usuario.EmailConfirmed,
             IsLockedout = usuario.LockoutEndDateUtc is not null,
         };
 

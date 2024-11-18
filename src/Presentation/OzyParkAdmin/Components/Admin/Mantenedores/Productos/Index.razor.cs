@@ -60,6 +60,7 @@ public partial class Index
         await LoadReferencesAsync();
     }
 
+
     private async Task LoadReferencesAsync()
     {
         Task[] loadingTasks =

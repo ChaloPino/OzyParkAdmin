@@ -20,6 +20,7 @@ namespace OzyParkAdmin.Infrastructure.CategoriasProducto;
 /// <param name="context">El <see cref="OzyParkAdminContext"/>.</param>
 public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : Repository<CategoriaProducto>(context), ICategoriaProductoRepository
 {
+
     /// <inheritdoc/>
     public async Task<CategoriaProducto?> FindByIdAsync(int id, CancellationToken cancellationToken) =>
         await EntitySet.AsSplitQuery().FirstOrDefaultAsync(x => x.Id == id, cancellationToken).ConfigureAwait(false);
@@ -60,15 +61,16 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
         ArgumentNullException.ThrowIfNull(sortExpressions);
 
         //Ojo que AsNoTracking tiene un problema de recursividad. Por ejemplo para el Caso del "NombreComleto" que se conforma en forma recursiva.
-        IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery();
+        //> genera error IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery();
+        IQueryable<CategoriaProducto> query = EntitySet.AsNoTracking();
 
         if (searchText is not null)
         {
             query = query.Where(x =>
                 x.Aka.Contains(searchText) ||
                 x.Nombre.Contains(searchText) ||
-                x.UsuarioCreacion.FriendlyName.Contains(searchText) ||
-                x.UsuarioModificacion.FriendlyName.Contains(searchText));
+                x.UsuarioCreacion.UserName.Contains(searchText) ||
+                x.UsuarioModificacion.UserName.Contains(searchText));
         }
 
         query = filterExpressions.Where(query);
@@ -91,6 +93,8 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
             Nivel = x.Nivel,
             PrimeroProductos = x.PrimeroProductos,
             UsuarioCreacion = new UsuarioInfo { Id = x.UsuarioCreacion.Id, UserName = x.UsuarioCreacion.UserName, FriendlyName = x.UsuarioCreacion.FriendlyName },
+            FechaCreacion = x.FechaCreacion,
+            UsuarioModificacion = new UsuarioInfo { Id = x.UsuarioModificacion.Id, UserName = x.UsuarioModificacion.UserName, FriendlyName = x.UsuarioModificacion.FriendlyName },
             UltimaModificacion = x.UltimaModificacion,
             CajasAsignadas = x.CajasAsignadas,
             CanalesVenta = x.CanalesVenta,
@@ -112,5 +116,11 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
             Items = items,
         };
 
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> ExistAkaAsync(int categoriaProductoId, int franquiciaId, string? aka, CancellationToken cancellationToken)
+    {
+        return await EntitySet.AnyAsync(x => x.FranquiciaId == franquiciaId && x.Aka == aka && x.Id != categoriaProductoId, cancellationToken);
     }
 }

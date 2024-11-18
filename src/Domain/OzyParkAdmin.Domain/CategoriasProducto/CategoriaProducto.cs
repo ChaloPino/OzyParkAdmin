@@ -154,4 +154,32 @@ public sealed class CategoriaProducto
         return categoriaProducto;
 
     }
+
+    internal ResultOf<CategoriaProducto> Update(
+        string aka,
+        string nombre,
+        CategoriaProducto padre,
+        bool esFinal,
+        CatalogoImagen imagen,
+        int orden,
+        bool esTop,
+        short nivel,
+        bool primeroProductos,
+        Usuario usuarioModificacion,
+        DateTime ultimaModificacion)
+    {
+        Aka = aka;
+        Nombre = nombre;
+        Padre = padre;
+        EsFinal = esFinal;
+        Imagen = imagen;
+        Orden = orden;
+        EsTop = esTop;
+        Nivel = nivel;
+        PrimeroProductos = primeroProductos;
+        UsuarioModificacion = usuarioModificacion;
+        UltimaModificacion = ultimaModificacion;
+
+        return this;
+    }
 }

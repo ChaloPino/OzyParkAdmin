@@ -12,6 +12,7 @@ namespace OzyParkAdmin.Application.Seguridad.Usuarios.Create;
 /// <param name="Roles">Los roles asociados al usuario.</param>
 /// <param name="CentroCostos">Los centros de costo asociados al usuario.</param>
 /// <param name="Franquicias">Las franquicias asociadas al usuario.</param>
+/// <param name="ConfirmationLink">El link base para la confirmación.</param>
 public sealed record CreateUser(
     string UserName,
     string FriendlyName,
@@ -19,4 +20,5 @@ public sealed record CreateUser(
     string? Email,
     ImmutableArray<string> Roles,
     ImmutableArray<int> CentroCostos,
-    ImmutableArray<int> Franquicias) : IUserChangeable;
+    ImmutableArray<int> Franquicias,
+    string ConfirmationLink) : IUserChangeable;

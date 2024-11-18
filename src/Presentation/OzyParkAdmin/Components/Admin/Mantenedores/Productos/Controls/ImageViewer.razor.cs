@@ -31,7 +31,7 @@ public partial class ImageViewer
     /// El tipo del catálogo de imagen.
     /// </summary>
     [Parameter]
-    public string TipoCatalogo { get; set; } = "Producto";
+    public string TipoCatalogo { get; set; } = "Productos";
 
     /// <summary>
     /// La clase de estilo.

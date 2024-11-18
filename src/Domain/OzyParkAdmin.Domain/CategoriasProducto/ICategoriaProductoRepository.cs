@@ -44,4 +44,14 @@ public interface ICategoriaProductoRepository
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>La lista paginada de <see cref="CategoriaProductoFullInfo"/> que coinciden con los criterios de búsqueda.</returns>
     Task<PagedList<CategoriaProductoFullInfo>> SearchCategoriaProductoAsync(string? searchText, FilterExpressionCollection<CategoriaProducto> filterExpressions, SortExpressionCollection<CategoriaProducto> sortExpressions, int page, int pageSize, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Revisa si es que existe un producto con el mismo aka.
+    /// </summary>
+    /// <param name="categoriaProductoId">El id de la categoria de producto que se está revisado.</param>
+    /// <param name="franquiciaId">El id de la franquicia.</param>
+    /// <param name="aka">El aka a buscar.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns><c>true</c> si existe un producto con el mismo aka; en caso contrario, <c>false</c>.</returns>
+    Task<bool> ExistAkaAsync(int categoriaProductoId, int franquiciaId, string? aka, CancellationToken cancellationToken);
 }

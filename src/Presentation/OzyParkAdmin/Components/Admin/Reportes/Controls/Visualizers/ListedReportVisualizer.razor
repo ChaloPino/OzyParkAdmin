@@ -6,12 +6,12 @@
 <IfThen Condition="Loading == LoadingState.Loaded">
     <Then>
         <MudDataGrid T="DataInfo" ServerData="ServerData!" Items="Items" SortMode="SortMode" ReadOnly="true" Filterable="false" Groupable="false"
-                     Dense="true" Striped="true" Bordered="true" FixedHeader="true" Height="600px">
+                     Dense="true" Striped="true" Bordered="true" FixedHeader="true" Height="600px" Breakpoint="Breakpoint.None">
             <Columns>
                 <ForIn Items="Columns" Context="column">
                     <TemplateColumn Title="@column.Header" Sortable="column.CanSort" AggregateDefinition="GetAggregateDefinition(column)"
                                     CellClassFunc="(item) => GetCellClass(column, item)" CellStyleFunc="(item) => GetCellStyle(column, item)"
-                                    FooterClassFunc="(_) => GetFooterClass(column)">
+                                    FooterClassFunc="(_) => GetFooterClass(column)" SortBy="column.SortBy">
                         <CellTemplate>
                             @Format(column, context.Item[column])
                         </CellTemplate>

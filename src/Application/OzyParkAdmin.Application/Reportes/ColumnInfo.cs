@@ -94,6 +94,11 @@ public class ColumnInfo : IConditionable
     /// </summary>
     public ConditionalStyle? ErrorStyle { get; set; }
 
+    /// <summary>
+    /// La función de ordenamiento que puede tener.
+    /// </summary>
+    public Func<DataInfo, object?>? SortBy => CanSort ? (info) => info[this] : null;
+
 
     internal bool IsStringType()
         => Type == DbType.String

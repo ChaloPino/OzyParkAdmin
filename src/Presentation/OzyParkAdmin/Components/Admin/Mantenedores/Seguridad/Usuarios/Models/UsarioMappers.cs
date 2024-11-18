@@ -57,7 +57,9 @@ internal static class UsarioMappers
 
     private static SortExpressionCollection<Usuario> ToSortExpressions(this GridState<UsuarioViewModel> state)
     {
-        SortExpressionCollection<Usuario> sortExpressions = new();
+        SortExpressionCollection<Usuario> sortExpressions = state.SortDefinitions.Count == 0
+            ? SortExpressionCollection<Usuario>.CreateDefault(x => x.UserName, false)
+            : new();
 
         foreach (var sortDefinition in state.SortDefinitions)
         {

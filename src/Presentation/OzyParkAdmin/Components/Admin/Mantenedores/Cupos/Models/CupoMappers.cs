@@ -46,7 +46,9 @@ internal static class CupoMappers
 
     private static SortExpressionCollection<Cupo> ToSortExpressions(this GridState<CupoViewModel> state)
     {
-        SortExpressionCollection<Cupo> sortExpressions = new();
+        SortExpressionCollection<Cupo> sortExpressions = state.SortDefinitions.Count == 0
+            ? SortExpressionCollection<Cupo>.CreateDefault(x => x.FechaEfectiva, true)
+            : new();
 
         foreach (SortDefinition<CupoViewModel> sortDefinition in state.SortDefinitions)
         {

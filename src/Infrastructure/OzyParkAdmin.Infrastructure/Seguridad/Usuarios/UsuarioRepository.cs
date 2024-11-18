@@ -25,7 +25,7 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
 
         if (centrosCosto?.Length > 0)
         {
-            query = query.Where(usuario => usuario.CentrosCosto.Any(cc => centrosCosto.Contains(cc.CentroCostoId)));
+            query = query.Where(usuario => usuario.CentrosCosto.Any(cc => Enumerable.Contains(centrosCosto, cc.CentroCostoId)));
         }
 
         if (roles?.Length > 0)
@@ -33,7 +33,7 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
             query = (from user in query
                      from userRole in user.Roles
                      join rol in Context.Set<Rol>() on userRole.RoleId equals rol.Id
-                     where roles.Contains(rol.Name)
+                     where Enumerable.Contains(roles, rol.Name)
                      select user).Distinct();
         }
 
@@ -67,9 +67,9 @@ public sealed class UsuarioRepository(OzyParkAdminContext context) : Repository<
         int[] centrosCostoId = usuarios.SelectMany(x => x.CentrosCosto.Select(x => x.CentroCostoId)).ToArray();
         int[] franquiciasId = usuarios.SelectMany(x => x.Franquicias.Select(x => x.FranquiciaId)).ToArray();
 
-        List<Rol> roles = await Context.Set<Rol>().Where(x => rolesId.Contains(x.Id)).ToListAsync(cancellationToken);
-        List<CentroCosto> centrosCosto = await Context.Set<CentroCosto>().Where(x => centrosCostoId.Contains(x.Id)).ToListAsync(cancellationToken);
-        List<Franquicia> franquicias = await Context.Set<Franquicia>().Where(x => franquiciasId.Contains(x.Id)).ToListAsync(cancellationToken);
+        List<Rol> roles = await Context.Set<Rol>().Where(x => Enumerable.Contains(rolesId, x.Id)).ToListAsync(cancellationToken);
+        List<CentroCosto> centrosCosto = await Context.Set<CentroCosto>().Where(x => Enumerable.Contains(centrosCostoId, x.Id)).ToListAsync(cancellationToken);
+        List<Franquicia> franquicias = await Context.Set<Franquicia>().Where(x => Enumerable.Contains(franquiciasId, x.Id)).ToListAsync(cancellationToken);
 
         return usuarios.Select(x => ToUsuarioInfo(x, roles, centrosCosto, franquicias));
     }

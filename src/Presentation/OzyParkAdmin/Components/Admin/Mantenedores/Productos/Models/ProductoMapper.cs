@@ -60,7 +60,7 @@ internal static class ProductoMapper
     {
         SortExpressionCollection<Producto> sortExpressions = state.SortDefinitions.Count == 0
              ? SortExpressionCollection<Producto>.CreateDefault(x => x.Sku, false)
-             : new SortExpressionCollection<Producto>();
+             : new();
 
         foreach (var sortDefinition in state.SortDefinitions)
         {

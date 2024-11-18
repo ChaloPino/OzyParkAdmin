@@ -1,16 +1,14 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto.Models;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.Franquicias;
-using OzyParkAdmin.Domain.Productos;
-using System.Runtime.CompilerServices;
-using static MudBlazor.CategoryTypes;
-
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto.Controls;
 
+/// <summary>
+/// Dialogo para Crear y Editar una categoria
+/// </summary>
 public partial class CategoriaProductoEditDialog
 {
     private const int OneInt = 1;

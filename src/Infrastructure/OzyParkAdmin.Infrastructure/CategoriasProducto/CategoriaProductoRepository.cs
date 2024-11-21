@@ -71,6 +71,7 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
                 x.UsuarioCreacion.UserName.Contains(searchText) ||
                 x.UsuarioModificacion.UserName.Contains(searchText));
         }
+       
 
         query = filterExpressions.Where(query);
 

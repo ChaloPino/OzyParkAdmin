@@ -14,12 +14,8 @@ using OzyParkAdmin.Application.Franquicias.List;
 using OzyParkAdmin.Application.CategoriasProducto.List;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Application.Shared;
-using Azure;
-using OzyParkAdmin.Domain.Productos;
-using DocumentFormat.OpenXml.EMMA;
 using OzyParkAdmin.Application.CanalesVenta.List;
 using OzyParkAdmin.Domain.CanalesVenta;
-using OzyParkAdmin.Application.Productos.Find;
 using OzyParkAdmin.Application.CategoriasProducto.Find;
 using OzyParkAdmin.Application.CategoriasProducto.Assign;
 
@@ -231,5 +227,28 @@ public sealed partial class Index : IDisposable, IAsyncDisposable
                 AddFailure(failure, "cargar categorías de producto");
                 return [];
             });
+    }
+
+    private async Task<bool> SaveCanalesVentaAsync(CategoriaProductoViewModel categoriaProducto)
+    {
+        ResultOf<CategoriaProductoFullInfo> result = await Mediator.SendRequest(new AssignCanalesToCategoriaProducto(categoriaProducto.Id, [.. categoriaProducto.CanalesVenta]));
+        return result.Match(
+            onSuccess: info => UpdateCategoriaProducto(categoriaProducto, info),
+            onFailure: failure => AddFailure(failure, "asignar canales de venta"));
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+        }
     }
 }

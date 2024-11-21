@@ -114,7 +114,6 @@ public sealed class CategoriaProducto
     internal string ToNombreCompleto() =>
         Padre is not null ? $"{Padre.ToNombreCompleto()} > {Nombre}" : Nombre;
 
-
     internal static ResultOf<CategoriaProducto> Create(
         int id,
         int franquiciaId,

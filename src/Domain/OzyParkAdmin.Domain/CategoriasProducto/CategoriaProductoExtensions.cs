@@ -32,10 +32,10 @@ public static class CategoriaProductoExtensions
         };
 
     /// <summary>
-    /// Convierte el <paramref name="CategoriaProducto"/> en <see cref="CategoriaProductoFullInfo"/>.
+    /// Convierte el <paramref name="categoriaProducto"/> en <see cref="CategoriaProductoFullInfo"/>.
     /// </summary>
     /// <param name="categoriaProducto">La Categoria producto a convertir.</param>
-    /// <returns>El <see cref="CategoriaProductoFullInfo"/> convertido desde <paramref name="producto"/>.</returns>
+    /// <returns>El <see cref="CategoriaProductoFullInfo"/> convertido desde <paramref name="categoriaProducto"/>.</returns>
     public static CategoriaProductoFullInfo ToFullInfo(this CategoriaProducto categoriaProducto) =>
         new()
         {

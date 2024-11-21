@@ -13,16 +13,14 @@ using OzyParkAdmin.Domain.Franquicias;
 using OzyParkAdmin.Application.Franquicias.List;
 using OzyParkAdmin.Application.CategoriasProducto.List;
 using OzyParkAdmin.Domain.CategoriasProducto;
-using Azure;
-using OzyParkAdmin.Domain.Productos;
-using DocumentFormat.OpenXml.EMMA;
+using OzyParkAdmin.Application.Shared;
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto;
 
 /// <summary>
 /// Pagina del Mantenedor de Categoria Producto
 /// </summary>
-public partial class Index
+public sealed partial class Index : IDisposable, IAsyncDisposable
 {
     //TODO ver que pueda crear una categoria sin padre, es decir en el ComboBox de las Categprias debería tener un Text "Raiz" con Value: null
     private ClaimsPrincipal? user;
@@ -34,7 +32,10 @@ public partial class Index
 
     private bool openEditing;
     private bool openCanalesVenta;
+    private bool groupable = true;
+
     private CategoriaProductoViewModel? currentCategoriaProducto;
+    private CancellationTokenSource? _cancellationTokenSource;
 
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
@@ -43,7 +44,7 @@ public partial class Index
     /// <summary>
     /// Esto es lo primero que se ejecuta cuando llega a esta pagina
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Una tarea que contiene una operación asíncrona.</returns>
     protected override async Task OnInitializedAsync()
     {
         user = (await AuthenticationState).User;
@@ -57,8 +58,17 @@ public partial class Index
 
     private async Task<GridData<CategoriaProductoViewModel>> SearchCategoriaServiciosAsync(GridState<CategoriaProductoViewModel> state)
     {
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+        }
+
+#pragma warning disable S2930 // "IDisposables" should be disposed
+        _cancellationTokenSource = new CancellationTokenSource();
+#pragma warning restore S2930 // "IDisposables" should be disposed
+
         SearchCategoriaProducto searchServicios = state.ToSearch(user!, searchText);
-        var result = await Mediator.SendRequest(searchServicios);
+        var result = await Mediator.SendRequestWithCancellation(searchServicios, _cancellationTokenSource.Token);
         result.Switch(
             onSuccess: categorias => currentCategoriasProducto = categorias.ToGridData(dataGrid),
             onFailure: failure => AddFailure(failure, "buscar Categoria de Productos"));
@@ -66,9 +76,8 @@ public partial class Index
         if (state.SortDefinitions.Any() && dataGrid is not null)
         {
             //Si aplicaron algún ordenamiento ya no tiene sentido que se agrupe, ya que practicamente quedan agrupados con un solo item.
-            dataGrid.Groupable = false;
+            groupable = false;
         }
-
         return currentCategoriasProducto;
     }
 
@@ -173,5 +182,20 @@ public partial class Index
                 AddFailure(failure, "cargar categorías de producto");
                 return [];
             });
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+        }
     }
 }

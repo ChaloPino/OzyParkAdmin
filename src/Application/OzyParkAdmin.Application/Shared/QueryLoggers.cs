@@ -14,7 +14,7 @@ internal static partial class QueryLoggers
     public static partial void LogQueryHandledDetail(ILogger logger, string queryName, object response);
 
     [LoggerMessage(EventId = 1003, Level = LogLevel.Error, Message = "Hubo un problema al manejar la consulta '{QueryName}': {Failure}")]
-    public static partial void LogHandingQueryError(ILogger logger, string queryName, Failure failure);
+    public static partial void  LogHandingQueryError(ILogger logger, string queryName, Failure failure);
 
     [LoggerMessage(EventId = 1004, Level = LogLevel.Error, Message = "Hubo un problema al manejar la consulta '{QueryName}'. Ticket relacionado: {Ticket}")]
     public static partial void LogHandlingQueryException(ILogger logger, string queryName, string ticket, Exception exception);

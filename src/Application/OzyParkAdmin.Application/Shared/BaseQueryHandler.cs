@@ -1,7 +1,7 @@
 ﻿using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Domain.Shared;
-using System.Text;
+using System.Runtime.ExceptionServices;
 
 namespace OzyParkAdmin.Application.Shared;
 
@@ -39,11 +39,17 @@ public abstract class BaseQueryHandler<TQuery, TResponse> : MediatorRequestHandl
 
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var response = await ExecuteAsync(request, cancellationToken);
 
             return response.Match(
                 onSuccess: LogSuccess,
                 onFailure: LogFailure);
+        }
+        catch (OperationCanceledException ex)
+        {
+            ExceptionDispatchInfo.Capture(ex).Throw();
+            throw;
         }
         catch (Exception ex)
         {

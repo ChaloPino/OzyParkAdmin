@@ -1,8 +1,11 @@
 ﻿
+using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
+using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 
 namespace OzyParkAdmin.Domain.CategoriasProducto;
 
@@ -14,6 +17,7 @@ public sealed class CategoriaProductoManager : IBusinessLogic
     private readonly ICategoriaProductoRepository _categoriaProductoRepository;
     private readonly CatalogoImagenService _catalogoImagenService;
     private readonly IUsuarioRepository _usuarioRepository;
+    private readonly ICanalVentaRepository _canalVentaRepository;
 
     /// <summary>
     /// Crea una instancia de <see cref="CategoriaProductoManager"/>
@@ -21,19 +25,23 @@ public sealed class CategoriaProductoManager : IBusinessLogic
     /// <param name="categoriaProductoRepository"></param>
     /// <param name="catalogoImagenService"></param>
     /// <param name="usuarioRepository"></param>
+    /// <param name="canalVentaRepository"></param>
     public CategoriaProductoManager(
         ICategoriaProductoRepository categoriaProductoRepository,
         CatalogoImagenService catalogoImagenService,
-        IUsuarioRepository usuarioRepository
+        IUsuarioRepository usuarioRepository,
+        ICanalVentaRepository canalVentaRepository
         )
     {
         ArgumentNullException.ThrowIfNull(categoriaProductoRepository);
         ArgumentNullException.ThrowIfNull(catalogoImagenService);
         ArgumentNullException.ThrowIfNull(usuarioRepository);
+        ArgumentNullException.ThrowIfNull(canalVentaRepository);
 
         _categoriaProductoRepository = categoriaProductoRepository;
         _catalogoImagenService = catalogoImagenService;
         _usuarioRepository = usuarioRepository;
+        _canalVentaRepository = canalVentaRepository;
     }
 
     /// <summary>
@@ -189,4 +197,25 @@ public sealed class CategoriaProductoManager : IBusinessLogic
         return id + 1;
     }
 
+
+    /// <summary>
+    /// Asignar canales de venta a la Categoria de Producto
+    /// </summary>
+    /// <param name="categoriaProductoId">ID de la categoria de producto</param>
+    /// <param name="canalesVentaAsinar">Canales de venta a asignar</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<ResultOf<CategoriaProducto>> AssignCanalesVentaAsync(int categoriaProductoId, ImmutableArray<CanalVenta> canalesVentaAsinar, CancellationToken cancellationToken)
+    {
+        CategoriaProducto? categoriaProducto = await _categoriaProductoRepository.FindByIdAsync(categoriaProductoId, cancellationToken);
+
+        if (categoriaProducto is null)
+        {
+            return new NotFound();
+        }
+
+        IEnumerable<CanalVenta> canalesVenta = await _canalVentaRepository.FindByIdsAsync(canalesVentaAsinar.Select(s => s.Id).ToArray(), cancellationToken);
+
+        return categoriaProducto.AssignCanalesVenta(canalesVenta);
+    }
 }

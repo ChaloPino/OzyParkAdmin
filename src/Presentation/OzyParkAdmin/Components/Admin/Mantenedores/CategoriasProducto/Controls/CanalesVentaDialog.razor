@@ -1,6 +1,21 @@
-﻿@using OzyParkAdmin.Domain.CategoriasProducto
+﻿@using OzyParkAdmin.Domain.CanalesVenta
+@using OzyParkAdmin.Domain.CategoriasProducto
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
-        Modal de Canales de venta
+        <IfThen Condition="CategoriaProducto.Loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudSelect @bind-SelectedValues="canalesVentaSelected" Margin="Margin.Dense" MultiSelection="true"
+                   Label="Canales de venta asignados" ToStringFunc="x => x?.Nombre">
+            <ForIn Items="CanalesVenta" Context="canalVenta">
+                <MudSelectItem T="CanalVenta" Value="canalVenta" />
+            </ForIn>
+        </MudSelect>
     </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Class="px-10">Guardar</MudButton>
+    </DialogActions>
 </MudDialog>

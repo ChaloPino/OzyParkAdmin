@@ -2,7 +2,6 @@
 using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.EscenariosCupo;
-using OzyParkAdmin.Domain.OmisionesCupo;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
@@ -23,8 +22,8 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
 
     /// <inheritdoc/>
     public async Task<CategoriaProducto?> FindByIdAsync(int id, CancellationToken cancellationToken) =>
-        await EntitySet.AsSplitQuery().FirstOrDefaultAsync(x => x.Id == id, cancellationToken).ConfigureAwait(false);
-
+        await EntitySet.AsSplitQuery().Include("Imagen").FirstOrDefaultAsync(x => x.Id == id, cancellationToken).ConfigureAwait(false);
+        
     /// <inheritdoc/>
     public async Task<List<CategoriaProductoInfo>> ListByFranquiciaIdAsync(int franquiciaId, TipoCategoria tipoCategoria, CancellationToken cancellationToken)
     {
@@ -61,7 +60,7 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
         ArgumentNullException.ThrowIfNull(sortExpressions);
 
         //Ojo que AsNoTracking tiene un problema de recursividad. Por ejemplo para el Caso del "NombreComleto" que se conforma en forma recursiva.
-        //> genera error IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery();
+        //genera error IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery();
         IQueryable<CategoriaProducto> query = EntitySet.AsNoTracking();
 
         if (searchText is not null)

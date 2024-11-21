@@ -34,9 +34,9 @@
                 <StringGrouping Title="Centro de costo de cupo" GroupDefinition="context" />
             </GroupTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Zona != null" Title="Zona">
+        <PropertyColumn Property="x => x.ZonaDescripcion" Title="Zona">
             <CellTemplate>
-                <MudHighlighter Text="@context.Item.Zona?.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+                <MudHighlighter Text="@context.Item.ZonaDescripcion" CaseSensitive="false" HighlightedText="@searchText" />
             </CellTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.EsHoraInicio" Title="Controla hora de inicio" Hideable="false">

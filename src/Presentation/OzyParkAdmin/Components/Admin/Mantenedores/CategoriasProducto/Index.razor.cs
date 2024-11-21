@@ -14,6 +14,14 @@ using OzyParkAdmin.Application.Franquicias.List;
 using OzyParkAdmin.Application.CategoriasProducto.List;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Application.Shared;
+using Azure;
+using OzyParkAdmin.Domain.Productos;
+using DocumentFormat.OpenXml.EMMA;
+using OzyParkAdmin.Application.CanalesVenta.List;
+using OzyParkAdmin.Domain.CanalesVenta;
+using OzyParkAdmin.Application.Productos.Find;
+using OzyParkAdmin.Application.CategoriasProducto.Find;
+using OzyParkAdmin.Application.CategoriasProducto.Assign;
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.CategoriasProducto;
 
@@ -29,6 +37,7 @@ public sealed partial class Index : IDisposable, IAsyncDisposable
     private string? searchText;
 
     private List<FranquiciaInfo> franquicias = []; //Para mudSelect cuando se edite o cree nueva categoria
+    private List<CanalVenta> canalesVenta = []; //Para mudSelect cuando se agrega Canales de Venta
 
     private bool openEditing;
     private bool openCanalesVenta;
@@ -47,6 +56,29 @@ public sealed partial class Index : IDisposable, IAsyncDisposable
     /// <returns>Una tarea que contiene una operación asíncrona.</returns>
     protected override async Task OnInitializedAsync()
     {
+        Task[] loadingTasks = [LoadFranquiciasAsync(), LoadCanalesVentaAsync()];
+
+        await Task.WhenAll(loadingTasks);
+
+        //user = (await AuthenticationState).User;
+
+        ////Carga de listado de Franquicias
+        //var result = await Mediator.SendRequest(new ListFranquicias(user!));
+        //result.Switch(
+        //onSuccess: list => franquicias = list,
+        //onFailure: failure => AddFailure(failure, "cargar franquicias"));
+    }
+
+    private async Task LoadCanalesVentaAsync()
+    {
+        var result = await Mediator.SendRequest(new ListCanalesVenta());
+        result.Switch(
+            onSuccess: list => canalesVenta = list,
+            onFailure: failure => AddFailure(failure, "cargar canales de venta"));
+    }
+
+    private async Task LoadFranquiciasAsync()
+    {
         user = (await AuthenticationState).User;
 
         //Carga de listado de Franquicias
@@ -54,6 +86,21 @@ public sealed partial class Index : IDisposable, IAsyncDisposable
         result.Switch(
             onSuccess: list => franquicias = list,
             onFailure: failure => AddFailure(failure, "cargar franquicias"));
+    }
+
+    private async Task LoadCategoriaProductoDetalleAsync(CategoriaProductoViewModel categoriaProducto)
+    {
+        ResultOf<CategoriaProductoFullInfo> result = await Mediator.SendRequest(new FindCategoriaProducto(categoriaProducto.Id));
+        result.Switch(
+            onSuccess: info => LoadCategoriaProductoInfo(categoriaProducto, info),
+            onFailure: failure => AddFailure(failure, "cargar el detalle del producto"));
+
+    }
+
+    private static void LoadCategoriaProductoInfo(CategoriaProductoViewModel categoriaProducto, CategoriaProductoFullInfo categoriaProductoFullInfo)
+    {
+        //ni idea porque en productos ocupa algo así categoriaProducto.DetailLoaded = true; ,pero no veo que se ocupe en otro lado
+        categoriaProducto.CanalesVenta = [.. categoriaProductoFullInfo.CanalesVenta];
     }
 
     private async Task<GridData<CategoriaProductoViewModel>> SearchCategoriaServiciosAsync(GridState<CategoriaProductoViewModel> state)
@@ -95,12 +142,11 @@ public sealed partial class Index : IDisposable, IAsyncDisposable
 
     private Task ShowEditingAsync(CellContext<CategoriaProductoViewModel> context)
     {
+        DialogOptions.MaxWidth = MaxWidth.ExtraLarge;
         currentCategoriaProducto = dataGrid.CloneStrategy.CloneObject(context.Item);
 
         if (currentCategoriaProducto is not null)
         {
-            //TODO: por lo visto no es neceario cargar acá await LoadCategoriasAsync(currentCategoriaProducto.FranquiciaId);
-            //Revisar esto mismo cuando se edita el producto
             openEditing = true;
         }
         return Task.CompletedTask;
@@ -108,6 +154,7 @@ public sealed partial class Index : IDisposable, IAsyncDisposable
 
     private Task ShowCanalesVentaAsync(CellContext<CategoriaProductoViewModel> context)
     {
+        DialogOptions.MaxWidth = MaxWidth.Medium;
         currentCategoriaProducto = context.Item;
 
         if (currentCategoriaProducto is not null)
@@ -119,6 +166,8 @@ public sealed partial class Index : IDisposable, IAsyncDisposable
 
     private async Task<bool> SaveCategoriaProductoAsync(CategoriaProductoViewModel categoriaProducto)
     {
+        //TODO Cuando se edita una segunda vez la Categoria Padre se pierde de alguna manera.
+        //TODO relacionado a lo anterior: No debería aparecer su propia categoria en la selección padre
         if (categoriaProducto.IsNew)
         {
             var response = await Mediator.SendRequest(categoriaProducto.ToCreate(user!));
@@ -132,7 +181,7 @@ public sealed partial class Index : IDisposable, IAsyncDisposable
             var response = await Mediator.SendRequest(categoriaProducto.ToUpdate(user!));
             return response.Match(
                 onSuccess: fullInfo => UpdateCategoriaProducto(categoriaProducto, fullInfo),
-                onFailure: failure => AddFailure(failure, "Crear")
+                onFailure: failure => AddFailure(failure, "Modificar")
                 );
         }
     }
@@ -182,20 +231,5 @@ public sealed partial class Index : IDisposable, IAsyncDisposable
                 AddFailure(failure, "cargar categorías de producto");
                 return [];
             });
-    }
-
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        _cancellationTokenSource?.Cancel();
-    }
-
-    /// <inheritdoc/>
-    public async ValueTask DisposeAsync()
-    {
-        if (_cancellationTokenSource is not null)
-        {
-            await _cancellationTokenSource.CancelAsync();
-        }
     }
 }

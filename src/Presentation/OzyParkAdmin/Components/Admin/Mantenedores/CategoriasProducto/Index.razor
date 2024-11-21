@@ -139,6 +139,7 @@
     <CategoriaProductoEditDialog @bind-IsOpen="openEditing" CategoriaProducto="currentCategoriaProducto" Franquicias="franquicias"
                                  LoadCategorias="LoadCategoriasAsync"
                                  CommitChanges="SaveCategoriaProductoAsync" DialogOptions="DialogOptions" />
-    <CanalesVentaDialog @bind-IsOpen="openCanalesVenta" />
+    <CanalesVentaDialog @bind-IsOpen="openCanalesVenta" CanalesVenta="canalesVenta" CategoriaProducto="currentCategoriaProducto" CommitChanges="SaveCanalesVentaAsync"
+                        LoadCategoriaProductoDetalle="LoadCategoriaProductoDetalleAsync" DialogOptions="DialogOptions" />
 
 </CascadingValue>

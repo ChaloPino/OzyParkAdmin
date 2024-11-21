@@ -35,8 +35,13 @@ internal static class EscenarioCupoMappers
     {
         _ = filterDefinition.Column!.PropertyName switch
         {
+            nameof(EscenarioCupoModel.Id) => filterExpressions.Add(x => x.Id, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(EscenarioCupoModel.Nombre) => filterExpressions.Add(x => x.Nombre, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(EscenarioCupoModel.ZonaDescripcion) => filterExpressions.Add(x => x.Zona != null ? x.Zona.Descripcion : "Sin Zona", filterDefinition.Operator!, filterDefinition.Value),
+            nameof(EscenarioCupoModel.EsHoraInicio) => filterExpressions.Add(x => x.EsHoraInicio, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(EscenarioCupoModel.MinutosAntes) => filterExpressions.Add(x => x.MinutosAntes, filterDefinition.Operator!, filterDefinition.Value),
+            nameof(EscenarioCupoModel.EsActivo) => filterExpressions.Add(x => x.EsActivo, filterDefinition.Operator!, filterDefinition.Value),
             "CentroCosto.Descripcion" => filterExpressions.Add(x => x.CentroCosto.Descripcion, filterDefinition.Operator!, filterDefinition.Value),
-            "Zona.Descripcion" => filterExpressions.Add(x => x.Zona.Descripcion, filterDefinition.Operator!, filterDefinition.Value),
             _ => throw new UnreachableException(),
         };
     }
@@ -57,11 +62,17 @@ internal static class EscenarioCupoMappers
     {
         _ = sortDefinition.SortBy switch
         {
+            nameof(EscenarioCupoModel.Id) => sortExpressions.Add(x => x.Id, sortDefinition.Descending),
+            nameof(EscenarioCupoModel.Nombre) => sortExpressions.Add(x => x.Nombre, sortDefinition.Descending),
+            nameof(EscenarioCupoModel.ZonaDescripcion) => sortExpressions.Add(x => x.Zona != null ? x.Zona.Descripcion : "Sin Zona", sortDefinition.Descending),
+            nameof(EscenarioCupoModel.EsHoraInicio) => sortExpressions.Add(x => x.EsHoraInicio, sortDefinition.Descending),
+            nameof(EscenarioCupoModel.MinutosAntes) => sortExpressions.Add(x => x.MinutosAntes, sortDefinition.Descending),
+            nameof(EscenarioCupoModel.EsActivo) => sortExpressions.Add(x => x.EsActivo, sortDefinition.Descending),
             "CentroCosto.Descripcion" => sortExpressions.Add(x => x.CentroCosto.Descripcion, sortDefinition.Descending),
-            "Zona.Descripcion" => sortExpressions.Add(x => x.Zona.Descripcion, sortDefinition.Descending),
             _ => throw new UnreachableException(),
         };
     }
+
 
     public static ObservableGridData<EscenarioCupoModel> ToGridData(this PagedList<EscenarioCupoFullInfo> source, IMudStateHasChanged stateHasChanged) =>
         new([.. source.Items.Select(ToModel)], source.TotalCount, stateHasChanged);

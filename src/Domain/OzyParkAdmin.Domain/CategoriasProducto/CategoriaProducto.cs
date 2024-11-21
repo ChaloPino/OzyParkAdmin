@@ -182,4 +182,27 @@ public sealed class CategoriaProducto
 
         return this;
     }
+
+    internal ResultOf<CategoriaProducto> AssignCanalesVenta(IEnumerable<CanalVenta> canalesVentaToAssign)
+    {
+        List<CanalVenta> toAdd = (from cvToAssign in canalesVentaToAssign
+                                  join persisted in _canalesVenta on cvToAssign.Id equals persisted.Id into canalesVenta
+                                  from canalVenta in canalesVenta.DefaultIfEmpty()
+                                  where canalVenta is null
+                                  select cvToAssign).ToList();
+
+        List<CanalVenta> toRemove = (from cvToRemove in _canalesVenta
+                                       join cvToAssign in canalesVentaToAssign on cvToRemove.Id equals cvToAssign.Id into canalesVenta
+                                       from canaVenta in canalesVenta.DefaultIfEmpty()
+                                       where canaVenta is null
+                                       select cvToRemove).ToList();
+
+        toAdd.ForEach(AddCanalVenta);
+        toRemove.ForEach(RemoveCanalVenta);
+
+        return this;
+    }
+
+    private void AddCanalVenta(CanalVenta canalVenta) => _canalesVenta.Add(canalVenta);
+    private void RemoveCanalVenta(CanalVenta canalVenta) => _canalesVenta.Remove(canalVenta);
 }

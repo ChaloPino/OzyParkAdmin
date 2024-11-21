@@ -26,6 +26,11 @@ public class EscenarioCupoModel
     public ZonaInfo? Zona { get; set; } = null!;
 
     /// <summary>
+    /// La descripción de la zona asociada al escenario de cupo.
+    /// </summary>
+    public string ZonaDescripcion => Zona?.Descripcion ?? "Sin Zona";
+
+    /// <summary>
     /// El nombre del escenario de cupo.
     /// </summary>
     public string Nombre { get; set; } = string.Empty;

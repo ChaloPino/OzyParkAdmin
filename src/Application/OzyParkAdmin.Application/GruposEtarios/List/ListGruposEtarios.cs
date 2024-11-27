@@ -1,7 +1,7 @@
 ﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.Servicios;
 
-namespace OzyParkAdmin.Application.Servicios.List;
+namespace OzyParkAdmin.Application.GruposEtarios.List;
 
 /// <summary>
 /// Lista todos los grupos etarios.

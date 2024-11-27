@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OzyParkAdmin.Domain.Tickets;
+using OzyParkAdmin.Domain.Entidades;
 
-namespace OzyParkAdmin.Infrastructure.Tickets;
+namespace OzyParkAdmin.Infrastructure.Entidades;
 internal sealed class TipoSegmentacionConfiguration : IEntityTypeConfiguration<TipoSegmentacion>
 {
     public void Configure(EntityTypeBuilder<TipoSegmentacion> builder)

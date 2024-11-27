@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Servicios;
+﻿using OzyParkAdmin.Domain.Entidades;
+using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Tickets;
 using OzyParkAdmin.Domain.Tramos;
 using OzyParkAdmin.Domain.Zonas;
@@ -113,7 +114,7 @@ public class TicketToPrint
     /// <summary>
     /// El centro de costo del servicio.
     /// </summary>
-    public int CentroCostoId => Servicio.CentroCostoId;
+    public int CentroCostoId => Servicio.CentroCostoId ?? 0;
 
     /// <summary>
     /// El id del tramo.

@@ -8,5 +8,5 @@ internal static class ServicioExtensions
         new() { CurrentPage = source.CurrentPage, PageSize = source.PageSize, TotalCount = source.TotalCount, Items = source.Items.ToInfo() };
 
     private static IEnumerable<ServicioFullInfo> ToInfo(this IEnumerable<Servicio> source) =>
-        source.Select(x => x.ToInfo()).ToList();
+        source.Select(x => x.ToFullInfo()).ToList();
 }

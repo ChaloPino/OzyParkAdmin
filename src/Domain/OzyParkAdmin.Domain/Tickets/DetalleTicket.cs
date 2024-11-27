@@ -1,4 +1,4 @@
-﻿using OzyParkAdmin.Domain.Servicios;
+﻿using OzyParkAdmin.Domain.GruposEtarios;
 
 namespace OzyParkAdmin.Domain.Tickets;
 

@@ -1,4 +1,4 @@
-﻿namespace OzyParkAdmin.Domain.Servicios;
+﻿namespace OzyParkAdmin.Domain.GruposEtarios;
 
 /// <summary>
 /// El grupo etario.

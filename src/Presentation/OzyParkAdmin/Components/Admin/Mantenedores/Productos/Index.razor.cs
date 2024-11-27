@@ -26,13 +26,14 @@ using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Shared;
 using System.Security.Claims;
+using OzyParkAdmin.Application.Shared;
 
 namespace OzyParkAdmin.Components.Admin.Mantenedores.Productos;
 
 /// <summary>
 /// Página del mantenedor de productos.
 /// </summary>
-public partial class Index
+public sealed partial class Index : IDisposable, IAsyncDisposable
 {
     private ClaimsPrincipal? user;
     private MudDataGrid<ProductoViewModel> dataGrid = default!;
@@ -50,6 +51,8 @@ public partial class Index
     private bool openPartes;
     private ProductoViewModel? currentProducto;
 
+    private CancellationTokenSource? _cancellationTokenSource;
+
     [CascadingParameter]
     private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
 
@@ -59,7 +62,6 @@ public partial class Index
         user = (await AuthenticationState).User;
         await LoadReferencesAsync();
     }
-
 
     private async Task LoadReferencesAsync()
     {
@@ -150,8 +152,17 @@ public partial class Index
 
     private async Task<GridData<ProductoViewModel>> SearchProductosAsync(GridState<ProductoViewModel> state)
     {
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+        }
+
+#pragma warning disable S2930 // "IDisposables" should be disposed
+        _cancellationTokenSource = new();
+#pragma warning restore S2930 // "IDisposables" should be disposed
+
         SearchProductos searchProductos = state.ToSearch(user!, searchText);
-        var result = await Mediator.SendRequest(searchProductos);
+        var result = await Mediator.SendRequestWithCancellation(searchProductos, _cancellationTokenSource.Token);
         result.Switch(
             onSuccess: productos => currentProductos = productos.ToGridData(dataGrid),
             onFailure: failure => AddFailure(failure, "buscar productos"));
@@ -283,5 +294,20 @@ public partial class Index
     {
         Snackbar.AddFailure(failure, action);
         return false;
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+    }
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        if (_cancellationTokenSource is not null)
+        {
+            await _cancellationTokenSource.CancelAsync();
+        }
     }
 }

@@ -48,6 +48,15 @@ public interface IServicioRepository
     Task<int> MaxIdAsync(CancellationToken cancellationToken);
 
     /// <summary>
+    /// Busca serivios que pertenezcan al <paramref name="centroCostoId"/> y que coincidan con los criterios de búqueda.
+    /// </summary>
+    /// <param name="centroCostoId">El id del centro de costo al que pertenecen los servicios.</param>
+    /// <param name="searchText">El texto de búsqueda del nombre.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>La lista de servicios que pertenecen al <paramref name="centroCostoId"/> y que coinciden al criterio de búqueda.</returns>
+    Task<List<ServicioWithDetailInfo>> SearchByCentroCostoAsync(int centroCostoId, string? searchText, CancellationToken cancellationToken);
+
+    /// <summary>
     /// Busca servicios que coincidan con los criterios de búsqueda.
     /// </summary>
     /// <param name="centrosCostoId">Lista de ids de centros de costo que acota el universo de servicios.</param>

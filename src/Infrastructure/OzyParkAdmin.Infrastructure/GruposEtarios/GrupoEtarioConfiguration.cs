@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OzyParkAdmin.Domain.Servicios;
+using OzyParkAdmin.Domain.GruposEtarios;
 
-namespace OzyParkAdmin.Infrastructure.Servicios;
+namespace OzyParkAdmin.Infrastructure.GruposEtarios;
 internal sealed class GrupoEtarioConfiguration : IEntityTypeConfiguration<GrupoEtario>
 {
     public void Configure(EntityTypeBuilder<GrupoEtario> builder)

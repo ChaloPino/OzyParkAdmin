@@ -15,7 +15,7 @@ public sealed class TramoRepository(OzyParkAdminContext context) : Repository<Tr
 {
     /// <inheritdoc/>
     public async Task<IEnumerable<Tramo>> FindByIdsAsync(int[] tramoIds, CancellationToken cancellationToken) =>
-        await EntitySet.Where(x => tramoIds.Contains(x.Id)).ToListAsync(cancellationToken);
+        await EntitySet.Where(x => Enumerable.Contains(tramoIds, x.Id)).ToListAsync(cancellationToken);
 
     /// <inheritdoc/>
     public async Task<List<TramoInfo>> ListTramosAsync(CancellationToken cancellationToken)

@@ -28,6 +28,6 @@ public sealed class FindServicioHandler : QueryHandler<FindServicio, ServicioFul
     {
         ArgumentNullException.ThrowIfNull(query);
         Servicio? servicio = await _repository.FindByIdAsync(query.ServicioId, cancellationToken);
-        return servicio?.ToInfo();
+        return servicio?.ToFullInfo();
     }
 }

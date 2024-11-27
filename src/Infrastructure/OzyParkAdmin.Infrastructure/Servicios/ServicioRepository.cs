@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OzyParkAdmin.Domain.CentrosCosto;
-using OzyParkAdmin.Domain.Franquicias;
+using OzyParkAdmin.Domain.GruposEtarios;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Infrastructure.Shared;
@@ -37,7 +37,7 @@ public sealed class ServicioRepository(OzyParkAdminContext context) : Repository
     /// <inheritdoc/>
     public async Task<List<ServicioInfo>> ListByCentroCostoAsync(int centroCostoId, CancellationToken cancellationToken)
     {
-        return await EntitySet.AsNoTracking().AsSingleQuery().Where(x => x.CentroCosto.Id == centroCostoId && x.EsActivo)
+        return await EntitySet.AsNoTracking().AsSingleQuery().Where(x => x.CentroCosto!.Id == centroCostoId && x.EsActivo)
             .OrderBy(x => x.Nombre)
             .Select(x => new ServicioInfo { Id = x.Id, Aka = x.Aka, Nombre = x.Nombre })
             .ToListAsync(cancellationToken);
@@ -51,6 +51,25 @@ public sealed class ServicioRepository(OzyParkAdminContext context) : Repository
     }
 
     /// <inheritdoc/>
+    public async Task<List<ServicioWithDetailInfo>> SearchByCentroCostoAsync(int centroCostoId, string? searchText, CancellationToken cancellationToken)
+    {
+        IQueryable<Servicio> query = EntitySet.AsNoTracking().AsSingleQuery().Where(x => x.CentroCostoId == centroCostoId);
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            query = query.Where(x => x.Nombre.Contains(searchText));
+        }
+
+        query = query.OrderBy(x => x.Nombre);
+
+        IEnumerable<Servicio> servicios = await query.ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        IEnumerable<GrupoEtario> gruposEtarios = await Context.Set<GrupoEtario>().ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        return servicios.ToDetailInfo(gruposEtarios);
+    }
+
+    /// <inheritdoc/>
     public async Task<PagedList<ServicioFullInfo>> SearchServiciosAsync(int[]? centrosCostoId, string? searchText, FilterExpressionCollection<Servicio> filterExpressions, SortExpressionCollection<Servicio> sortExpressions, int page, int pageSize, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(filterExpressions);
@@ -60,15 +79,15 @@ public sealed class ServicioRepository(OzyParkAdminContext context) : Repository
 
         if (centrosCostoId is not null)
         {
-            query = query.Where(x => centrosCostoId.Contains(x.CentroCosto.Id));
+            query = query.Where(x => centrosCostoId.Contains(x.CentroCosto!.Id));
         }
 
-        if (searchText is not null)
+        if (!string.IsNullOrWhiteSpace(searchText))
         {
             query = query.Where(x =>
                 x.Aka.Contains(searchText) ||
                 x.Nombre.Contains(searchText) ||
-                x.CentroCosto.Descripcion.Contains(searchText) ||
+                x.CentroCosto!.Descripcion.Contains(searchText) ||
                 x.TipoDistribucion.Descripcion.Contains(searchText) ||
                 x.TipoVigencia.Descripcion.Contains(searchText) ||
                 x.TipoControl.Aka.Contains(searchText));
@@ -84,7 +103,7 @@ public sealed class ServicioRepository(OzyParkAdminContext context) : Repository
             Aka = x.Aka,
             Nombre = x.Nombre,
             FranquiciaId = x.FranquiciaId,
-            CentroCosto = new CentroCostoInfo {  Id = x.CentroCosto.Id, Descripcion = x.CentroCosto.Descripcion },
+            CentroCosto = new CentroCostoInfo {  Id = x.CentroCosto!.Id, Descripcion = x.CentroCosto.Descripcion },
             TipoControl = x.TipoControl,
             TipoDistribucion = x.TipoDistribucion,
             TipoServicio = x.TipoServicio,

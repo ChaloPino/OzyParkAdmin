@@ -1,5 +1,6 @@
 ﻿using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.GruposEtarios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Domain.Tramos;
 using OzyParkAdmin.Domain.Zonas;
@@ -153,33 +154,6 @@ public sealed class ServicioManager : IBusinessLogic
                                                                                                      select (info, tramo, centroCosto);
 
         return servicio.AssignPermisos(permisosInfo);
-    }
-
-    /// <summary>
-    /// Asigna o desasigna zonas de un servicio.
-    /// </summary>
-    /// <param name="servicioId">El id del servicio a asignar las zonas.</param>
-    /// <param name="zonasAsignar">Las zonas a asignar.</param>
-    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
-    /// <returns>El resultado de asignar las zonas.</returns>
-    public async Task<ResultOf<Servicio>> AssignZonasAsync(int servicioId, ImmutableArray<ZonaPorTramoInfo> zonasAsignar, CancellationToken cancellationToken)
-    {
-        Servicio? servicio = await _repository.FindByIdAsync(servicioId, cancellationToken);
-
-        if (servicio is null)
-        {
-            return new NotFound();
-        }
-
-        IEnumerable<Tramo> tramos = await _tramoRepository.FindByIdsAsync(zonasAsignar.Select(x => x.Tramo.Id).ToArray(), cancellationToken);
-        IEnumerable<Zona> zonas = await _zonaRepository.FindByIdsAsync(zonasAsignar.Select(x => x.Zona.Id).ToArray(), cancellationToken);
-
-        IEnumerable<(ZonaPorTramoInfo Info, Tramo Tramo, Zona Zona)> zonasInfo = from info in zonasAsignar
-                                                                                 join tramo in tramos on info.Tramo.Id equals tramo.Id
-                                                                                 join zona in zonas on info.Zona.Id equals zona.Id
-                                                                                 select (info, tramo, zona);
-
-        return servicio.AssignZonasTramos(zonasInfo);
     }
 
     /// <summary>

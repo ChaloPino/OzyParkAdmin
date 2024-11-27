@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Shared;
+using OzyParkAdmin.Domain.GruposEtarios;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 
-namespace OzyParkAdmin.Application.Servicios.List;
+namespace OzyParkAdmin.Application.GruposEtarios.List;
 
 /// <summary>
 /// El manejador de <see cref="ListGruposEtarios"/>.

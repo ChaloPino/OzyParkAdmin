@@ -9,7 +9,7 @@
 
 <MudDataGrid @ref="dataGrid" T="CategoriaProductoViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
              ServerData="SearchCategoriaServiciosAsync" SortMode="SortMode.Multiple" Dense="true"
-             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             Groupable="groupable" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
              Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
         <MudSpacer />
@@ -139,6 +139,7 @@
     <CategoriaProductoEditDialog @bind-IsOpen="openEditing" CategoriaProducto="currentCategoriaProducto" Franquicias="franquicias"
                                  LoadCategorias="LoadCategoriasAsync"
                                  CommitChanges="SaveCategoriaProductoAsync" DialogOptions="DialogOptions" />
-    <CanalesVentaDialog @bind-IsOpen="openCanalesVenta" />
+    <CanalesVentaDialog @bind-IsOpen="openCanalesVenta" CanalesVenta="canalesVenta" CategoriaProducto="currentCategoriaProducto" CommitChanges="SaveCanalesVentaAsync"
+                        LoadCategoriaProductoDetalle="LoadCategoriaProductoDetalleAsync" DialogOptions="DialogOptions" />
 
 </CascadingValue>

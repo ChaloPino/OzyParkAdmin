@@ -42,7 +42,7 @@ internal static class ServicioMappers
     {
         _ = filterDefinition.Column!.PropertyName switch
         {
-            "CentroCosto.Nombre" => filterExpressions.Add(x => x.CentroCosto.Descripcion, filterDefinition.Operator!, filterDefinition.Value),
+            "CentroCosto.Descripcion" => filterExpressions.Add(x => x.CentroCosto.Descripcion, filterDefinition.Operator!, filterDefinition.Value),
             nameof(ServicioViewModel.Aka) => filterExpressions.Add(x => x.Aka, filterDefinition.Operator!, filterDefinition.Value),
             nameof(ServicioViewModel.Nombre) => filterExpressions.Add(x => x.Nombre, filterDefinition.Operator!, filterDefinition.Value),
             nameof(ServicioViewModel.TipoServicio) => filterExpressions.Add(x => x.TipoServicio, filterDefinition.Operator!, filterDefinition.Value),
@@ -75,7 +75,7 @@ internal static class ServicioMappers
     {
         _ = sortDefinition.SortBy switch
         {
-            "CentroCosto.Nombre" => sortExpressions.Add(x => x.CentroCosto.Descripcion, sortDefinition.Descending),
+            "CentroCosto.Descripcion" => sortExpressions.Add(x => x.CentroCosto.Descripcion, sortDefinition.Descending),
             nameof(ServicioViewModel.Aka) => sortExpressions.Add(x => x.Aka, sortDefinition.Descending),
             nameof(ServicioViewModel.Nombre) => sortExpressions.Add(x => x.Nombre, sortDefinition.Descending),
             nameof(ServicioViewModel.TipoServicio) => sortExpressions.Add(x => x.TipoServicio, sortDefinition.Descending),

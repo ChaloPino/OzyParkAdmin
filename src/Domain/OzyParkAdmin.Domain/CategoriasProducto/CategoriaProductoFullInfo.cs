@@ -104,9 +104,6 @@ public sealed record CategoriaProductoFullInfo
     /// </summary>
     public IEnumerable<CategoriaProductoInfo> Hijos { get; set; } = [];
 
-    //>public string ToNombreCompleto() =>
-    //>    Padre is not null ? $"{Padre.ToNombreCompleto()} > {Nombre}" : Nombre;
-
     /// <summary>
     /// Nombre Completo de la categoria que incluye a sus padres y ancestros.
     /// </summary>

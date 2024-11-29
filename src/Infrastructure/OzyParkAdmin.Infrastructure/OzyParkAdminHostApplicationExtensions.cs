@@ -30,6 +30,8 @@ using OzyParkAdmin.Domain.Shared;
 using Polly.Extensions.Http;
 using Polly.Timeout;
 using Polly;
+using Microsoft.CodeAnalysis.FlowAnalysis;
+using OzyParkAdmin.Infrastructure.Filters;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -82,8 +84,12 @@ public static class OzyParkAdminHostApplicationExtensions
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicity);
 
-        builder.Services.AddMediator(configure => 
-            configure.AddConsumers(typeof(IOzyParkAdminContext).Assembly));
+        builder.Services.AddMediator(configure =>
+        {
+            configure.AddConsumers(typeof(IOzyParkAdminContext).Assembly);
+            configure.ConfigureMediator((context, cfg) => cfg.UseSendFilter(typeof(IgnoreCancellationFilter<>), context));
+
+        });
 
         builder.Services.AddServices();
 

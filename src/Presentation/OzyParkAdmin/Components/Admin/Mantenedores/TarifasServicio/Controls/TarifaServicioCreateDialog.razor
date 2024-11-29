@@ -1,0 +1,201 @@
+﻿@using OzyParkAdmin.Domain.CentrosCosto;
+@inject TarifaServicioCreateModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <MudText Typo="Typo.h4" GutterBottom="true">Crear tarifas de servicio</MudText>
+        <IfThen Condition="loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudForm @ref="form" Model="tarifaServicio" Validation="Validator.ValidateValue" ValidationDelay="0">
+            <MudGrid>
+                <MudItem xs="12" md="4">
+                    <MudDatePicker @bind-Date="tarifaServicio.InicioVigencia"
+                                   Label="Inicio vigencia"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Class="mt-4"
+                                   ImmediateText="true"
+                                   MinDate="DateTime.Today"
+                                   For="() => tarifaServicio.InicioVigencia" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudTimePicker @bind-Time="tarifaServicio.HoraVigencia"
+                                   Label="Hora vigencia"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Class="mt-4"
+                                   ImmediateText="true"
+                                   For="() => tarifaServicio.HoraVigencia" />
+                </MudItem>
+
+                <MudItem xs="12" md="4">
+                    <MudSelect @bind-Value="tarifaServicio.Moneda"
+                               Label="Moneda"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Class="mt-4"
+                               For="() => tarifaServicio.Moneda"
+                               ToStringFunc="x => x?.Nombre">
+                        <ForIn Items="Monedas" Context="moneda">
+                            <MudSelectItem Value="moneda" />
+                        </ForIn>
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            <MudSelect T="CentroCostoInfo"
+                       Value="tarifaServicio.CentroCosto"
+                       ValueChanged="OnChangeCentroCostoAsync"
+                       Label="Centro de costo"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       Class="mt-4"
+                       For="() => tarifaServicio.CentroCosto"
+                       ToStringFunc="x => x?.Descripcion">
+                <ForIn Items="CentrosCosto" Context="centroCosto">
+                    <MudSelectItem Value="centroCosto" />
+                </ForIn>
+            </MudSelect>
+
+            <MudAutocomplete @bind-Value="tarifaServicio.Servicio"
+                             Label="Servicio"
+                             Variant="Variant.Outlined"
+                             Margin="Margin.Dense"
+                             Dense="true"
+                             Class="mt-4"
+                             For="() => tarifaServicio.Servicio"
+                             ToStringFunc="x => x?.Nombre"
+                             SearchFunc="OnSearchServiciosAsync" />
+
+            <MudSelect @bind-SelectedValues="tarifaServicio.Tramos"
+                       Label="Tramos"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       MultiSelection="true"
+                       Class="mt-4"
+                       For="() => tarifaServicio.ValidationTramos"
+                       ToStringFunc="x => x?.Descripcion">
+                <IfThen Condition="tarifaServicio.Servicio != null">
+                    <Then>
+                        <ForIn Items="tarifaServicio.Servicio!.Tramos" Context="tramo">
+                            <MudSelectItem Value="tramo" />
+                        </ForIn>
+                    </Then>
+                </IfThen>
+            </MudSelect>
+
+            <MudSelect @bind-SelectedValues="tarifaServicio.GruposEtarios"
+                       Label="Grupos etarios"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       MultiSelection="true"
+                       Class="mt-4"
+                       For="() => tarifaServicio.ValidationGruposEtarios"
+                       ToStringFunc="x => x?.Descripcion">
+                <IfThen Condition="tarifaServicio.Servicio != null">
+                    <Then>
+                        <ForIn Items="tarifaServicio.Servicio!.GruposEtarios" Context="grupoEtario">
+                            <MudSelectItem Value="grupoEtario" />
+                        </ForIn>
+                    </Then>
+                </IfThen>
+            </MudSelect>
+
+            <MudSelect @bind-SelectedValues="tarifaServicio.CanalesVenta"
+                       Label="Canales de venta"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       SelectAll="true"
+                       SelectAllText="Todos"
+                       MultiSelection="true"
+                       Class="mt-4"
+                       For="() => tarifaServicio.ValidationCanalesVenta"
+                       ToStringFunc="x => x?.Nombre">
+                <ForIn Items="CanalesVenta" Context="canalVenta">
+                    <MudSelectItem Value="canalVenta" />
+                </ForIn>
+            </MudSelect>
+
+            <MudSelect @bind-SelectedValues="tarifaServicio.TiposDia"
+                       Label="Tipos de día"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       MultiSelection="true"
+                       Class="mt-4"
+                       For="() => tarifaServicio.ValidationTiposDia"
+                       ToStringFunc="x => x?.Descripcion">
+                <ForIn Items="TiposDia" Context="tipoDia">
+                    <MudSelectItem Value="tipoDia" />
+                </ForIn>
+            </MudSelect>
+
+            <MudSelect @bind-SelectedValues="tarifaServicio.TiposHorario"
+                       Label="Tipos de horario"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       MultiSelection="true"
+                       Class="mt-4"
+                       For="() => tarifaServicio.ValidationTiposHorario"
+                       ToStringFunc="x => x?.Descripcion">
+                <ForIn Items="TiposHorario" Context="tipoHorario">
+                    <MudSelectItem Value="tipoHorario" />
+                </ForIn>
+            </MudSelect>
+
+            <MudSelect @bind-SelectedValues="tarifaServicio.TiposSegmentacion"
+                       Label="Tipos de segmentación"
+                       Variant="Variant.Outlined"
+                       Margin="Margin.Dense"
+                       Dense="true"
+                       MultiSelection="true"
+                       Class="mt-4"
+                       For="() => tarifaServicio.ValidationTiposSegmentacion"
+                       ToStringFunc="x => x?.Descripcion">
+                <ForIn Items="TiposSegmentacion" Context="tipoSegmentacion">
+                    <MudSelectItem Value="tipoSegmentacion" />
+                </ForIn>
+            </MudSelect>
+
+            <MudGrid>
+                <MudItem md="4">
+                    <MudNumericField @bind-Value="tarifaServicio.ValorAfecto"
+                                     Label="Valor afecto"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     Immediate="true"
+                                     Class="mt-4"
+                                     For="() => tarifaServicio.ValorAfecto" />
+                </MudItem>
+                <MudItem md="4">
+                    <MudNumericField @bind-Value="tarifaServicio.ValorExento"
+                                     Label="Valor exento"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     Immediate="true"
+                                     Class="mt-4"
+                                     For="() => tarifaServicio.ValorExento" />
+                </MudItem>
+                <MudItem md="4">
+                    <MudField Label="Valor"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @tarifaServicio.Valor
+                    </MudField>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Disabled="loading" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="loading" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>

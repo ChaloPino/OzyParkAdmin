@@ -1,16 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using OzyParkAdmin.Application.Identity;
-using OzyParkAdmin.Application.Productos.Search;
 using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CategoriasProducto;
-using OzyParkAdmin.Domain.Productos;
-using OzyParkAdmin.Domain.Reportes;
 using OzyParkAdmin.Domain.Shared;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OzyParkAdmin.Application.CategoriasProducto.Search;
 

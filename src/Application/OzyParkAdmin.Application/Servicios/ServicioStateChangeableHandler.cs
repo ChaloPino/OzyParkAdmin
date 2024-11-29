@@ -71,6 +71,6 @@ public abstract class ServicioStateChangeableHandler<TState> : CommandHandler<TS
 
         await Context.SaveChangesAsync(cancellationToken);
 
-        return servicio.ToInfo();
+        return servicio.ToFullInfo();
     }
 }

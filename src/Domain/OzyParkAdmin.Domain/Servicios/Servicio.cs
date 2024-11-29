@@ -1,5 +1,6 @@
 ﻿using OzyParkAdmin.Domain.Cajas;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.GruposEtarios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Domain.Tramos;
 using OzyParkAdmin.Domain.Zonas;
@@ -14,8 +15,6 @@ public sealed class Servicio
     private ServicioPolitica? _servicioPolitica;
     private ServicioControlParental? _servicioControlParental;
     private readonly List<TramoServicio> _tramosServicio = [];
-    private readonly List<ZonaPorTramo> _zonasPorTramo = [];
-    private readonly List<ZonaRuta> _rutas = [];
     private readonly List<CentroCostoServicio> _centrosCosto = [];
     private readonly List<GrupoEtario> _gruposEtarios = [];
     private readonly List<ServicioPorCaja> _serviciosPorCaja = [];
@@ -93,12 +92,12 @@ public sealed class Servicio
     /// <summary>
     /// El id del centro de costo.
     /// </summary>
-    public int CentroCostoId { get; private set; }
+    public int? CentroCostoId { get; private set; }
 
     /// <summary>
     /// El centro de costo.
     /// </summary>
-    public CentroCosto CentroCosto { get; private set; } = default!;
+    public CentroCosto? CentroCosto { get; private set; }
 
     /// <summary>
     /// Si el servicio tiene horas de entrada y salida.
@@ -156,11 +155,6 @@ public sealed class Servicio
     public IEnumerable<GrupoEtario> GruposEtarios => _gruposEtarios;
 
     /// <summary>
-    /// Las rutas definidas para el servicio.
-    /// </summary>
-    public IEnumerable<ZonaRuta> Rutas => _rutas;
-
-    /// <summary>
     /// Las cajas asociadas al servicio.
     /// </summary>
     public IEnumerable<Caja> Cajas => _serviciosPorCaja.Select(x => x.Caja);
@@ -194,14 +188,14 @@ public sealed class Servicio
     /// Devuelve toda la información del servicio.
     /// </summary>
     /// <returns>Una nueva instancia de <see cref="ServicioFullInfo"/>.</returns>
-    public ServicioFullInfo ToInfo() =>
+    public ServicioFullInfo ToFullInfo() =>
         new()
         {
             Id = Id,
             Aka = Aka,
             Nombre = Nombre,
             FranquiciaId = FranquiciaId,
-            CentroCosto = CentroCosto.ToInfo(),
+            CentroCosto = CentroCosto?.ToInfo(),
             TipoControl = TipoControl,
             TipoDistribucion = TipoDistribucion,
             TipoServicio = TipoServicio,
@@ -229,7 +223,6 @@ public sealed class Servicio
             GruposEtarios = _gruposEtarios.ToInfo(),
             Cajas = _serviciosPorCaja.ToInfo(),
             Permisos = _permisos.ToInfo(),
-            Zonas = _zonasPorTramo.ToInfo(),
             PlantillaId = PlantillaId,
             PlantillaDigitalId = PlantillaDigitalId,
             EsActivo = EsActivo,
@@ -663,40 +656,6 @@ public sealed class Servicio
     private void RemovePermiso(PermisoServicio permisoServicio) =>
         _permisos.Remove(permisoServicio);
 
-    internal ResultOf<Servicio> AssignZonasTramos(IEnumerable<(ZonaPorTramoInfo Info, Tramo Tramo, Zona Zona)> zonasInfo)
-    {
-        List<(ZonaPorTramoInfo Info, Tramo Tramo, Zona Zona)> toAdd = (from info in zonasInfo
-                                                                       join persisted in _zonasPorTramo on info.Info.Id equals persisted.Id into zonasTramo
-                                                                       from zonaTramo in zonasTramo.DefaultIfEmpty()
-                                                                       where zonaTramo is null
-                                                                       select info).ToList();
-
-        List<ZonaPorTramo> toRemove = (from zonaTramo in _zonasPorTramo
-                                       join info in zonasInfo on zonaTramo.Id equals info.Info.Id into defZonas
-                                       from defZona in defZonas.DefaultIfEmpty()
-                                       where defZona.Tramo is null
-                                       select zonaTramo).ToList();
-
-        List<(ZonaPorTramo ZonaPorTramo, ZonaPorTramoInfo Info)> toUpdate = (from zonaTramo in _zonasPorTramo
-                                                                             join info in zonasInfo on zonaTramo.Id equals info.Info.Id
-                                                                             select (zonaTramo, info.Info)).ToList();
-
-        toAdd.ForEach(AddZonaTramo);
-        toRemove.ForEach(RemoveZonaTramo);
-        toUpdate.ForEach(UpdateZonaTramo);
-
-        return this;
-    }
-
-    private void AddZonaTramo((ZonaPorTramoInfo Info, Tramo Tramo, Zona Zona) info) =>
-        _zonasPorTramo.Add(ZonaPorTramo.Create(info.Tramo, info.Zona, info.Info.EsRetorno, info.Info.EsCombinacion, info.Info.Orden, info.Info.EsActivo));
-
-    private void RemoveZonaTramo(ZonaPorTramo zonaTramo) =>
-        _zonasPorTramo.Remove(zonaTramo);
-
-    private static void UpdateZonaTramo((ZonaPorTramo ZonaPorTramo, ZonaPorTramoInfo Info) info) =>
-        info.ZonaPorTramo.Update(info.Info.EsRetorno, info.Info.EsCombinacion, info.Info.Orden, info.Info.EsActivo);
-
     internal ResultOf<Servicio> AssignGruposEtarios(IEnumerable<GrupoEtario> gruposEtariosInfo)
     {
         List<GrupoEtario> toAdd = (from info in gruposEtariosInfo
@@ -744,5 +703,5 @@ public sealed class Servicio
     /// <param name="tramoId">El id del tramo para buscar el nombre.</param>
     /// <returns>El nombre del servicio asociado al tramo, o si no existe el nombre del servicio.</returns>
     public string NombrePorTramo(int tramoId) =>
-        NombrePorTramo(tramoId, CentroCostoId);
+        NombrePorTramo(tramoId, CentroCostoId ?? 0);
 }

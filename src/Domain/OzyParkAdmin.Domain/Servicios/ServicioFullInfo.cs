@@ -31,7 +31,7 @@ public sealed record ServicioFullInfo
     /// <summary>
     /// El centro de costo del servicio.
     /// </summary>
-    public CentroCostoInfo CentroCosto { get; init; } = default!;
+    public CentroCostoInfo? CentroCosto { get; init; } = default!;
 
     /// <summary>
     /// El tipo de control del servicio.
@@ -137,11 +137,6 @@ public sealed record ServicioFullInfo
     /// Los permisos por tramo y centro de costo del servicio.
     /// </summary>
     public ImmutableArray<PermisoServicioInfo> Permisos { get; set; } = [];
-
-    /// <summary>
-    /// Las zonas asociadas al servicio.
-    /// </summary>
-    public ImmutableArray<ZonaPorTramoInfo> Zonas { get; set; } = [];
 
     /// <summary>
     /// Si el servicio está activo.

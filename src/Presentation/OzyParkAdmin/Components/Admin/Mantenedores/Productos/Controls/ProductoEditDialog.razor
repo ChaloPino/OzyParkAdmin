@@ -28,7 +28,8 @@
             </MudSelect>
 
             <MudStack Row="true" Class="mt-4">
-                <MudSelect T="CategoriaProductoInfo" Value="Producto.Categoria" ValueChanged="CategoriaChanged" Variant="Variant.Outlined" Margin="Margin.Dense"
+                <MudSelect T="CategoriaProductoInfo" Value="Producto.Categoria" ValueChanged="CategoriaChanged"
+                           Variant="Variant.Outlined" Margin="Margin.Dense"
                            Label="Categoria" ToStringFunc="(x) => x?.NombreCompleto"
                            For="() => Producto.Categoria" Immediate="true">
 

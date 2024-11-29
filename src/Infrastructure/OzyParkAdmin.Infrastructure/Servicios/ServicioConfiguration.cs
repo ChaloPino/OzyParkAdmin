@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using OzyParkAdmin.Domain.GruposEtarios;
 using OzyParkAdmin.Domain.Servicios;
 
 namespace OzyParkAdmin.Infrastructure.Servicios;
@@ -43,17 +44,6 @@ internal sealed class ServicioConfiguration : IEntityTypeConfiguration<Servicio>
             navBuilder.WithOwner().HasForeignKey("ServicioId");
         });
 
-        builder.OwnsMany<ZonaPorTramo>("_zonasPorTramo", navBuilder =>
-        {
-            navBuilder.ToTable("tkt_ZonasPorTramos_td");
-            navBuilder.HasKey("ServicioId", "TramoId", "ZonaId", "EsRetorno", "EsCombinacion");
-            navBuilder.HasOne(x => x.Tramo).WithMany().HasForeignKey("TramoId");
-            navBuilder.Navigation(x => x.Tramo).AutoInclude();
-            navBuilder.HasOne(x => x.Zona).WithMany().HasForeignKey("ZonaId");
-            navBuilder.Navigation(x => x.Zona).AutoInclude();
-            navBuilder.WithOwner().HasForeignKey("ServicioId");
-        });
-
         builder.OwnsMany<CentroCostoServicio>("_centrosCosto", navBuilder =>
         {
             navBuilder.ToTable("tkt_ServiciosPorCentroCosto_td");
@@ -77,51 +67,6 @@ internal sealed class ServicioConfiguration : IEntityTypeConfiguration<Servicio>
             navBuilder.HasOne(x => x.Caja).WithMany().HasForeignKey("CajaId");
             navBuilder.Navigation(x => x.Caja).AutoInclude();
             navBuilder.WithOwner().HasForeignKey("ServicioId");
-        });
-
-        builder.OwnsMany(x => x.Rutas, navBuilder =>
-        {
-            navBuilder.ToTable("tkt_ZonasRuta_td");
-            navBuilder.Property<int>("ZonaRutaSentidoId");
-            navBuilder.HasKey("ServicioId", "TramoId", "ZonaOrigenId", "ZonaRutaSentidoId");
-            navBuilder.HasOne(x => x.Tramo).WithMany().HasForeignKey("TramoId");
-            navBuilder.Navigation(x => x.Tramo).AutoInclude();
-            navBuilder.HasOne(x => x.ZonaOrigen).WithMany().HasForeignKey("ZonaOrigenId");
-            navBuilder.Navigation(x => x.ZonaOrigen).AutoInclude();
-            navBuilder.HasOne(x => x.Sentido).WithMany().HasForeignKey("ZonaRutaSentidoId");
-            navBuilder.Navigation(x => x.Sentido).AutoInclude();
-            navBuilder.HasOne(x => x.SentidoControl).WithMany().HasForeignKey("ZonaRutaSentidoControlId");
-            navBuilder.Navigation(x => x.SentidoControl).AutoInclude();
-            navBuilder.WithOwner().HasForeignKey("ServicioId");
-
-            navBuilder.OwnsMany(x => x.Destinos, detBuilder =>
-            {
-                detBuilder.ToTable("tkt_ZonasRutaDestinos_td");
-                detBuilder.Property<int>("ServicioId");
-                detBuilder.Property<int>("TramoId");
-                detBuilder.Property<int>("ZonaOrigenId");
-                detBuilder.Property<int>("ZonaRutaSentidoId");
-                detBuilder.HasKey("ServicioId", "TramoId", "ZonaOrigenId", "ZonaRutaSentidoId", "ZonaDestinoId");
-                detBuilder.HasOne(x => x.ZonaDestino).WithMany().HasForeignKey("ZonaDestinoId");
-                detBuilder.Navigation(x => x.ZonaDestino).AutoInclude();
-                detBuilder.WithOwner().HasForeignKey("ServicioId", "TramoId", "zonaOrigenId", "ZonaRutaSentidoId");
-            });
-
-            navBuilder.OwnsMany(x => x.Detalle, detBuilder =>
-            {
-                detBuilder.ToTable("tkt_ZonasRutaDetalle_td");
-                detBuilder.Property<int>("ServicioId");
-                detBuilder.Property<int>("TramoId");
-                detBuilder.Property<int>("ZonaOrigenId");
-                detBuilder.Property<int>("ZonaRutaSentidoId");
-                detBuilder.Property<int>("ZonaRutaSentidoControlId");
-                detBuilder.HasKey("ServicioId", "TramoId", "ZonaOrigenId", "ZonaRutaSentidoId", "ZonaId", "EsRetorno", "EsCombinacion", "ZonaRutaSentidoControlId");
-                detBuilder.HasOne(x => x.Zona).WithMany().HasForeignKey("ZonaId");
-                detBuilder.Navigation(x => x.Zona).AutoInclude();
-                detBuilder.HasOne(x => x.SentidoControl).WithMany().HasForeignKey("ZonaRutaSentidoControlId");
-                detBuilder.Navigation(x => x.SentidoControl).AutoInclude();
-                detBuilder.WithOwner().HasForeignKey("ServicioId", "TramoId", "zonaOrigenId", "ZonaRutaSentidoId");
-            });
         });
 
         builder.OwnsOne(x => x.Movil, navBuilder =>

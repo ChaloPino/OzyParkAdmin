@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DetalleEscenarioExclusionFecha\**" />
+    <Compile Remove="DetalleEscenarioExclusion\**" />
+    <EmbeddedResource Remove="DetalleEscenarioExclusionFecha\**" />
+    <EmbeddedResource Remove="DetalleEscenarioExclusion\**" />
+    <None Remove="DetalleEscenarioExclusionFecha\**" />
+    <None Remove="DetalleEscenarioExclusion\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MassTransit.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Newtonsoft.Json" />

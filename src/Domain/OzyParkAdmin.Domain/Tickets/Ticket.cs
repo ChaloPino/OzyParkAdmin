@@ -1,4 +1,5 @@
-﻿using OzyParkAdmin.Domain.Seguridad.Usuarios;
+﻿using OzyParkAdmin.Domain.Entidades;
+using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Tramos;
 using OzyParkAdmin.Domain.Zonas;

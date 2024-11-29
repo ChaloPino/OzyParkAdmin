@@ -117,7 +117,7 @@ public sealed class CategoriaProductoViewModel
     public bool IsNew { get; set; }
 
     /// <summary>
-    /// Indica si se esta cargando en el Modal
+    /// Indica si se esta cargando el Modal
     /// </summary>
     internal bool Loading { get; set; }
     #endregion

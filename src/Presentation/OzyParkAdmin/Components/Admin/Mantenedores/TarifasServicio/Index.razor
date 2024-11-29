@@ -1,0 +1,127 @@
+﻿@page "/Mantenedores/TarifasServicio"
+@using MassTransit.Mediator
+@inject DialogOptions DialogOptions
+@inject IMediator Mediator
+@inject ISnackbar Snackbar
+
+<PageTitle>Tarifas de servicios</PageTitle>
+<MudText Typo="Typo.h4">Tarifas de servicios</MudText>
+
+<MudDataGrid @ref="dataGrid" T="TarifaServicioViewModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
+             ServerData="SearchTarifasAsync" SortMode="SortMode.Multiple" MultiSelection="true" sele
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+    <ToolBarContent>
+        <MudSpacer />
+        <CentroCostoSearch @bind-CentroCosto="centroCosto" CentrosCosto="centrosCosto" Class="mr-3" />
+        <SearchControl @bind-SearchText="searchText" />
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddTarifasAsync">Nueva tarifa</MudButton>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.InicioVigencia" Title="Inicio de vigencia">
+            <FilterTemplate>
+                <DateOnlyFilter FilterContext="context" />
+            </FilterTemplate>
+            <GroupTemplate>
+                <Grouping T="TarifaServicioViewModel" TValue="DateOnly" Title="Inicio de vigencia" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Moneda.Nombre" Title="Moneda">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Moneda.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Moneda" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Servicio.Nombre" Title="Servicio">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Servicio.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Servicio" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Tramo.Descripcion" Title="Tramo">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.Tramo.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Tramo" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.GrupoEtario.Descripcion" Title="Grupo etario">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.GrupoEtario.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Grupo etario" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.TipoDia.Descripcion" Title="Tipo día">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.TipoDia.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Tipo día" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.TipoHorario.Descripcion" Title="Tipo horario">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.TipoHorario.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Tipo horario" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.CanalVenta.Nombre" Title="Canal venta">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.CanalVenta.Nombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Canal de venta" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.TipoSegmenetacion.Descripcion" Title="Tipo segmentación">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.TipoSegmenetacion.Descripcion" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Tipo segmentación" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.ValorAfecto" Title="Valor afecto" Groupable="false" />
+        <PropertyColumn Property="x => x.ValorExento" Title="Valor exento" Groupable="false" />
+        <PropertyColumn Property="x => x.Valor" Title="Valor" Groupable="false" />
+        <TemplateColumn Hideable="false" Groupable="false" Filterable="false" Sortable="false">
+            <CellTemplate>
+                <div class="d-flex justify-end">
+                    <MudTooltip Text="Editar">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEditingAsync(context)" />
+                    </MudTooltip>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="TarifaServicioViewModel" />
+    </PagerContent>
+</MudDataGrid>
+
+<CascadingValue Value="true" Name="IsNested">
+    <TarifaServicioCreateDialog @bind-IsOpen="openCreate" 
+                                Monedas="monedas"
+                                CentrosCosto="centrosCosto" 
+                                CanalesVenta="canalesVenta"
+                                TiposDia="tiposDia" 
+                                TiposHorario="tiposHorario"
+                                TiposSegmentacion="tiposSegmentacion"
+                                DialogOptions="DialogOptions"
+                                SearchServicios="OnSearchServiciosAsync"
+                                CommitChanges="OnCreateTarifaServicioAsync" />
+
+    <TarifaServicioEditDialog @bind-IsOpen="openEditing"
+                              Tarifa="currentTarifa"
+                              DialogOptions="DialogOptions"
+                              CommitChanges="OnSaveTarifaServicioAsync" />
+</CascadingValue>

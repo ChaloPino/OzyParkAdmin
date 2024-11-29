@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Cms;
 using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.EscenariosCupo;
-using OzyParkAdmin.Domain.OmisionesCupo;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
@@ -23,7 +23,7 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
 
     /// <inheritdoc/>
     public async Task<CategoriaProducto?> FindByIdAsync(int id, CancellationToken cancellationToken) =>
-        await EntitySet.AsSplitQuery().FirstOrDefaultAsync(x => x.Id == id, cancellationToken).ConfigureAwait(false);
+        await EntitySet.AsSplitQuery().Include("Imagen").FirstOrDefaultAsync(x => x.Id == id, cancellationToken).ConfigureAwait(false);
 
     /// <inheritdoc/>
     public async Task<List<CategoriaProductoInfo>> ListByFranquiciaIdAsync(int franquiciaId, TipoCategoria tipoCategoria, CancellationToken cancellationToken)
@@ -61,8 +61,8 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
         ArgumentNullException.ThrowIfNull(sortExpressions);
 
         //Ojo que AsNoTracking tiene un problema de recursividad. Por ejemplo para el Caso del "NombreComleto" que se conforma en forma recursiva.
-        //> genera error IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery();
-        IQueryable<CategoriaProducto> query = EntitySet.AsNoTracking();
+        //genera error IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery();
+        IQueryable<CategoriaProducto> query = EntitySet.AsNoTracking().AsSplitQuery();
 
         if (searchText is not null)
         {
@@ -72,6 +72,7 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
                 x.UsuarioCreacion.UserName.Contains(searchText) ||
                 x.UsuarioModificacion.UserName.Contains(searchText));
         }
+
 
         query = filterExpressions.Where(query);
 
@@ -85,7 +86,7 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
             Aka = x.Aka,
             Nombre = x.Nombre,
             EsActivo = x.EsActivo,
-            Padre = x.Padre != null ? new CategoriaProductoInfo { Id = x.Padre.Id, Aka = x.Padre.Aka, Nombre = x.Padre.Nombre, EsActivo = x.Padre.EsActivo, NombreCompleto = x.Padre.Nombre } : null,
+            //Padre = x.Padre != null ? new CategoriaProductoInfo { Id = x.Padre.Id, Aka = x.Padre.Aka, Nombre = x.Padre.Nombre, EsActivo = x.Padre.EsActivo, NombreCompleto = x.Padre.Nombre } : null,
             EsFinal = x.EsFinal,
             Imagen = new CatalogoImagenInfo { Aka = x.Imagen.Aka, Base64 = x.Imagen.Base64, MimeType = x.Imagen.MimeType, Tipo = x.Imagen.Tipo },
             Orden = x.Orden,
@@ -98,15 +99,31 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
             UltimaModificacion = x.UltimaModificacion,
             CajasAsignadas = x.CajasAsignadas,
             CanalesVenta = x.CanalesVenta,
-            Hijos = x.Hijos.Select(s => new CategoriaProductoInfo
-            {
-                Id = s.Id,
-                Aka = s.Aka,
-                Nombre = s.Nombre,
-                EsActivo = s.EsActivo,
-                NombreCompleto = s.Nombre
-            }),
+            //Hijos = x.Hijos.Select(s => new CategoriaProductoInfo
+            //{
+            //    Id = s.Id,
+            //    Aka = s.Aka,
+            //    Nombre = s.Nombre,
+            //    EsActivo = s.EsActivo,
+            //    NombreCompleto = s.Nombre
+            //}),
         }).ToListAsync(cancellationToken).ConfigureAwait(false);
+
+
+        if (items.Count > 0)
+        {
+            List<CategoriaProducto> categorias = await ListByFranquiciaIdAsync(items[0].FranquiciaId, cancellationToken).ConfigureAwait(false);
+
+            foreach (var item in items)
+            {
+                var categoria = categorias.Find(x => x.Id == item.Id);
+
+                if (categoria is not null)
+                {
+                    item.Padre = categoria.Padre?.ToInfo();
+                }
+            }
+        }
 
         return new PagedList<CategoriaProductoFullInfo>
         {
@@ -115,12 +132,21 @@ public sealed class CategoriaProductoRepository(OzyParkAdminContext context) : R
             TotalCount = totalCount,
             Items = items,
         };
-
     }
 
     /// <inheritdoc/>
     public async Task<bool> ExistAkaAsync(int categoriaProductoId, int franquiciaId, string? aka, CancellationToken cancellationToken)
     {
         return await EntitySet.AnyAsync(x => x.FranquiciaId == franquiciaId && x.Aka == aka && x.Id != categoriaProductoId, cancellationToken);
+    }
+
+    private async Task<List<CategoriaProducto>> ListByFranquiciaIdAsync(int franquiciaId, CancellationToken cancellationToken)
+    {
+        IQueryable<CategoriaProducto> query = EntitySet.AsSplitQuery().Where(x => x.FranquiciaId == franquiciaId);
+
+        return await query
+            .Include(x => x.Padre)
+            .OrderBy(x => x.Orden)
+            .ToListAsync(cancellationToken);
     }
 }

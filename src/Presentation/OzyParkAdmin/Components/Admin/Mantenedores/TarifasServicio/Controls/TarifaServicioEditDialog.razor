@@ -1,0 +1,129 @@
+﻿@using OzyParkAdmin.Domain.CentrosCosto;
+@inject TarifaServicioViewModelValidator Validator
+<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
+    <DialogContent>
+        <MudText Typo="Typo.h4" GutterBottom="true">Editar tarifa de servicio</MudText>
+        <IfThen Condition="loading">
+            <Then>
+                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            </Then>
+        </IfThen>
+        <MudForm @ref="form" Model="Tarifa" Validation="Validator.ValidateValue" ValidationDelay="0">
+            <MudGrid>
+                <MudItem xs="12" md="4">
+                    <MudField Label="Inicio vigencia"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.InicioVigencia.ToString("dd-MM-yyyy") @Tarifa.InicioVigencia.ToString("HH:mm")
+                    </MudField>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudField Label="Moneda"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.Moneda.Nombre
+                    </MudField>
+                </MudItem>
+            </MudGrid>
+
+            <MudGrid>
+                <MudItem xs="12" md="4">
+                    <MudField Label="Servicio"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.Servicio.Nombre
+                    </MudField>
+                </MudItem>
+
+                <MudItem xs="12" md="4">
+                    <MudField Label="Tramo"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.Tramo.Descripcion
+                    </MudField>
+                </MudItem>
+
+                <MudItem xs="12" md="4">
+                    <MudField Label="Grupo etario"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.GrupoEtario.Descripcion
+                    </MudField>
+                </MudItem>
+
+                <MudItem xs="12" md="3">
+                    <MudField Label="Canal de venta"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.CanalVenta.Nombre
+                    </MudField>
+                </MudItem>
+
+                <MudItem xs="12" md="3">
+                    <MudField Label="Tipo de día"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.TipoDia.Descripcion
+                    </MudField>
+                </MudItem>
+
+                <MudItem xs="12" md="3">
+                    <MudField Label="Tipo de horario"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.TipoHorario.Descripcion
+                    </MudField>
+                </MudItem>
+
+                <MudItem xs="12" md="3">
+                    <MudField Label="Tipo de segmentación"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.TipoSegmenetacion.Descripcion
+                    </MudField>
+                </MudItem>
+            </MudGrid>
+            <MudGrid>
+                <MudItem md="4">
+                    <MudNumericField @bind-Value="Tarifa.ValorAfecto"
+                                     Label="Valor afecto"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     Immediate="true"
+                                     Class="mt-4"
+                                     For="() => Tarifa.ValorAfecto" />
+                </MudItem>
+                <MudItem md="4">
+                    <MudNumericField @bind-Value="Tarifa.ValorExento"
+                                     Label="Valor exento"
+                                     Variant="Variant.Outlined"
+                                     Margin="Margin.Dense"
+                                     Immediate="true"
+                                     Class="mt-4"
+                                     For="() => Tarifa.ValorExento" />
+                </MudItem>
+                <MudItem md="4">
+                    <MudField Label="Valor"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="mt-4">
+                        @Tarifa.Valor
+                    </MudField>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Disabled="loading" Class="px-10">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="loading" Class="px-10">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>

@@ -10,6 +10,8 @@ namespace OzyParkAdmin.Domain.Cupos;
 /// </summary>
 public interface ICupoRepository
 {
+
+
     /// <summary>
     /// Busca un cupo por su id.
     /// </summary>

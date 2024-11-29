@@ -30,7 +30,7 @@ public sealed class DetalleEscenarioCupoManager : IBusinessLogic
         IEnumerable<DetalleEscenarioCupoInfo> nuevosDetallesInfo,
         CancellationToken cancellationToken)
     {
-        var detallesExistentes = await _detalleEscenarioCupoRepository.GetDetallesByEscenarioCupoIdAsync(escenarioCupoId, cancellationToken);
+        var detallesExistentes = await _detalleEscenarioCupoRepository.FindByIdsAsync(escenarioCupoId, cancellationToken);
         var nuevosDetalles = nuevosDetallesInfo.Select(d => DetalleEscenarioCupo.Create(
             escenarioCupoId,
             d.ServicioId,
@@ -105,7 +105,7 @@ public sealed class DetalleEscenarioCupoManager : IBusinessLogic
         IList<ValidationError> errors,
         CancellationToken cancellationToken)
     {
-        var detalles = await _detalleEscenarioCupoRepository.GetDetallesByEscenarioCupoIdAsync(detalleToValidate.EscenarioCupoId, cancellationToken);
+        var detalles = await _detalleEscenarioCupoRepository.FindByIdsAsync(detalleToValidate.EscenarioCupoId, cancellationToken);
 
         var existente = detalles.FirstOrDefault(x => x.ServicioId == detalleToValidate.ServicioId);
         if (existente is not null && existente.EscenarioCupoId != detalleToValidate.EscenarioCupoId)

@@ -10,9 +10,10 @@
 
 <MudDataGrid @ref="dataGrid" T="EscenariosCupo.Models.EscenarioCupoModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
              ServerData="SearchEscenariosCupoAsync" SortMode="SortMode.Multiple" MultiSelection="true" Loading="loading"
-             @bind-SelectedItems="escenariosCupoToDelete"
+             SelectedItems="escenariosCupoToDelete"
              Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
-             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu"
+             SelectedItemChanged="OnSelectedItemChanged" SelectedItemsChanged="OnSelectedItemsChanged" >
     <ToolBarContent>
         <MudSpacer />
         <SearchControl @bind-SearchText="searchText" />
@@ -56,7 +57,10 @@
         <TemplateColumn Hideable="false" Groupable="false" Filterable="false" Sortable="false">
             <CellTemplate>
                 <div class="d-flex justify-end">
-                    <MudTooltip Text="Editar">
+                    <MudTooltip Text="Editar Exclusiones">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Dangerous" OnClick="async () => await ShowEditingExclusionsAsync(context)" />
+                    </MudTooltip>
+                    <MudTooltip Text="Editar Escenario">
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEditingAsync(context)" />
                     </MudTooltip>
                 </div>
@@ -68,14 +72,3 @@
     </PagerContent>
 </MudDataGrid>
 
-<CascadingValue Value="true" Name="IsNested">
-
-
-    <EscenarioCupoEditorDialog @bind-IsOpen="openEditing" CentrosCostos="centrosCosto" Zonas="zonas" Servicios="servicios" SelectedEscenarioCupo="currentEscenarioCupo"
-                               CommitChanges="UpdateEscenarioCupoAsync" DialogOptions="DialogOptions" ViewModel="viewModel" />
-
-    <EscenarioCupoCreateDialog @bind-IsOpen="openCreating" CentrosCostos="centrosCosto" Zonas="zonas" ViewModel="viewModel" Servicios="servicios"
-                               CommitChanges="SaveEscenarioCupoAsync" DialogOptions="DialogOptions" />
-
-
-</CascadingValue>

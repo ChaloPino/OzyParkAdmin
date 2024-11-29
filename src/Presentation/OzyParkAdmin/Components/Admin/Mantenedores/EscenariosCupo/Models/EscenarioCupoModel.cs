@@ -1,5 +1,7 @@
 ﻿using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.DetallesEscenariosCupos;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.EscenariosCupo;
 using OzyParkAdmin.Domain.Zonas;
 
@@ -51,9 +53,24 @@ public class EscenarioCupoModel
     public bool EsActivo { get; set; } = true;
 
     /// <summary>
+    /// Si el escenario de cupo puede ser eliminado o no, depende de si tiene cupos asociados.
+    /// </summary>
+    public bool PuedeSerEliminado { get; set; } = true;
+
+    /// <summary>
     /// Lista de detalles asociados al escenario de cupo.
     /// </summary>
     public List<DetalleEscenarioCupoInfo> Detalles { get; set; } = new();
+
+    /// <summary>
+    /// Lista de exclusiones fechas asociadas al escenario de cupo.
+    /// </summary>
+    public List<DetalleEscenarioCupoExclusionFechaFullInfo> ExclusionesFecha { get; set; } = new();
+
+    /// <summary>
+    /// Lista de exclusiones asociadas al escenario de cupo.
+    /// </summary>
+    public List<DetalleEscenarioCupoExclusionFullInfo> Exclusiones { get; set; } = new();
 
     /// <summary>
     /// Actualiza el modelo con la información completa de <see cref="EscenarioCupoFullInfo"/>.
@@ -67,6 +84,8 @@ public class EscenarioCupoModel
         CentroCosto = info.CentroCosto;
         Zona = info.Zona;
         Detalles = info.Detalles?.ToList() ?? new List<DetalleEscenarioCupoInfo>();
+        Exclusiones = info.Exclusiones.ToList();
+        ExclusionesFecha = info.ExclusionesFechas.ToList();
     }
 
     /// <summary>
@@ -81,5 +100,7 @@ public class EscenarioCupoModel
         CentroCosto = model.CentroCosto;
         Zona = model.Zona;
         Detalles = model.Detalles;
+        Exclusiones = model.Exclusiones;
+        ExclusionesFecha = model.ExclusionesFecha;
     }
 }

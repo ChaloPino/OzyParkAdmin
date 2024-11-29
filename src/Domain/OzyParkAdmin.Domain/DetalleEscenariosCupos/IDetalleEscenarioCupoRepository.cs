@@ -11,6 +11,10 @@ public interface IDetalleEscenarioCupoRepository
     Task<IEnumerable<DetalleEscenarioCupo>> GetDetallesByEscenarioCupoIdAsync(int escenarioCupoId, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Obtiene los detalles asociados a un escenario de cupo por su ID.
+    /// </summary>
+    Task<IEnumerable<DetalleEscenarioCupo>> FindByIdsAsync(int escenarioCupoId, CancellationToken cancellationToken);
+    /// <summary>
     /// Agrega múltiples detalles asociados a un escenario de cupo.
     /// </summary>
     Task AddDetallesAsync(IEnumerable<DetalleEscenarioCupo> detalles, CancellationToken cancellationToken);

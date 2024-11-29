@@ -1,5 +1,7 @@
 ﻿using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.DetallesEscenariosCupos;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.Zonas;
 
 namespace OzyParkAdmin.Domain.EscenariosCupo;
@@ -43,5 +45,15 @@ public sealed record EscenarioCupoFullInfo
     /// Si el escenario de cupo está activo.
     /// </summary>
     public bool EsActivo { get; set; }
+
+    /// <summary>
+    /// Si el escenario tiene un cupo asoaciado.
+    /// </summary>
+    public bool TienCupoAsociado { get; set; }
+
     public IEnumerable<DetalleEscenarioCupoInfo> Detalles { get; set; }
+
+    public IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> ExclusionesFechas { get; set; }
+
+    public IEnumerable<DetalleEscenarioCupoExclusionFullInfo> Exclusiones { get; set; }
 }

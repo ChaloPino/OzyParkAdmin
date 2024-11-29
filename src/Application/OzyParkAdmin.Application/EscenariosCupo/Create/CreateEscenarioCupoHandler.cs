@@ -9,7 +9,7 @@ namespace OzyParkAdmin.Application.EscenariosCupo.Create;
 /// <summary>
 /// El manejador de <see cref="CreateEscenarioCupo"/>.
 /// </summary>
-public sealed class CreateEscenarioCupoHandler : CommandHandler<CreateEscenarioCupo>
+public sealed class CreateEscenarioCupoHandler : CommandHandler<CreateEscenarioCupo, EscenarioCupoFullInfo>
 {
     private readonly IOzyParkAdminContext _context;
     private readonly EscenarioCupoManager _manager;
@@ -30,12 +30,12 @@ public sealed class CreateEscenarioCupoHandler : CommandHandler<CreateEscenarioC
     }
 
     /// <inheritdoc/>
-    protected override async Task<SuccessOrFailure> ExecuteAsync(CreateEscenarioCupo command, CancellationToken cancellationToken)
+    protected override async Task<ResultOf<EscenarioCupoFullInfo>> ExecuteAsync(CreateEscenarioCupo command, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        // Invocar el manager para crear el escenario de cupo junto con los detalles
-        var result = await _manager.CreateEscenarioCupoAsync(
+        // Invocar el manager para crear el escenario de cupo junto con los detalles y exclusiones
+        ResultOf<EscenarioCupo> result = await _manager.CreateEscenarioCupoAsync(
             command.CentroCosto,
             command.ZonaInfo,
             command.Nombre,
@@ -43,98 +43,34 @@ public sealed class CreateEscenarioCupoHandler : CommandHandler<CreateEscenarioC
             command.MinutosAntes,
             command.EsActivo,
             command.Detalles,
+            command.Exclusiones,
             cancellationToken);
 
-        return await result.MatchAsync<SuccessOrFailure>(
-                 async (escenarioCupo, cancellationToken) => await Task.FromResult(new Success()),
-                 failure => failure,
-                 cancellationToken);
-
+        return await result.BindAsync(
+            onSuccess: SaveAsync,
+            onFailure: failure => failure,
+            cancellationToken: cancellationToken);
     }
 
     /// <summary>
-    /// Guarda los escenarios de cupo y sus detalles asociados en la base de datos.
+    /// Guarda el escenario de cupo y sus detalles asociados en la base de datos.
     /// </summary>
-    private async Task<SuccessOrFailure> SaveAsync(IEnumerable<EscenarioCupo> escenarioCupos, CancellationToken cancellationToken)
+    private async Task<ResultOf<EscenarioCupoFullInfo>> SaveAsync(EscenarioCupo escenarioCupo, CancellationToken cancellationToken)
     {
-        // Validar duplicados antes de iniciar la transacción
-        foreach (var escenarioCupo in escenarioCupos)
-        {
-            if (escenarioCupo.DetallesEscenarioCupo != null)
-            {
-                var duplicados = escenarioCupo.DetallesEscenarioCupo
-                    .GroupBy(d => new { d.EscenarioCupoId, d.ServicioId })
-                    .Where(g => g.Count() > 1)
-                    .Select(g => g.Key)
-                    .ToList();
+        await _context.AddAsync(escenarioCupo, cancellationToken);
 
-                if (duplicados.Any())
-                {
-                    return new ValidationError("DetallesEscenarioCupo",
-                        "Se encontraron duplicados en los detalles de los escenarios.");
-                }
-            }
+        if (escenarioCupo.DetallesEscenarioCupo.Any())
+        {
+            await _context.AddRangeAsync(escenarioCupo.DetallesEscenarioCupo, cancellationToken);
         }
 
-        // Iniciar transacción
-        await _context.BeginTransactionAsync(cancellationToken);
-        try
+        if (escenarioCupo.ExclusionesPorFecha.Any())
         {
-            var escenariosCupoList = escenarioCupos.ToList();
-
-            // Extraer detalles de los escenarios
-            var todosLosDetalles = escenariosCupoList
-                .Where(e => e.DetallesEscenarioCupo != null)
-                .SelectMany(e => e.DetallesEscenarioCupo)
-                .ToList();
-
-            // Vaciar los detalles antes de insertar los escenarios
-            foreach (var escenario in escenariosCupoList)
-            {
-                escenario.DetallesEscenarioCupo.Clear();
-            }
-
-            // Insertar escenarios
-            if (escenariosCupoList.Count <= 30)
-            {
-                await _context.AddRangeAsync(escenariosCupoList, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-            }
-            else
-            {
-                await _context.BulkInsertAsync(escenariosCupoList, cancellationToken);
-            }
-
-            // Asignar nuevamente los IDs de los escenarios a los detalles
-            foreach (var detalle in todosLosDetalles)
-            {
-                detalle.UpdateEscenarioId(detalle.EscenarioCupoId);
-            }
-
-            // Insertar detalles
-            if (todosLosDetalles.Count > 30)
-            {
-                await _context.BulkInsertAsync(todosLosDetalles, cancellationToken);
-            }
-            else
-            {
-                await _context.AddRangeAsync(todosLosDetalles, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-            }
-
-            // Confirmar transacción
-            await _context.CommitTransactionAsync(cancellationToken);
-            return new Success();
+            await _context.AddRangeAsync(escenarioCupo.ExclusionesPorFecha, cancellationToken);
         }
-        catch (Exception ex)
-        {
-            // Revertir transacción en caso de error
-            await _context.RollbackTransactionAsync(cancellationToken);
-            return new Failure();
-        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return escenarioCupo.ToFullInfo();
     }
-
-
-
-
 }

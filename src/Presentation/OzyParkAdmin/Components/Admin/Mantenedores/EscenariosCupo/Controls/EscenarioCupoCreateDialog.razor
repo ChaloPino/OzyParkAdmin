@@ -6,35 +6,45 @@
 
 <MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
     <DialogContent>
-        <IfThen Condition="ViewModel.Loading">
-            <Then>
-                <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
-            </Then>
-        </IfThen>
+        @if (ViewModel.Loading)
+        {
+            <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+        }
+        else
+        {
+            <MudTabs>
+                <!-- Tab Escenario Cupo -->
+                <MudTabPanel Text="Escenario Cupo">
+                    <CreateEscenarioCupoLayout @ref="createEscenarioCupoForm"
+                                               Validator="Validator"
+                                               escenarioCupo="escenarioCupo"
+                                               CentrosCostos="CentrosCostos"
+                                               Zonas="Zonas" />
+                </MudTabPanel>
 
-        <MudTabs>
-            <!-- Tab Escenario Cupo -->
-            <MudTabPanel Text="Escenario Cupo">
-                <CreateEscenarioCupoLayout @ref="createEscenarioCupoForm"
-                                           Validator="Validator"
-                                           escenarioCupo="escenarioCupo"
-                                           CentrosCostos="CentrosCostos"
-                                           Zonas="Zonas" />
-            </MudTabPanel>
+                <!-- Tab Detalles -->
+                <MudTabPanel Text="Detalles">
+                    <!-- Componente de detalles, notificará al agregar uno -->
+                    <CreateDetalleEscenarioCupoLayout Detalles="@escenarioCupo.Detalles"
+                                                      Servicios="Servicios"
+                                                      EscenarioSeleccionado="escenarioCupo"
+                                                      OnDetalleAgregado="OnDetalleAgregado" />
+                </MudTabPanel>
 
-            <!-- Tab Detalles -->
-            <MudTabPanel Text="Detalles">
-                <!-- Componente de detalles, notificará al agregar uno -->
-                <CreateDetalleEscenarioCupoLayout Detalles="@escenarioCupo.Detalles"
-                                                  Servicios="Servicios"
-                                                  OnDetalleAgregado="OnDetalleAgregado" />
-            </MudTabPanel>
-        </MudTabs>
+                <!-- Tab Exclusiones -->
+                <MudTabPanel Text="Exclusiones">
+                    <!-- Componente de exclusiones, notificará al agregar uno -->
+                    <CreateExclusionesPorFechaLayout Exclusiones="@escenarioCupo.ExclusionesFecha"
+                                                     CanalesVentaDisponibles="CanalesVenta"
+                                                     ServiciosDisponibles="Servicios"
+                                                     OnExclusionAgregada="OnExclusionAgregada" />
+                </MudTabPanel>
+            </MudTabs>
+        }
     </DialogContent>
 
     <DialogActions>
         <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Disabled="ViewModel.Loading" Class="px-10">Cancelar</MudButton>
-        <!-- Botón guardar, solo habilitado si el escenario es válido y hay detalles -->
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="ViewModel.Loading || !EsValidoParaGuardar" Class="px-10">Guardar</MudButton>
     </DialogActions>
 </MudDialog>

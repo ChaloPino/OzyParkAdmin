@@ -19,11 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DetalleEscenarioExclusionFecha\" />
     <Folder Include="DetalleEscenarioExclusion\Create\" />
     <Folder Include="DetalleEscenarioExclusion\Delete\" />
-    <Folder Include="DetalleEscenarioExclusion\Update\" />
-    <Folder Include="DetalleEscenarioExclusion\Search\" />
   </ItemGroup>
 
 </Project>

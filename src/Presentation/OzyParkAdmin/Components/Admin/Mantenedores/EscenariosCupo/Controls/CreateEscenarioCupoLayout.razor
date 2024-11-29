@@ -4,7 +4,7 @@
 @using OzyParkAdmin.Domain.CentrosCosto
 @using OzyParkAdmin.Domain.Zonas
 
-<MudForm @ref="form" Model="escenarioCupo" Validation="Validator.ValidateValue" ValidationDelay="0">
+<MudForm @ref="form" Model="escenarioCupo" Validation="Validator.ValidateValue" ValidationDelay="0" @bind-IsValid="@formEscenarioCupoValid">
     <MudGrid Spacing="1" Class="mt-4">
         <MudItem xs="4">
             <MudTextField @bind-Value="escenarioCupo.Nombre" Variant="Variant.Outlined"
@@ -72,9 +72,9 @@
     [Parameter]
     public List<ZonaInfo> Zonas { get; set; } = new();
 
-    public async Task<bool> ValidateForm()
-    {
-        await form.Validate();
-        return form.IsValid;
-    }
+    public bool formEscenarioCupoValid = false;
+
+    [Parameter]
+    public EventCallback<bool> OnFormValidChange { get; set; }
+
 }

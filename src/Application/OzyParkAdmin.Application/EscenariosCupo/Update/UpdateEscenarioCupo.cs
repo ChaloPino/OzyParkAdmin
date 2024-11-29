@@ -1,6 +1,8 @@
 ﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.DetallesEscenariosCupos;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.EscenariosCupo;
 using OzyParkAdmin.Domain.Zonas;
 
@@ -19,10 +21,12 @@ namespace OzyParkAdmin.Application.EscenariosCupo.Update;
 /// <param name="EsActivo">Si estará activo.</param>
 public sealed record UpdateEscenarioCupo(
     int Id,
-    CentroCostoInfo CentroCosto,
-    ZonaInfo? ZonaInfo,
-    IEnumerable<DetalleEscenarioCupoInfo> Detalles,
     string Nombre,
     bool EsHoraInicio,
     int MinutosAntes,
-    bool EsActivo) : ICommand<EscenarioCupoFullInfo>;
+    bool EsActivo,
+    CentroCostoInfo CentroCosto,
+    ZonaInfo? ZonaInfo,
+    IEnumerable<DetalleEscenarioCupoInfo> Detalles,
+    IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> ExclusionesFecha,
+    IEnumerable<DetalleEscenarioCupoExclusionFullInfo> Exclusiones) : ICommand<EscenarioCupoFullInfo>;

@@ -1,0 +1,86 @@
+﻿@using OzyParkAdmin.Domain.Servicios
+@using OzyParkAdmin.Domain.CanalesVenta
+@using OzyParkAdmin.Domain.Entidades
+@using MudBlazor
+@using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Validators
+@inject DetalleEscenarioCupoExclusionValidator Validator
+
+<MudPaper Elevation="4">
+        <MudForm Model="@Model" @ref="_form" Validation="@Validator" ValidationDelay="0" @bind-IsValid="_valid">
+            <MudGrid Spacing="2" Class="mt-4 pa-5">
+                <MudItem xs="12" sm="6" md="4">
+                    <MudSelect T="ServicioInfo" @bind-SelectedValues="ServiciosSeleccionados"
+                               Label="Servicios"
+                               SelectAll="true"
+                               SelectAllText="Seleccionar todos"
+                               MultiSelection="!IsEditMode"
+                               Required="true"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x != null ? x.Nombre : string.Empty"
+                               Variant="Variant.Outlined">
+                        @foreach (var servicio in Servicios.Where(s => s != null))
+                        {
+                            <MudSelectItem Value="@servicio">@servicio.Nombre</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4">
+                    <MudSelect T="CanalVenta" @bind-SelectedValues="CanalesVentaSeleccionados" 
+                               Label="Canales de Venta"
+                               SelectAll="true"
+                               SelectAllText="Seleccionar todos"
+                               MultiSelection="!IsEditMode"
+                               Required="true"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x != null ? x.Nombre : string.Empty"
+                               Variant="Variant.Outlined">
+                        @foreach (var canal in CanalesVenta)
+                        {
+                            <MudSelectItem Value="@canal">@canal.Nombre</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4">
+                    <MudSelect T="DiaSemana" @bind-SelectedValues="DiasSemanaSeleccionados"
+                               Label="Días de la Semana"
+                               SelectAll="true"
+                               SelectAllText="Seleccionar todos"
+                               MultiSelection="!IsEditMode"
+                               Required="true"
+                               Margin="Margin.Dense"
+                               Dense="true"
+                               ToStringFunc="x => x != null ? x.Aka : string.Empty"
+                               Variant="Variant.Outlined">
+                        @foreach (var dia in DiasSemana)
+                        {
+                            <MudSelectItem Value="@dia">@dia.Aka</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4">
+                    <MudTimePicker Label="Hora de Inicio" @bind-Time="@Model.HoraInicio" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" Class="w-100" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4">
+                    <MudTimePicker Label="Hora de Fin" @bind-Time="@Model.HoraFin" Variant="Variant.Outlined" Margin="Margin.Dense" Class="w-100" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    <MudGrid Spacing="2" Class="mt-4 pa-5">
+        <MudItem xs="6">
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="Cancel">
+                <MudIcon Icon="@Icons.Material.Filled.Close" /> Cancelar
+            </MudButton>
+        </MudItem>
+        <MudItem xs="6" Class="d-flex justify-end">
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveAsync" Disabled="!_valid">
+                <MudIcon Icon="@Icons.Material.Filled.Add" /> Guardar
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>

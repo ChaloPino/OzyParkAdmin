@@ -87,25 +87,29 @@ internal static class EscenarioCupoMappers
             MinutosAntes = escenarioCupo.MinutosAntes,
             Nombre = escenarioCupo.Nombre,
             EsActivo = escenarioCupo.EsActivo,
+            PuedeSerEliminado = !escenarioCupo.TienCupoAsociado,
             Detalles = escenarioCupo.Detalles.ToList()
         };
 
     public static CreateEscenarioCupo ToCreate(this EscenarioCupoModel model) =>
-        new(model.CentroCosto, model.Zona, model.Detalles, model.Nombre, model.EsHoraInicio, model.MinutosAntes, model.EsActivo);
+        new(model.CentroCosto, model.Zona, model.Detalles, model.ExclusionesFecha, model.Nombre, model.EsHoraInicio, model.MinutosAntes, model.EsActivo);
 
     public static DeleteEscenarioCupo ToDelete(this IEnumerable<EscenarioCupoModel> source) =>
-        new([.. source.Select(ToInfo)]);
+        new([.. source.Select(x => x.Id)]);
 
     public static UpdateEscenarioCupo ToUpdate(this EscenarioCupoModel model) =>
        new(
            model.Id,
-           new CentroCostoInfo { Id = model.CentroCosto.Id, Descripcion = model.CentroCosto.Descripcion },
-           model.Zona is not null ? new ZonaInfo { Id = model.Zona.Id, Descripcion = model.Zona.Descripcion } : null,
-           model.Detalles,
            model.Nombre,
            model.EsHoraInicio,
            model.MinutosAntes,
-           model.EsActivo);
+           model.EsActivo,
+           new CentroCostoInfo { Id = model.CentroCosto.Id, Descripcion = model.CentroCosto.Descripcion },
+           model.Zona is not null ? new ZonaInfo { Id = model.Zona.Id, Descripcion = model.Zona.Descripcion } : null,
+           model.Detalles,
+           model.ExclusionesFecha,
+           model.Exclusiones
+           );
 
     private static EscenarioCupoFullInfo ToInfo(this EscenarioCupoModel escenarioCupo) =>
         new()

@@ -1,0 +1,209 @@
+﻿@using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models
+@using MudBlazor
+@using OzyParkAdmin.Domain.CanalesVenta
+@using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas
+@using OzyParkAdmin.Domain.Servicios
+@inject IDialogService DialogService
+@inject IMediator Mediator
+@inject ISnackbar Snackbar
+
+<MudCard>
+    <MudCardHeader>
+        <MudText Typo="Typo.h6">Exclusiones por Fecha</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudGrid Spacing="1" Class="mt-4">
+            <MudItem xs="4">
+                <MudSelect @bind-SelectedValues="ServiciosSeleccionados"
+                           SelectAll="true"
+                           SelectAllText="Seleccionar todos"
+                           Label="Servicios"
+                           MultiSelection="true"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Dense="true"
+                           ToStringFunc="x => x?.Nombre"
+                           MultiSelectionTextFunc="ServiciosVentaDescriptions"
+                           Required="true">
+                    @foreach (var servicio in ServiciosDisponibles)
+                    {
+                        <MudSelectItem T="ServicioInfo" Value="servicio">@servicio.Nombre</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="4">
+                <MudSelect @bind-SelectedValues="CanalesVentaSeleccionados"
+                           SelectAll="true"
+                           SelectAllText="Seleccionar todos"
+                           Label="Canales de Venta"
+                           MultiSelection="true"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Dense="true"
+                           ToStringFunc="x => x?.Nombre"
+                           Required="true">
+                    @foreach (var canal in CanalesVentaDisponibles)
+                    {
+                        <MudSelectItem T="CanalVenta" Value="canal">@canal.Nombre</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="4">
+                <MudDatePicker Label="Fecha de Exclusión" @bind-Date="detalle.FechaExclusion" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="4">
+                <MudTimePicker Label="Hora Inicio" @bind-Time="detalle.HoraInicio" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="4">
+                <MudTimePicker Label="Hora Fin" @bind-Time="detalle.HoraFin" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AgregarExclusion" Disabled="!EsDetalleValido">
+            <MudIcon Icon="@Icons.Material.Filled.Add" /> Agregar Exclusión
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="CancelarEdicion" Disabled="!IsEditMode">
+            <MudIcon Icon="@Icons.Material.Filled.Close" /> Cancelar edición
+        </MudButton>
+    </MudCardActions>
+
+    <MudDivider Class="mt-5 mb-5" />
+
+    <MudGrid Class="mt-4">
+        <MudItem xs="12" Class="d-flex justify-end">
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="EliminarSeleccionados" Disabled="DetallesSeleccionados.Count == 0">
+                <MudIcon Icon="@Icons.Material.Filled.Delete" /> Eliminar seleccionados
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+
+    <MudTable Items="Exclusiones" Class="mt-4" @bind-SelectedItems="DetallesSeleccionados" MultiSelection="true" T="DetalleEscenarioCupoExclusionFechaFullInfo">
+        <HeaderContent>
+            <MudTh>Servicio</MudTh>
+            <MudTh>Canal de Venta</MudTh>
+            <MudTh>Fecha de Exclusión</MudTh>
+            <MudTh>Hora Inicio</MudTh>
+            <MudTh>Hora Fin</MudTh>
+            <MudTh>Acciones</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.ServicioNombre</MudTd>
+            <MudTd>@context.CanalVentaNombre</MudTd>
+            <MudTd>@(context.FechaExclusion.HasValue ? context.FechaExclusion.Value.ToString("dd/MM/yyyy") : "-")</MudTd>
+            <MudTd>@(context.HoraInicio.HasValue ? context.HoraInicio.Value.ToString(@"hh\:mm") : "-")</MudTd>
+            <MudTd>@(context.HoraFin.HasValue ? context.HoraFin.Value.ToString(@"hh\:mm") : "-")</MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditarExclusion(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => EliminarExclusion(context)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudCard>
+
+@code {
+    private HashSet<DetalleEscenarioCupoExclusionFechaFullInfo> DetallesSeleccionados = new();
+    private IEnumerable<ServicioInfo> ServiciosSeleccionados = new List<ServicioInfo>();
+    private IEnumerable<CanalVenta> CanalesVentaSeleccionados = new List<CanalVenta>();
+    private DetalleEscenarioCupoExclusionFechaFullInfo detalle = new();
+    private bool IsEditMode { get; set; } = false;
+
+    [Parameter]
+    public List<DetalleEscenarioCupoExclusionFechaFullInfo> Exclusiones { get; set; } = new();
+
+    [Parameter]
+    public EscenarioCupoModel? EscenarioSeleccionado { get; set; } = default!;
+
+    [Parameter]
+    public Func<DetalleEscenarioCupoExclusionFechaModel, Task<bool>> CommitChanges { get; set; } = _ => Task.FromResult(true);
+
+    [Parameter]
+    public List<ServicioInfo> ServiciosDisponibles { get; set; } = default!;
+
+    [Parameter]
+    public List<CanalVenta> CanalesVentaDisponibles { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<List<DetalleEscenarioCupoExclusionFechaFullInfo>> OnExclusionAgregada { get; set; }
+
+    private static string ServiciosVentaDescriptions(List<string?>? servicios) => servicios switch
+    {
+        null => "Seleccione Servicios",
+        { Count: 0 } => "Seleccione Servicios",
+        { Count: 1 } => servicios[0] ?? string.Empty,
+        _ => $"{servicios.Count} servicios seleccionados",
+    };
+
+    private bool EsDetalleValido =>
+        ServiciosSeleccionados.Any() && CanalesVentaSeleccionados.Any() && detalle.FechaExclusion != DateTime.MinValue;
+
+    private async Task AgregarExclusion()
+    {
+        foreach (var servicio in ServiciosSeleccionados)
+        {
+            foreach (var canal in CanalesVentaSeleccionados)
+            {
+                if (!Exclusiones.Any(e => e.ServicioId == servicio.Id && e.CanalVentaId == canal.Id && e.FechaExclusion == detalle.FechaExclusion))
+                {
+                    Exclusiones.Add(new DetalleEscenarioCupoExclusionFechaFullInfo
+                        {
+                            EscenarioCupoId = EscenarioSeleccionado?.Id ?? 0,
+                            ServicioId = servicio.Id,
+                            CanalVentaId = canal.Id,
+                            FechaExclusion = detalle.FechaExclusion,
+                            HoraInicio = detalle.HoraInicio,
+                            HoraFin = detalle.HoraFin,
+                            ServicioNombre = servicio.Nombre,
+                            CanalVentaNombre = canal.Nombre
+
+                        });
+                }
+            }
+        }
+
+        await OnExclusionAgregada.InvokeAsync(Exclusiones);
+    }
+
+    private void EditarExclusion(DetalleEscenarioCupoExclusionFechaFullInfo exclusionAEditar)
+    {
+        detalle = new DetalleEscenarioCupoExclusionFechaFullInfo
+            {
+                EscenarioCupoId = exclusionAEditar.EscenarioCupoId,
+                ServicioId = exclusionAEditar.ServicioId,
+                CanalVentaId = exclusionAEditar.CanalVentaId,
+                FechaExclusion = exclusionAEditar.FechaExclusion,
+                HoraInicio = exclusionAEditar.HoraInicio,
+                HoraFin = exclusionAEditar.HoraFin,
+                ServicioNombre = exclusionAEditar.ServicioNombre,
+                CanalVentaNombre = exclusionAEditar.CanalVentaNombre
+            };
+        ServiciosSeleccionados = ServiciosDisponibles.Where(s => s.Id == exclusionAEditar.ServicioId).ToList();
+        CanalesVentaSeleccionados = CanalesVentaDisponibles.Where(c => c.Id == exclusionAEditar.CanalVentaId).ToList();
+        IsEditMode = true;
+    }
+
+    private void EliminarExclusion(DetalleEscenarioCupoExclusionFechaFullInfo exclusionAEliminar)
+    {
+        Exclusiones.Remove(exclusionAEliminar);
+        Snackbar.Add("Exclusión eliminada correctamente.", Severity.Info);
+    }
+
+    private void EliminarSeleccionados()
+    {
+        foreach (var detalle in DetallesSeleccionados.ToList())
+        {
+            Exclusiones.Remove(detalle);
+        }
+
+        DetallesSeleccionados.Clear();
+        Snackbar.Add("ExclusionesFecha seleccionadas eliminadas correctamente.", Severity.Info);
+    }
+
+    private void CancelarEdicion()
+    {
+        detalle = new();
+        ServiciosSeleccionados = Enumerable.Empty<ServicioInfo>();
+        CanalesVentaSeleccionados = Enumerable.Empty<CanalVenta>();
+        IsEditMode = false;
+    }
+}

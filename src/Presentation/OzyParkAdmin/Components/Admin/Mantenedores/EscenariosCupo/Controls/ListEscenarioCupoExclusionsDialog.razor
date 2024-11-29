@@ -1,0 +1,66 @@
+﻿@page "/escenario-cupo-exclusion-list-dialog"
+
+@using OzyParkAdmin.Application.DetalleEscenarioExclusion.Search
+@using OzyParkAdmin.Application.EscenariosCupo.Search
+@using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models
+@using OzyParkAdmin.Domain.EscenariosCupo
+@using System.Security.Claims
+@inject ISnackbar Snackbar
+@inject IMediator Mediator
+@inject IDialogService DialogService
+
+<MudDataGrid @ref="dataGrid" T="DetalleEscenarioCupoExclusionModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="false"
+             ServerData="SearchEscenariosCupoExclusionesAsync" SortMode="SortMode.Multiple" MultiSelection="true" Loading="loading"
+             @bind-SelectedItems="exclusionesToDelete"
+             Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
+             Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu">
+    <ToolBarContent>
+        <MudSpacer />
+        <SearchControl @bind-SearchText="searchText" />
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="() => OpenCreateExclusionDialogAsync()">Nueva Exclusión</MudButton>
+        <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Filled" Class="ml-3" Disabled="exclusionesToDelete.Count == 0" OnClick="() => EliminarExclusiones()">Eliminar Seleccionadas</MudButton>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="DetalleEscenarioCupoExclusionModel" Hideable="false" />
+        <PropertyColumn Property="x => x.ServicioNombre" Title="Servicio">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.ServicioNombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.CanalVentaNombre" Title="Canal de Venta">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.CanalVentaNombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+            <GroupTemplate>
+                <StringGrouping Title="Canal de venta de la exclusion" GroupDefinition="context" />
+            </GroupTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.DiaSemanaNombre" Title="Día">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.DiaSemanaNombre" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.HoraInicio" Title="Hora de inicio" Hideable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.HoraInicio.ToString()" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.HoraFin" Title="Hora de término" Hideable="false">
+            <CellTemplate>
+                <MudHighlighter Text="@context.Item.HoraFin.ToString()" CaseSensitive="false" HighlightedText="@searchText" />
+            </CellTemplate>
+        </PropertyColumn>
+        <TemplateColumn Hideable="false" Groupable="false" Filterable="false" Sortable="false">
+            <CellTemplate>
+                <div class="d-flex justify-end">
+                    <MudTooltip Text="Editar">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@(() => OpenEditExclusionDialogAsync(context.Item))" />
+                    </MudTooltip>
+                </div>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="DetalleEscenarioCupoExclusionModel" />
+    </PagerContent>
+</MudDataGrid>

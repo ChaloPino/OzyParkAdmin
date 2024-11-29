@@ -49,14 +49,16 @@ public sealed class UpdateEscenarioCupoHandler : CommandHandler<UpdateEscenarioC
         // Actualizar el escenario usando el EscenarioCupoManager
         var updateEscenarioCupoResult = await _escenarioCupoManager.UpdateAsync(
             id: command.Id,
-            escenarioExistente: escenarioCupo,
+            existente: escenarioCupo,
             centroCostoInfo: command.CentroCosto,
             zonaInfo: command.ZonaInfo,
             nombre: command.Nombre,
             esHoraInicio: command.EsHoraInicio,
             minutosAntes: command.MinutosAntes,
             esActivo: command.EsActivo,
-            nuevosDetalles: command.Detalles,
+            detalles: command.Detalles,
+            exclusionesFecha: command.ExclusionesFecha,
+            exclusiones: command.Exclusiones,
             cancellationToken: cancellationToken);
 
         if (updateEscenarioCupoResult.IsFailure(out var failure))

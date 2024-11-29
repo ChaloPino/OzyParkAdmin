@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.Cupos;
 using OzyParkAdmin.Domain.DetallesEscenariosCupos;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.EscenariosCupo;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
@@ -14,88 +17,75 @@ namespace OzyParkAdmin.Infrastructure.EscenariosCupo;
 /// </summary>
 public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<EscenarioCupo>(context), IEscenarioCupoRepository
 {
-    public async Task AddDetallesAsync(IEnumerable<DetalleEscenarioCupoInfo> detalles, CancellationToken cancellationToken)
+
+    /// <summary>
+    /// Método que retorna una consulta base de `EscenarioCupo`, incluyendo detalles y exclusiones por fecha.
+    /// </summary>
+    /// <returns>Una consulta de `IQueryable` con los `Include` necesarios.</returns>
+    private IQueryable<EscenarioCupo> GetBaseQuery()
     {
-        // Validar que los detalles no sean nulos
-        ArgumentNullException.ThrowIfNull(detalles, nameof(detalles));
-
-        // Convertir los DetalleEscenarioCupoInfo a DetalleEscenarioCupo usando el método Create
-        var detallesEntidades = detalles.Select(d =>
-        {
-            return DetalleEscenarioCupo.Create(
-                d.EscenarioCupoId,
-                d.ServicioId,
-                d.TopeDiario,
-                d.UsaSobreCupo,
-                d.HoraMaximaVenta!.Value,
-                d.HoraMaximaRevalidacion!.Value,
-                d.UsaTopeEnCupo,
-                d.TopeFlotante
-            );
-        }).ToList();
-
-        // Agregar los detalles al contexto
-        await Context.Set<DetalleEscenarioCupo>().AddRangeAsync(detallesEntidades, cancellationToken);
+        return Context.Set<EscenarioCupo>()
+            .IgnoreAutoIncludes()
+                      .AsSplitQuery()
+                      .Include(e => e.DetallesEscenarioCupo);
     }
 
-    public async Task<bool> ExistsWithSimilarNameAsync(string nombre, int? excludeId, CancellationToken cancellationToken)
-    {
-        return await Context.Set<EscenarioCupo>()
-            .AsNoTracking()
-            .Where(e => e.Nombre == nombre && (excludeId == null || e.Id != excludeId))
-            .AnyAsync(cancellationToken);
-    }
-
+    /// <inheritdoc/>
     public async Task<EscenarioCupo?> FindByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return await Context.Set<EscenarioCupo>()
-            .Include(e => e.DetallesEscenarioCupo)
+        // Usar el método GetBaseQuery para incluir detalles y exclusionesFecha asociadas al escenario de cupo
+        return await GetBaseQuery()
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<EscenarioCupo>> FindByIdsAsync(int[] ids, CancellationToken cancellationToken)
-    {
-        return await Context.Set<EscenarioCupo>()
-            .Where(e => ids.Contains(e.Id))
-            .Include(e => e.DetallesEscenarioCupo)
-            .ToListAsync(cancellationToken);
-    }
 
-    public async Task<IEnumerable<EscenarioCupo>> FindEscenariosAsync(int centroCostoId, int? zonaId, CancellationToken cancellationToken)
-    {
-        return await Context.Set<EscenarioCupo>()
-            .Where(e => e.CentroCosto.Id == centroCostoId && (zonaId == null || e.Zona!.Id == zonaId))
-            .Include(e => e.DetallesEscenarioCupo)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<IEnumerable<EscenarioCupo>> FindEscenariosAsync(IEnumerable<EscenarioCupoFullInfo> escenariosCupos, CancellationToken cancellationToken)
-    {
-        // Implementa la lógica para buscar escenarios basándote en EscenarioCupoFullInfo
-        throw new NotImplementedException();
-    }
-
+    /// <inheritdoc/>
     public async Task<EscenarioCupo?> FindEscenarioAsync(int centroCostoId, int? zonaId, string nombre, CancellationToken cancellationToken)
     {
+        // Incluir detalles y exclusionesFecha en la búsqueda por centro de costo, zona y nombre
         return await Context.Set<EscenarioCupo>()
-            .FirstOrDefaultAsync(e => e.CentroCosto.Id == centroCostoId && (zonaId == null || e.Zona!.Id == zonaId) && e.Nombre == nombre, cancellationToken);
+            .FirstOrDefaultAsync(e => e.CentroCosto.Id == centroCostoId &&
+                                      (zonaId == null || e.Zona!.Id == zonaId) &&
+                                      e.Nombre == nombre, cancellationToken);
     }
 
-    public async Task<PagedList<EscenarioCupoFullInfo>> SearchAsync(
-    int[]? centrosCostoId,
-    int[]? zonasId,
-    string? searchText,
-    FilterExpressionCollection<EscenarioCupo> filterExpressions,
-    SortExpressionCollection<EscenarioCupo> sortExpressions,
-    int page,
-    int pageSize,
-    CancellationToken cancellationToken)
+    /// <inheritdoc/>
+    public async Task<IEnumerable<EscenarioCupo>> FindEscenariosAsync(int centroCostoId, int? zonaId, CancellationToken cancellationToken)
     {
+        // Buscar escenarios de cupo por centro de costo y zona, e incluir detalles y exclusionesFecha
+        return await Context.Set<EscenarioCupo>()
+            .Where(e => e.CentroCosto.Id == centroCostoId &&
+                        (zonaId == null || e.Zona != null && e.Zona.Id == zonaId))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> ExistsWithSimilarNameAsync(string nombre, int? excludeId, CancellationToken cancellationToken)
+    {
+        // Verificar si existe un escenario de cupo con un nombre similar, excluyendo un ID específico si es necesario
+        return await Context.Set<EscenarioCupo>()
+            .AsNoTracking()
+            .AnyAsync(e => e.Nombre == nombre && (!excludeId.HasValue || e.Id != excludeId.Value), cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<PagedList<EscenarioCupoFullInfo>> SearchAsync(
+        int[]? centrosCostoId,
+        int[]? zonasId,
+        string? searchText,
+        FilterExpressionCollection<EscenarioCupo> filterExpressions,
+        SortExpressionCollection<EscenarioCupo> sortExpressions,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        // Validar que las expresiones de filtro y de ordenamiento no sean nulas
         ArgumentNullException.ThrowIfNull(filterExpressions, nameof(filterExpressions));
         ArgumentNullException.ThrowIfNull(sortExpressions, nameof(sortExpressions));
 
         // Base query para buscar escenarios de cupo
-        var query = Context.Set<EscenarioCupo>().AsNoTracking();
+        var query = Context.Set<EscenarioCupo>()
+            .AsNoTracking();
 
         // Filtrar por centros de costo si se proporciona
         if (centrosCostoId is not null && centrosCostoId.Any())
@@ -128,7 +118,8 @@ public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<E
         query = sortExpressions.Sort(query);
 
         // Aplicar la paginación
-        var paginatedQuery = query.Skip(page * pageSize).Take(pageSize);
+        var paginatedQuery = query
+            .Skip(page * pageSize).Take(pageSize);
 
         // Proyectar los resultados a `EscenarioCupoFullInfo`
         var items = await paginatedQuery.Select(ec => new EscenarioCupoFullInfo
@@ -165,7 +156,14 @@ public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<E
                 UsaTopeEnCupo = d.UsaTopeEnCupo,
                 TopeFlotante = d.TopeFlotante
             }).ToList()
-        }).ToListAsync(cancellationToken).ConfigureAwait(false);
+        })
+        .ToListAsync(cancellationToken)
+        .ConfigureAwait(false);
+
+        foreach (EscenarioCupoFullInfo info in items)
+        {
+            info.TienCupoAsociado = await HasCupoRelated(info.Id, cancellationToken).ConfigureAwait(false);
+        }
 
         // Construir el objeto paginado
         return new PagedList<EscenarioCupoFullInfo>
@@ -177,86 +175,72 @@ public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<E
         };
     }
 
-
+    /// <inheritdoc/>
     public async Task<List<EscenarioCupoInfo>> ListAsync(int[]? centroCostoIds, CancellationToken cancellationToken)
     {
+        // Lista los escenarios de cupo, filtrando por centros de costo si se proporcionan
         return await Context.Set<EscenarioCupo>()
             .Where(e => centroCostoIds == null || centroCostoIds.Contains(e.CentroCosto.Id))
             .Select(e => new EscenarioCupoInfo { Id = e.Id, Nombre = e.Nombre })
             .ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task<int> GetLastIdAsync(CancellationToken cancellationToken)
     {
+        // Obtiene el último ID del escenario cupo
         return await Context.Set<EscenarioCupo>().MaxAsync(e => e.Id, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task AddAsync(EscenarioCupo escenarioCupo, CancellationToken cancellationToken)
     {
+        // Agrega un nuevo escenario cupo al contexto
         await Context.Set<EscenarioCupo>().AddAsync(escenarioCupo, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task AddRangeAsync(IEnumerable<EscenarioCupo> escenariosCupos, CancellationToken cancellationToken)
     {
+        // Agrega varios escenarios cupos al contexto
         await Context.Set<EscenarioCupo>().AddRangeAsync(escenariosCupos, cancellationToken);
     }
 
-    public async Task AddDetallesAsync(IEnumerable<DetalleEscenarioCupo> detalles, CancellationToken cancellationToken)
+    /// <inheritdoc/>
+    public async Task AddDetallesAsync(IEnumerable<DetalleEscenarioCupoInfo> detalles, CancellationToken cancellationToken)
     {
-        await Context.Set<DetalleEscenarioCupo>().AddRangeAsync(detalles, cancellationToken);
+        // Convertir DetalleEscenarioCupoInfo a DetalleEscenarioCupo y agregar al contexto
+        var detallesEntidades = detalles.Select(d =>
+            DetalleEscenarioCupo.Create(
+                d.EscenarioCupoId,
+                d.ServicioId,
+                d.TopeDiario,
+                d.UsaSobreCupo,
+                d.HoraMaximaVenta!.Value,
+                d.HoraMaximaRevalidacion!.Value,
+                d.UsaTopeEnCupo,
+                d.TopeFlotante
+            )).ToList();
+
+        await Context.Set<DetalleEscenarioCupo>().AddRangeAsync(detallesEntidades, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task RemoveAsync(EscenarioCupo escenarioCupo, CancellationToken cancellationToken)
     {
+        // Elimina un escenario cupo del contexto
         Context.Set<EscenarioCupo>().Remove(escenarioCupo);
     }
 
+    /// <inheritdoc/>
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
+        // Guarda los cambios pendientes en la base de datos
         await Context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateAsync(EscenarioCupo escenarioCupo, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(escenarioCupo, nameof(escenarioCupo));
 
-        // Buscar la entidad existente en el contexto
-        var existingEntity = await Context.Set<EscenarioCupo>()
-            .Include(e => e.DetallesEscenarioCupo) // Incluir detalles relacionados
-            .FirstOrDefaultAsync(e => e.Id == escenarioCupo.Id, cancellationToken);
-
-        if (existingEntity == null)
-        {
-            throw new InvalidOperationException($"No se encontró un EscenarioCupo con Id {escenarioCupo.Id}");
-        }
-
-        // Usar CreateOrUpdate para actualizar la entidad existente
-        var updateResult = EscenarioCupo.CreateOrUpdate(
-            id: existingEntity.Id,
-            escenarioExistente: existingEntity,
-            centroCosto: escenarioCupo.CentroCosto,
-            zona: escenarioCupo.Zona,
-            nombre: escenarioCupo.Nombre,
-            esHoraInicio: escenarioCupo.EsHoraInicio,
-            minutosAntes: escenarioCupo.MinutosAntes,
-            esActivo: escenarioCupo.EsActivo
-        );
-
-        if (updateResult.IsFailure(out var failure))
-        {
-            throw new InvalidOperationException($"Falló la actualización del EscenarioCupo: {failure}");
-        }
-
-        // Actualizar los detalles
-        UpdateDetalles(existingEntity, escenarioCupo.DetallesEscenarioCupo);
-
-        // Marcar la entidad como modificada
-        Context.Entry(existingEntity).State = EntityState.Modified;
-
-        // Guardar cambios
-        await Context.SaveChangesAsync(cancellationToken);
-    }
-
+    /// <inheritdoc/>
     private static void UpdateDetalles(EscenarioCupo existingEntity, IEnumerable<DetalleEscenarioCupo> nuevosDetalles)
     {
         // Eliminar detalles no incluidos en la nueva lista
@@ -286,5 +270,82 @@ public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<E
                 existingEntity.DetallesEscenarioCupo.Add(nuevoDetalle);
             }
         }
+    }
+
+    private static void UpdateExclusiones(EscenarioCupo existingEntity, IEnumerable<DetalleEscenarioCupoExclusionFecha> nuevasExclusiones)
+    {
+        // Eliminar exclusionesFecha no incluidas en la nueva lista
+        var exclusionesParaEliminar = existingEntity.ExclusionesPorFecha
+            .Where(e => !nuevasExclusiones.Any(ne => ne.ServicioId == e.ServicioId && ne.FechaExclusion == e.FechaExclusion))
+            .ToList();
+
+        foreach (var exclusion in exclusionesParaEliminar)
+        {
+            existingEntity.ExclusionesPorFecha.Remove(exclusion);
+        }
+
+        // Actualizar o agregar nuevas exclusionesFecha
+        foreach (var nuevaExclusion in nuevasExclusiones)
+        {
+            var exclusionExistente = existingEntity.ExclusionesPorFecha
+                .FirstOrDefault(e => e.ServicioId == nuevaExclusion.ServicioId && e.FechaExclusion == nuevaExclusion.FechaExclusion);
+
+            if (exclusionExistente != null)
+            {
+                // Actualizar propiedades de la exclusión existente
+                exclusionExistente.Update(nuevaExclusion);
+            }
+            else
+            {
+                // Agregar nueva exclusión
+                existingEntity.ExclusionesPorFecha.Add(nuevaExclusion);
+            }
+        }
+    }
+
+    private static void UpdateExclusiones(EscenarioCupo existingEntity, IEnumerable<DetalleEscenarioCupoExclusion> nuevasExclusiones)
+    {
+        // Eliminar exclusionesFecha no incluidas en la nueva lista
+        var exclusionesParaEliminar = existingEntity.Exclusiones
+            .Where(e => !nuevasExclusiones.Any(ne => ne.ServicioId == e.ServicioId && ne.DiaSemanaId == e.DiaSemanaId && ne.HoraInicio == e.HoraInicio))
+            .ToList();
+
+        foreach (var exclusion in exclusionesParaEliminar)
+        {
+            existingEntity.Exclusiones.Remove(exclusion);
+        }
+
+        // Actualizar o agregar nuevas exclusionesFecha
+        foreach (var nuevaExclusion in nuevasExclusiones)
+        {
+            var exclusionExistente = existingEntity.Exclusiones
+                .FirstOrDefault(e => e.ServicioId == nuevaExclusion.ServicioId && e.DiaSemanaId == nuevaExclusion.DiaSemanaId && e.HoraInicio == nuevaExclusion.HoraInicio);
+
+            if (exclusionExistente != null)
+            {
+                // Actualizar propiedades de la exclusión existente
+                exclusionExistente.Update(nuevaExclusion);
+            }
+            else
+            {
+                // Agregar nueva exclusión
+                existingEntity.Exclusiones.Add(nuevaExclusion);
+            }
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<EscenarioCupo>> FindByIdsAsync(int[] ids, CancellationToken cancellationToken)
+    {
+        return await GetBaseQuery()
+            .Where(e => Enumerable.Contains(ids, e.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> HasCupoRelated(int id, CancellationToken cancellationToken)
+    {
+        return await Context.Set<Cupo>()
+            .AnyAsync(x => x.EscenarioCupo.Id == id);
+
     }
 }

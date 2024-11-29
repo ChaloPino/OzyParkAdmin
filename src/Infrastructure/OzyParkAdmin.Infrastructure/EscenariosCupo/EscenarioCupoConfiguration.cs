@@ -11,25 +11,38 @@ internal sealed class EscenarioCupoConfiguration : IEntityTypeConfiguration<Esce
         builder.ToTable("cnf_EscenariosCupos_td");
 
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Id).HasColumnName("EscenarioCupoId").ValueGeneratedNever();
+
+        builder.Property(x => x.Id)
+            .HasColumnName("EscenarioCupoId")
+            .ValueGeneratedNever();
 
         builder.HasOne(x => x.CentroCosto)
                .WithMany()
-               .HasForeignKey("CentroCostoId")
-               .OnDelete(DeleteBehavior.Restrict);
+               .HasForeignKey("CentroCostoId");
 
         builder.Navigation(x => x.CentroCosto).AutoInclude();
 
         builder.HasOne(x => x.Zona)
                .WithMany()
                .HasForeignKey("ZonaId")
-               .OnDelete(DeleteBehavior.Restrict);
+               .IsRequired(false);
 
         builder.HasMany(x => x.DetallesEscenarioCupo)
                .WithOne(x => x.EscenarioCupo)
-               .HasForeignKey(x => x.EscenarioCupoId)
-               .OnDelete(DeleteBehavior.Cascade); // Elimina detalles en cascada si se elimina el EscenarioCupo
+               .HasForeignKey(x => x.EscenarioCupoId);
 
         builder.Navigation(x => x.DetallesEscenarioCupo).AutoInclude();
+
+        builder.HasMany(x => x.ExclusionesPorFecha)
+               .WithOne(x => x.EscenarioCupo)
+               .HasForeignKey(x => x.EscenarioCupoId);
+
+        builder.Navigation(x => x.ExclusionesPorFecha).AutoInclude(false);
+
+        builder.HasMany(x => x.Exclusiones)
+               .WithOne(x => x.EscenarioCupo)
+               .HasForeignKey(x => x.EscenarioCupoId);
+
+        builder.Navigation(x => x.Exclusiones).AutoInclude(false);
     }
 }

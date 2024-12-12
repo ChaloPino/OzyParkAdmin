@@ -35,15 +35,13 @@ public sealed class CreateEscenarioCupoHandler : CommandHandler<CreateEscenarioC
         ArgumentNullException.ThrowIfNull(command);
 
         // Invocar el manager para crear el escenario de cupo junto con los detalles y exclusiones
-        ResultOf<EscenarioCupo> result = await _manager.CreateEscenarioCupoAsync(
+        ResultOf<EscenarioCupo> result = await _manager.CreateAsync(
             command.CentroCosto,
             command.ZonaInfo,
             command.Nombre,
             command.EsHoraInicio,
             command.MinutosAntes,
             command.EsActivo,
-            command.Detalles,
-            command.Exclusiones,
             cancellationToken);
 
         return await result.BindAsync(
@@ -57,17 +55,15 @@ public sealed class CreateEscenarioCupoHandler : CommandHandler<CreateEscenarioC
     /// </summary>
     private async Task<ResultOf<EscenarioCupoFullInfo>> SaveAsync(EscenarioCupo escenarioCupo, CancellationToken cancellationToken)
     {
+
+        _context.Attach(escenarioCupo.CentroCosto);
+
+        if(escenarioCupo.Zona != null)
+        {
+            _context.Attach(escenarioCupo.Zona);
+        }
+
         await _context.AddAsync(escenarioCupo, cancellationToken);
-
-        if (escenarioCupo.DetallesEscenarioCupo.Any())
-        {
-            await _context.AddRangeAsync(escenarioCupo.DetallesEscenarioCupo, cancellationToken);
-        }
-
-        if (escenarioCupo.ExclusionesPorFecha.Any())
-        {
-            await _context.AddRangeAsync(escenarioCupo.ExclusionesPorFecha, cancellationToken);
-        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

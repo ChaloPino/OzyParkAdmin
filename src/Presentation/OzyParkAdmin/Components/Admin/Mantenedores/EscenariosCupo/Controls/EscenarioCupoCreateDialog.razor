@@ -1,51 +1,53 @@
-﻿@page "/escenario-cupo-dialog"
+﻿@page "/escenario-cupo-create-dialog"
 @using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models
 @using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Controls
 @using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Validators
-@inject EscenarioCupoValidator Validator;
+@using MudBlazor
 
-<MudDialog Options="DialogOptions" Visible="IsOpen" VisibleChanged="ChangeIsOpen">
-    <DialogContent>
-        @if (ViewModel.Loading)
+@inject EscenarioCupoValidator Validator
+@inject IMediator Mediator
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudStepper Vertical NonLinear OnPreviewInteraction="OnPreviewInteraction" ActiveIndex="_activeStep" ActiveIndexChanged="OnActiveIndexChanged" @bind-Completed="_completed" ShowCompleteInsteadOfNext="_completed">
+
+    <ChildContent>
+        <MudStep Style="display: flex; justify-content: start; align-items: start; flex-direction: column;" Title="Escenario Cupo" SecondaryText="Información básica del escenario" HasError="@(!_formEscenarioCupoValido && _hasAttemptedValidation && _fieldsModified)">
+            <CreateEscenarioCupoLayout @ref="_createEscenarioCupoForm"
+                                       Validator="Validator"
+                                       escenarioCupo="SelectedEscenarioCupo"
+                                       CentrosCostos="CentrosCostos"
+                                       Zonas="Zonas"
+                                       OnFormValidChange="@(valid => OnFieldChanged(valid))" />
+        </MudStep>
+        <MudStep Title="Detalles" SecondaryText="Agregar detalles obligatorios" HasError="@(!detalles.Any() && _hasAttemptedValidation)">
+            <CreateDetalleEscenarioCupoLayout Detalles="detalles"
+                                              Servicios="Servicios"
+                                              EscenarioSeleccionado="SelectedEscenarioCupo"
+                                              OnDetalleAgregado="OnDetalleAgregado" />
+        </MudStep>
+        <MudStep Title="Exclusiones" SecondaryText="Opcional" HasError="false">
+            <CreateExclusionesPorFechaLayout Exclusiones="exclusionesPorFecha"
+                                             CanalesVentaDisponibles="CanalesVenta"
+                                             ServiciosDisponibles="Servicios"
+                                             OnExclusionAgregada="OnExclusionAgregada" />
+        </MudStep>
+    </ChildContent>
+    <ActionContent Context="stepper">
+        <MudButton OnClick="@(() => stepper.ResetAsync(true))">Reset</MudButton>
+        @if (!_completed)
         {
-            <MudProgressLinear Color="@Color.Primary" Class="mud-table-loading-progress" Indeterminate="true" />
+            <MudIconButton OnClick="@(() => stepper.PreviousStepAsync())" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" Disabled="@(_index <= 0)" />
+            <MudSpacer />
+            <MudIconButton OnClick="@(() => stepper.NextStepAsync())" Icon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary" />
         }
         else
         {
-            <MudTabs>
-                <!-- Tab Escenario Cupo -->
-                <MudTabPanel Text="Escenario Cupo">
-                    <CreateEscenarioCupoLayout @ref="createEscenarioCupoForm"
-                                               Validator="Validator"
-                                               escenarioCupo="escenarioCupo"
-                                               CentrosCostos="CentrosCostos"
-                                               Zonas="Zonas" />
-                </MudTabPanel>
-
-                <!-- Tab Detalles -->
-                <MudTabPanel Text="Detalles">
-                    <!-- Componente de detalles, notificará al agregar uno -->
-                    <CreateDetalleEscenarioCupoLayout Detalles="@escenarioCupo.Detalles"
-                                                      Servicios="Servicios"
-                                                      EscenarioSeleccionado="escenarioCupo"
-                                                      OnDetalleAgregado="OnDetalleAgregado" />
-                </MudTabPanel>
-
-                <!-- Tab Exclusiones -->
-                <MudTabPanel Text="Exclusiones">
-                    <!-- Componente de exclusiones, notificará al agregar uno -->
-                    <CreateExclusionesPorFechaLayout Exclusiones="@escenarioCupo.ExclusionesFecha"
-                                                     CanalesVentaDisponibles="CanalesVenta"
-                                                     ServiciosDisponibles="Servicios"
-                                                     OnExclusionAgregada="OnExclusionAgregada" />
-                </MudTabPanel>
-            </MudTabs>
+            <MudItem xs="12" md="12">
+                <MudIconButton OnClick="CommitItemChangesAsync" Icon="@Icons.Material.Filled.Check" Color="Color.Primary" Class="object-center" />
+            </MudItem>
         }
-    </DialogContent>
+    </ActionContent>
 
-    <DialogActions>
-        <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CancelEditingItemAsync" Disabled="ViewModel.Loading" Class="px-10">Cancelar</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CommitItemChangesAsync" Disabled="ViewModel.Loading || !EsValidoParaGuardar" Class="px-10">Guardar</MudButton>
-    </DialogActions>
-</MudDialog>
+</MudStepper>
 

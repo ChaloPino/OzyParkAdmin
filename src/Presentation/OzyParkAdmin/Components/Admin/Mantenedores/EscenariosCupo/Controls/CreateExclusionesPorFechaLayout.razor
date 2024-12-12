@@ -7,13 +7,11 @@
 @inject IMediator Mediator
 @inject ISnackbar Snackbar
 
-<MudCard>
-    <MudCardHeader>
-        <MudText Typo="Typo.h6">Exclusiones por Fecha</MudText>
-    </MudCardHeader>
-    <MudCardContent>
+
+<MudGrid Spacing="5" Class="h-100vh">
+    <MudItem xs="4" Class="h-100vh overflow-y-auto">
         <MudGrid Spacing="1" Class="mt-4">
-            <MudItem xs="4">
+            <MudItem xs="12">
                 <MudSelect @bind-SelectedValues="ServiciosSeleccionados"
                            SelectAll="true"
                            SelectAllText="Seleccionar todos"
@@ -31,7 +29,7 @@
                     }
                 </MudSelect>
             </MudItem>
-            <MudItem xs="4">
+            <MudItem xs="12">
                 <MudSelect @bind-SelectedValues="CanalesVentaSeleccionados"
                            SelectAll="true"
                            SelectAllText="Seleccionar todos"
@@ -48,59 +46,60 @@
                     }
                 </MudSelect>
             </MudItem>
-            <MudItem xs="4">
+            <MudItem xs="12">
                 <MudDatePicker Label="Fecha de Exclusión" @bind-Date="detalle.FechaExclusion" Required="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
-            <MudItem xs="4">
+            <MudItem xs="12">
                 <MudTimePicker Label="Hora Inicio" @bind-Time="detalle.HoraInicio" Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
-            <MudItem xs="4">
+            <MudItem xs="12">
                 <MudTimePicker Label="Hora Fin" @bind-Time="detalle.HoraFin" Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
         </MudGrid>
-    </MudCardContent>
-    <MudCardActions>
-        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AgregarExclusion" Disabled="!EsDetalleValido">
-            <MudIcon Icon="@Icons.Material.Filled.Add" /> Agregar Exclusión
-        </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="CancelarEdicion" Disabled="!IsEditMode">
-            <MudIcon Icon="@Icons.Material.Filled.Close" /> Cancelar edición
-        </MudButton>
-    </MudCardActions>
-
-    <MudDivider Class="mt-5 mb-5" />
-
-    <MudGrid Class="mt-4">
-        <MudItem xs="12" Class="d-flex justify-end">
-            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="EliminarSeleccionados" Disabled="DetallesSeleccionados.Count == 0">
-                <MudIcon Icon="@Icons.Material.Filled.Delete" /> Eliminar seleccionados
+        <MudItem xs="12" Class="d-flex justify-space-between">
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="CancelarEdicion" Disabled="!IsEditMode">
+                <MudIcon Icon="@Icons.Material.Filled.Close" /> Cancelar edición
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="AgregarExclusion" Disabled="!EsDetalleValido">
+                <MudIcon Icon="@Icons.Material.Filled.Add" /> Agregar Exclusión
             </MudButton>
         </MudItem>
-    </MudGrid>
-
-    <MudTable Items="Exclusiones" Class="mt-4" @bind-SelectedItems="DetallesSeleccionados" MultiSelection="true" T="DetalleEscenarioCupoExclusionFechaFullInfo">
-        <HeaderContent>
-            <MudTh>Servicio</MudTh>
-            <MudTh>Canal de Venta</MudTh>
-            <MudTh>Fecha de Exclusión</MudTh>
-            <MudTh>Hora Inicio</MudTh>
-            <MudTh>Hora Fin</MudTh>
-            <MudTh>Acciones</MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>@context.ServicioNombre</MudTd>
-            <MudTd>@context.CanalVentaNombre</MudTd>
-            <MudTd>@(context.FechaExclusion.HasValue ? context.FechaExclusion.Value.ToString("dd/MM/yyyy") : "-")</MudTd>
-            <MudTd>@(context.HoraInicio.HasValue ? context.HoraInicio.Value.ToString(@"hh\:mm") : "-")</MudTd>
-            <MudTd>@(context.HoraFin.HasValue ? context.HoraFin.Value.ToString(@"hh\:mm") : "-")</MudTd>
-            <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditarExclusion(context)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => EliminarExclusion(context)" />
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
-</MudCard>
-
+    </MudItem>
+    <MudItem xs="8" Style="max-height: 550px !important" Class="overflow-y-auto">
+        <MudGrid Spacing="1" Class="mt-4">
+            <MudItem xs="12">
+                <MudTable Items="Exclusiones" Class="mt-4" @bind-SelectedItems="DetallesSeleccionados" MultiSelection="true" T="DetalleEscenarioCupoExclusionFechaFullInfo">
+                    <HeaderContent>
+                        <MudTh>Servicio</MudTh>
+                        <MudTh>Canal de Venta</MudTh>
+                        <MudTh>Fecha de Exclusión</MudTh>
+                        <MudTh>Hora Inicio</MudTh>
+                        <MudTh>Hora Fin</MudTh>
+                        <MudTh>Acciones</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.ServicioNombre</MudTd>
+                        <MudTd>@context.CanalVentaNombre</MudTd>
+                        <MudTd>@(context.FechaExclusion.HasValue ? context.FechaExclusion.Value.ToString("dd/MM/yyyy") : "-")</MudTd>
+                        <MudTd>@(context.HoraInicio.HasValue ? context.HoraInicio.Value.ToString(@"hh\:mm") : "-")</MudTd>
+                        <MudTd>@(context.HoraFin.HasValue ? context.HoraFin.Value.ToString(@"hh\:mm") : "-")</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditarExclusion(context)" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => EliminarExclusion(context)" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudItem>
+        </MudGrid>
+        <MudGrid Class="mt-4">
+            <MudItem xs="12" Class="d-flex justify-end">
+                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="EliminarSeleccionados" Disabled="DetallesSeleccionados.Count == 0">
+                    <MudIcon Icon="@Icons.Material.Filled.Delete" /> Eliminar seleccionados
+                </MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
 @code {
     private HashSet<DetalleEscenarioCupoExclusionFechaFullInfo> DetallesSeleccionados = new();
     private IEnumerable<ServicioInfo> ServiciosSeleccionados = new List<ServicioInfo>();
@@ -135,7 +134,7 @@
     };
 
     private bool EsDetalleValido =>
-        ServiciosSeleccionados.Any() && CanalesVentaSeleccionados.Any() && detalle.FechaExclusion != DateTime.MinValue;
+    ServiciosSeleccionados.Any() && CanalesVentaSeleccionados.Any() && detalle.FechaExclusion != DateTime.MinValue;
 
     private async Task AgregarExclusion()
     {

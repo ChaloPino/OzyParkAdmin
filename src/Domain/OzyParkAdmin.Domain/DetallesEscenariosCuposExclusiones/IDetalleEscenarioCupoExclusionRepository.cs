@@ -1,16 +1,31 @@
-﻿using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
-using OzyParkAdmin.Domain.Shared;
+﻿using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
 public interface IDetalleEscenarioCupoExclusionRepository
 {
     /// <summary>
-    /// Obtiene todas las exclusiones por fecha para un escenario de cupo específico.
+    /// Obtiene todas las exclusiones para un escenario de cupo específico.
     /// </summary>
     /// <param name="escenarioCupoId">El identificador del escenario de cupo.</param>
     /// <param name="cancellationToken">El token de cancelación.</param>
-    /// <returns>Una lista de <see cref="DetalleEscenarioCupoExclusionFecha"/>.</returns>
+    /// <returns>Una lista de <see cref="DetalleEscenarioCupoExclusion"/>.</returns>
     Task<IEnumerable<DetalleEscenarioCupoExclusion>> GetExclusionesByEscenarioCupoIdAsync(int escenarioCupoId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Obtiene todas las exclusiones para un escenario de cupo específico.
+    /// </summary>
+    /// <param name="escenarioCupoId">El identificador del escenario de cupo.</param>
+    /// <param name="cancellationToken">El token de cancelación.</param>
+    /// <returns>Una lista de <see cref="DetalleEscenarioCupoExclusionFullInfo"/>.</returns>
+    Task<IEnumerable<DetalleEscenarioCupoExclusionFullInfo>> GetExclusionesInfoByEscenarioCupoIdAsync(int escenarioCupoId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Obtiene todas las exclusiones para un escenario de cupo específico.
+    /// </summary>
+    /// <param name="escenarioCupoId">El identificador del escenario de cupo.</param>
+    /// <param name="cancellationToken">El token de cancelación.</param>
+    /// <returns>Una lista de <see cref="DetalleEscenarioCupoExclusionFullInfo"/>.</returns>
+    Task<IEnumerable<DetalleEscenarioCupoExclusionFullInfo>> List(int escenarioCupoId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Busca escenarios de cupo que coincidan con los criterios de búsqueda.

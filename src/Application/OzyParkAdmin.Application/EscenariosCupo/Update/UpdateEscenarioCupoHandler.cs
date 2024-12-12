@@ -2,7 +2,6 @@
 using OzyParkAdmin.Application;
 using OzyParkAdmin.Application.EscenariosCupo.Update;
 using OzyParkAdmin.Application.Shared;
-using OzyParkAdmin.Domain.DetallesEscenariosCupos;
 using OzyParkAdmin.Domain.ExclusionesCupo;
 using OzyParkAdmin.Domain.Shared;
 
@@ -16,25 +15,21 @@ public sealed class UpdateEscenarioCupoHandler : CommandHandler<UpdateEscenarioC
     private readonly IOzyParkAdminContext _context;
     private readonly IEscenarioCupoRepository _escenarioCupoRepository;
     private readonly EscenarioCupoManager _escenarioCupoManager;
-    private readonly DetalleEscenarioCupoManager _detalleEscenarioCupoManager;
 
     public UpdateEscenarioCupoHandler(
         IOzyParkAdminContext context,
         ILogger<UpdateEscenarioCupoHandler> logger,
         IEscenarioCupoRepository escenarioCupoRepository,
-        EscenarioCupoManager escenarioCupoManager,
-        DetalleEscenarioCupoManager detalleEscenarioCupoManager)
+        EscenarioCupoManager escenarioCupoManager)
         : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(escenarioCupoRepository);
         ArgumentNullException.ThrowIfNull(escenarioCupoManager);
-        ArgumentNullException.ThrowIfNull(detalleEscenarioCupoManager);
 
         _context = context;
         _escenarioCupoRepository = escenarioCupoRepository;
         _escenarioCupoManager = escenarioCupoManager;
-        _detalleEscenarioCupoManager = detalleEscenarioCupoManager;
     }
 
     protected override async Task<ResultOf<EscenarioCupoFullInfo>> ExecuteAsync(UpdateEscenarioCupo command, CancellationToken cancellationToken)
@@ -46,7 +41,7 @@ public sealed class UpdateEscenarioCupoHandler : CommandHandler<UpdateEscenarioC
             return new ValidationError(nameof(EscenarioCupo), $"El escenario con ID {command.Id} no existe.");
         }
 
-        // Actualizar el escenario usando el EscenarioCupoManager
+        // Actualizar los datos básicos del escenario de cupo
         var updateEscenarioCupoResult = await _escenarioCupoManager.UpdateAsync(
             id: command.Id,
             existente: escenarioCupo,
@@ -56,9 +51,6 @@ public sealed class UpdateEscenarioCupoHandler : CommandHandler<UpdateEscenarioC
             esHoraInicio: command.EsHoraInicio,
             minutosAntes: command.MinutosAntes,
             esActivo: command.EsActivo,
-            detalles: command.Detalles,
-            exclusionesFecha: command.ExclusionesFecha,
-            exclusiones: command.Exclusiones,
             cancellationToken: cancellationToken);
 
         if (updateEscenarioCupoResult.IsFailure(out var failure))
@@ -66,39 +58,16 @@ public sealed class UpdateEscenarioCupoHandler : CommandHandler<UpdateEscenarioC
             return failure;
         }
 
-        var updateDetallesEscenarioCupoResult = await _detalleEscenarioCupoManager.UpdateDetallesAsync(
-            command.Id,
-            command.Detalles,
-            cancellationToken);
-
-        if (updateDetallesEscenarioCupoResult.IsFailure(out var detailFailure))
-        {
-            return detailFailure;
-        }
-
-        await updateDetallesEscenarioCupoResult.BindAsync(
-           onSuccess: SaveDetailsAsync,
-           onFailure: failure => failure,
-           cancellationToken: cancellationToken);
-
-
         return await updateEscenarioCupoResult.BindAsync(
-         onSuccess: SaveAsync,
-         onFailure: failure => failure,
-         cancellationToken: cancellationToken);
+            onSuccess: SaveAsync,
+            onFailure: failure => failure,
+            cancellationToken: cancellationToken);
     }
 
-    private async Task<ResultOf<IEnumerable<DetalleEscenarioCupoInfo>>> SaveDetailsAsync(IEnumerable<DetalleEscenarioCupo> detallesEscenarioCupo, CancellationToken cancellationToken)
+    private async Task<ResultOf<EscenarioCupoFullInfo>> SaveAsync(EscenarioCupo escenarioCupo, CancellationToken cancellationToken)
     {
-        _context.UpdateRange(detallesEscenarioCupo);
+        _context.Update(escenarioCupo);
         await _context.SaveChangesAsync(cancellationToken);
-        return detallesEscenarioCupo.Select(x => x.ToInfo()).ToList();
-    }
-
-    private async Task<ResultOf<EscenarioCupoFullInfo>> SaveAsync(EscenarioCupo escenarioCUpo, CancellationToken cancellationToken)
-    {
-        _context.Update(escenarioCUpo);
-        await _context.SaveChangesAsync(cancellationToken);
-        return escenarioCUpo.ToFullInfo();
+        return escenarioCupo.ToFullInfo();
     }
 }

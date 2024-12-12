@@ -7,12 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="DetalleEscenarioExclusionFecha\**" />
-    <Compile Remove="DetalleEscenarioExclusion\**" />
-    <EmbeddedResource Remove="DetalleEscenarioExclusionFecha\**" />
-    <EmbeddedResource Remove="DetalleEscenarioExclusion\**" />
-    <None Remove="DetalleEscenarioExclusionFecha\**" />
-    <None Remove="DetalleEscenarioExclusion\**" />
+    <Compile Remove="DetallesEscenariosCuposExclusiones\**" />
+    <EmbeddedResource Remove="DetallesEscenariosCuposExclusiones\**" />
+    <None Remove="DetallesEscenariosCuposExclusiones\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="DetallesEscenariosCuposExclusiones\List\ListDetalleEscenarioCupoExclsiones.cs" />
+    <Compile Include="DetallesEscenariosCuposExclusiones\List\ListDetalleEscenarioCupoExclsuionesHandler.cs" />
+    <Compile Include="DetallesEscenariosCuposExclusiones\Search\SearchEscenarioCupoExclusion.cs" />
+    <Compile Include="DetallesEscenariosCuposExclusiones\Search\SearchEscenarioCupoExclusionHandler.cs" />
+    <Compile Include="DetallesEscenariosCuposExclusiones\Update\UpdateDetalleEscenarioExclusion.cs" />
+    <Compile Include="DetallesEscenariosCuposExclusiones\Update\UpdateDetalleEscenarioExclusionHandler.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,8 +34,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DetalleEscenarioExclusion\Create\" />
-    <Folder Include="DetalleEscenarioExclusion\Delete\" />
+    <Folder Include="DetalleEscenarioExclusionFecha\Create\" />
+    <Folder Include="DetallesEscenariosCuposExclusiones\Create\" />
+    <Folder Include="DetallesEscenariosCuposExclusiones\Delete\" />
   </ItemGroup>
 
 </Project>

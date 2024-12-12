@@ -3,7 +3,7 @@ using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
 using OzyParkAdmin.Domain.Shared;
 
-namespace OzyParkAdmin.Application.DetalleEscenarioExclusion.Update;
+namespace OzyParkAdmin.Application.DetallesEscenariosExclusiones.Update;
 
 /// <summary>
 /// Handler encargado de la actualización de las exclusiones de un escenario de cupo.

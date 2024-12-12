@@ -4,45 +4,46 @@
 @using OzyParkAdmin.Domain.CentrosCosto
 @using OzyParkAdmin.Domain.Zonas
 
+
 <MudForm @ref="form" Model="escenarioCupo" Validation="Validator.ValidateValue" ValidationDelay="0" @bind-IsValid="@formEscenarioCupoValid">
     <MudGrid Spacing="1" Class="mt-4">
-        <MudItem xs="4">
+        <MudItem xs="12">
             <MudTextField @bind-Value="escenarioCupo.Nombre" Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          Required="true" RequiredError="El nombre es requerido."
-                          Dense="true" Label="Nombre"></MudTextField>
+            Margin="Margin.Dense"
+            Required="true" RequiredError="El nombre es requerido."
+            Dense="true" Label="Nombre"></MudTextField>
         </MudItem>
-        <MudItem xs="4">
+        <MudItem xs="12">
             <MudNumericField @bind-Value="escenarioCupo.MinutosAntes"
-                             Label="Holgura en minutos"
-                             Min="0" Max="int.MaxValue"
-                             Variant="Variant.Outlined"
-                             Margin="Margin.Dense"
-                             Immediate="true" />
+            Label="Holgura en minutos"
+            Min="0" Max="int.MaxValue"
+            Variant="Variant.Outlined"
+            Margin="Margin.Dense"
+            Immediate="true" />
         </MudItem>
     </MudGrid>
     <MudGrid Spacing="1" Class="mt-4">
-        <MudItem xs="4">
+        <MudItem xs="12">
             <MudSelect @bind-Value="escenarioCupo.CentroCosto"
-                       Required="true" RequiredError="El Centro de Costo es requerido."
-                       Label="Centros de costo"
-                       Variant="Variant.Outlined"
-                       Margin="Margin.Dense"
-                       Dense="true"
-                       ToStringFunc="x => x?.Descripcion">
+            Required="true" RequiredError="El Centro de Costo es requerido."
+            Label="Centros de costo"
+            Variant="Variant.Outlined"
+            Margin="Margin.Dense"
+            Dense="true"
+            ToStringFunc="x => x?.Descripcion">
                 <ForIn Items="CentrosCostos" Context="centroCosto">
                     <MudSelectItem T="CentroCostoInfo" Value="centroCosto" />
                 </ForIn>
             </MudSelect>
         </MudItem>
-        <MudItem xs="4">
+        <MudItem xs="12">
             <MudSelect @bind-Value="escenarioCupo.Zona"
-                       Label="Zonas"
-                       Variant="Variant.Outlined"
-                       Margin="Margin.Dense"
-                       Dense="true"
-                       Clearable="true"
-                       ToStringFunc="x => x?.Descripcion">
+            Label="Zonas"
+            Variant="Variant.Outlined"
+            Margin="Margin.Dense"
+            Dense="true"
+            Clearable="true"
+            ToStringFunc="x => x?.Descripcion">
                 <MudSelectItem T="ZonaInfo" Value="@(null)">Sin Zona</MudSelectItem>
                 <ForIn Items="Zonas" Context="zona">
                     <MudSelectItem T="ZonaInfo" Value="zona" />
@@ -51,17 +52,18 @@
         </MudItem>
     </MudGrid>
     <MudGrid Spacing="1" Class="mt-4">
-        <MudItem xs="4">
+        <MudItem xs="12">
             <MudSwitch Color="Color.Primary" @bind-Value="escenarioCupo.EsHoraInicio" T="bool">Controla hora de inicio</MudSwitch>
         </MudItem>
     </MudGrid>
 </MudForm>
 
 @code {
-    private MudForm form = default!;
+    
+    public MudForm form = default!;
 
     [Parameter]
-    public EscenarioCupoValidator Validator { get; set; } = default!;
+    public EscenarioCupoValidator Validator { get; set; }
 
     [Parameter]
     public EscenarioCupoModel escenarioCupo { get; set; } = new();

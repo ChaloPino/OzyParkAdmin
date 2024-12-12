@@ -1,7 +1,7 @@
 ﻿using MudBlazor;
 using MudBlazor.Interfaces;
-using OzyParkAdmin.Application.DetalleEscenarioExclusion.Search;
-using OzyParkAdmin.Application.DetalleEscenarioExclusion.Update;
+using OzyParkAdmin.Application.DetallesEscenariosExclusiones.Search;
+using OzyParkAdmin.Application.DetallesEscenariosExclusiones.Update;
 using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Shared;
@@ -100,9 +100,9 @@ internal static class DetalleEscenarioCupoExclusionMapper
 
       };
 
-    public static UpdateDetalleEscenarioExclusion ToUpdateExclusions(this EscenarioCupoModel model) =>
+    public static UpdateDetalleEscenarioExclusion ToUpdateExclusions(this IEnumerable<DetalleEscenarioCupoExclusionFullInfo> model, int escenarioCupoId) =>
       new(
-            escenarioCupoId: model.Id,
-            exclusiones: model.Exclusiones
+            escenarioCupoId: escenarioCupoId,
+            exclusiones: model
           );
 }

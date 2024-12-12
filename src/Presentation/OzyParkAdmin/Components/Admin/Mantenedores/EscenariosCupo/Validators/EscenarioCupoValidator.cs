@@ -22,8 +22,5 @@ public class EscenarioCupoValidator : BaseValidator<EscenarioCupoModel>
             .MaximumLength(50)
               .NotNull();
 
-        RuleFor(x => x.MinutosAntes)
-            .GreaterThanOrEqualTo(0);
-
     }
 }

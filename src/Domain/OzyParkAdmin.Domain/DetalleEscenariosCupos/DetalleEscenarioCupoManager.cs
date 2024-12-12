@@ -23,96 +23,49 @@ public sealed class DetalleEscenarioCupoManager : IBusinessLogic
     }
 
     /// <summary>
-    /// Actualiza múltiples detalles para un escenario de cupo.
+    /// Sincroniza los detalles de un escenario de cupo, identificando cuáles deben crearse, actualizarse o eliminarse.
     /// </summary>
-    public async Task<ResultOf<IEnumerable<DetalleEscenarioCupo>>> UpdateDetallesAsync(
-        int escenarioCupoId,
-        IEnumerable<DetalleEscenarioCupoInfo> nuevosDetallesInfo,
-        CancellationToken cancellationToken)
+    public async Task<(IEnumerable<DetalleEscenarioCupo> nuevas, IEnumerable<DetalleEscenarioCupo> actualizar, IEnumerable<DetalleEscenarioCupo> eliminar)>
+    SyncDetallesAsync(
+    int escenarioCupoId,
+    IEnumerable<DetalleEscenarioCupoInfo> nuevosDetallesInfo,
+    CancellationToken cancellationToken)
     {
-        var detallesExistentes = await _detalleEscenarioCupoRepository.FindByIdsAsync(escenarioCupoId, cancellationToken);
-        var nuevosDetalles = nuevosDetallesInfo.Select(d => DetalleEscenarioCupo.Create(
+        var detallesExistentes = await _detalleEscenarioCupoRepository.FindByIdsAsync(escenarioCupoId, cancellationToken)
+                                  ?? Enumerable.Empty<DetalleEscenarioCupo>();
+
+        var nuevosDetalles = nuevosDetallesInfo?.Select(x => DetalleEscenarioCupo.Create(
             escenarioCupoId,
-            d.ServicioId,
-            d.TopeDiario,
-            d.UsaSobreCupo,
-            d.HoraMaximaVenta!.Value,
-            d.HoraMaximaRevalidacion!.Value,
-            d.UsaTopeEnCupo,
-            d.TopeFlotante)).ToList();
+            x.ServicioId,
+            x.TopeDiario,
+            x.UsaSobreCupo,
+            x.HoraMaximaVenta!.Value,
+            x.HoraMaximaRevalidacion!.Value,
+            x.UsaTopeEnCupo,
+            x.TopeFlotante)).ToList() ?? new List<DetalleEscenarioCupo>();
 
-        var errors = new List<ValidationError>();
-        foreach (var detalle in nuevosDetalles)
-        {
-            await ValidateDuplicityAsync((detalle.EscenarioCupoId, detalle.ServicioId), errors, cancellationToken);
-        }
+        var detallesParaActualizar = detallesExistentes
+            .Where(d => nuevosDetalles.Any(n => n.ServicioId == d.ServicioId))
+            .ToList();
 
-        if (errors.Any())
-        {
-            return errors;
-        }
+        var detallesParaEliminar = detallesExistentes
+            .Where(d => !nuevosDetalles.Any(n => n.ServicioId == d.ServicioId))
+            .ToList();
 
-        foreach (var detalle in detallesExistentes)
+        var detallesParaAgregar = nuevosDetalles
+            .Where(n => !detallesExistentes.Any(d => d.ServicioId == n.ServicioId))
+            .ToList();
+
+        foreach (var detalle in detallesParaActualizar)
         {
-            var detalleActualizado = nuevosDetalles.FirstOrDefault(nd => nd.ServicioId == detalle.ServicioId);
-            if (detalleActualizado != null)
+            var nuevoDetalle = nuevosDetalles.FirstOrDefault(n => n.ServicioId == detalle.ServicioId);
+            if (nuevoDetalle != null)
             {
-                detalle.Update(detalleActualizado);
+                detalle.Update(nuevoDetalle);
             }
         }
 
-        return nuevosDetalles;
+        return (detallesParaAgregar, detallesParaActualizar, detallesParaEliminar);
     }
 
-    /// <summary>
-    /// Crea múltiples detalles para un escenario de cupo.
-    /// </summary>
-    public async Task<ResultOf<IEnumerable<DetalleEscenarioCupo>>> CreateDetallesAsync(
-        int escenarioCupoId,
-        IEnumerable<DetalleEscenarioCupoInfo> detallesInfo,
-        CancellationToken cancellationToken)
-    {
-        var detalles = detallesInfo.Select(d => DetalleEscenarioCupo.Create(
-            escenarioCupoId,
-            d.ServicioId,
-            d.TopeDiario,
-            d.UsaSobreCupo,
-            d.HoraMaximaVenta!.Value,
-            d.HoraMaximaRevalidacion!.Value,
-            d.UsaTopeEnCupo,
-            d.TopeFlotante)).ToList();
-
-        var errors = new List<ValidationError>();
-
-        foreach (var detalle in detalles)
-        {
-            await ValidateDuplicityAsync((detalle.EscenarioCupoId, detalle.ServicioId), errors, cancellationToken);
-        }
-
-        if (errors.Any())
-        {
-            return errors;
-        }
-
-        return detalles;
-    }
-
-    /// <summary>
-    /// Valida duplicidad al actualizar detalles.
-    /// </summary>
-    private async Task ValidateDuplicityAsync(
-        (int EscenarioCupoId, int ServicioId) detalleToValidate,
-        IList<ValidationError> errors,
-        CancellationToken cancellationToken)
-    {
-        var detalles = await _detalleEscenarioCupoRepository.FindByIdsAsync(detalleToValidate.EscenarioCupoId, cancellationToken);
-
-        var existente = detalles.FirstOrDefault(x => x.ServicioId == detalleToValidate.ServicioId);
-        if (existente is not null && existente.EscenarioCupoId != detalleToValidate.EscenarioCupoId)
-        {
-            errors.Add(new ValidationError(
-                nameof(DetalleEscenarioCupo),
-                $"El detalle con ServicioId {detalleToValidate.ServicioId} ya existe para el EscenarioCupoId {detalleToValidate.EscenarioCupoId}."));
-        }
-    }
 }

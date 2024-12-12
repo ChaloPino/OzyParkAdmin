@@ -1,5 +1,4 @@
-﻿using OzyParkAdmin.Domain.EscenariosCupo;
-using OzyParkAdmin.Domain.Repositories;
+﻿using OzyParkAdmin.Domain.Repositories;
 using OzyParkAdmin.Domain.Shared;
 
 namespace OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
@@ -10,110 +9,54 @@ namespace OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 public sealed class DetalleEscenarioCupoExclusionFechaManager : IBusinessLogic
 {
     private readonly IDetalleEscenarioCupoExclusionFechaRepository _detalleExclusionRepository;
-    private readonly IEscenarioCupoRepository _escenarioCupoRepository;
 
-    public DetalleEscenarioCupoExclusionFechaManager(
-        IDetalleEscenarioCupoExclusionFechaRepository detalleExclusionRepository,
-        IEscenarioCupoRepository escenarioCupoRepository)
+    public DetalleEscenarioCupoExclusionFechaManager(IDetalleEscenarioCupoExclusionFechaRepository detalleExclusionRepository)
     {
         ArgumentNullException.ThrowIfNull(detalleExclusionRepository);
-        ArgumentNullException.ThrowIfNull(escenarioCupoRepository);
-
         _detalleExclusionRepository = detalleExclusionRepository;
-        _escenarioCupoRepository = escenarioCupoRepository;
     }
 
     /// <summary>
-    /// Actualiza múltiples exclusiones para un escenario de cupo.
+    /// Sincroniza las exclusiones con la lista proporcionada. Si hay duplicados, se actualizan.
     /// </summary>
-    public async Task<ResultOf<IEnumerable<DetalleEscenarioCupoExclusionFecha>>> UpdateExclusionesAsync(
-        int escenarioCupoId,
-        IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> nuevasExclusionesInfo,
-        CancellationToken cancellationToken)
+    public async Task<(IEnumerable<DetalleEscenarioCupoExclusionFecha> nuevas, IEnumerable<DetalleEscenarioCupoExclusionFecha> actualizar, IEnumerable<DetalleEscenarioCupoExclusionFecha> eliminar)>
+    SyncExclusionesAsync(
+    int escenarioCupoId,
+    IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> nuevasExclusionesInfo,
+    CancellationToken cancellationToken)
     {
-        var exclusionesExistentes = await _detalleExclusionRepository.GetExclusionesByEscenarioCupoIdAsync(escenarioCupoId, cancellationToken);
-        var nuevasExclusiones = nuevasExclusionesInfo.Select(d => DetalleEscenarioCupoExclusionFecha.Create(
-            escenarioCupoId,
-            d.ServicioId,
-            d.CanalVentaId,
-            d.FechaExclusion!,
-            d.HoraInicio,
-            d.HoraFin)).ToList();
+        var exclusionesExistentes = await _detalleExclusionRepository.GetSimpleExclusionesByEscenarioCupoIdAsync(escenarioCupoId, cancellationToken)
+                                    ?? Enumerable.Empty<DetalleEscenarioCupoExclusionFecha>();
 
-        var errors = new List<ValidationError>();
-        foreach (var exclusion in nuevasExclusiones)
-        {
-            await ValidateDuplicityAsync((exclusion.EscenarioCupoId, exclusion.ServicioId, exclusion.CanalVentaId, exclusion.FechaExclusion), errors, cancellationToken);
-        }
+        var nuevasExclusiones = nuevasExclusionesInfo?.Select(x => DetalleEscenarioCupoExclusionFecha.Create(
+            escenarioCupoId: escenarioCupoId,
+            servicioId: x.ServicioId,
+            canalVentaId: x.CanalVentaId,
+            fechaExclusion: x.FechaExclusion!.Value,
+            horaInicio: x.HoraInicio,
+            horaFin: x.HoraFin)).ToList() ?? new List<DetalleEscenarioCupoExclusionFecha>();
 
-        if (errors.Any())
-        {
-            return errors;
-        }
+        var exclusionesParaActualizar = exclusionesExistentes
+            .Where(e => nuevasExclusiones.Any(n => n.ServicioId == e.ServicioId && n.FechaExclusion == e.FechaExclusion && n.CanalVentaId == e.CanalVentaId))
+            .ToList();
 
-        foreach (var exclusion in exclusionesExistentes)
+        var exclusionesParaEliminar = exclusionesExistentes
+            .Where(e => !nuevasExclusiones.Any(n => n.ServicioId == e.ServicioId && n.FechaExclusion == e.FechaExclusion && n.CanalVentaId == e.CanalVentaId))
+            .ToList();
+
+        var exclusionesParaAgregar = nuevasExclusiones
+            .Where(n => !exclusionesExistentes.Any(e => e.ServicioId == n.ServicioId && e.FechaExclusion == n.FechaExclusion && e.CanalVentaId == n.CanalVentaId))
+            .ToList();
+
+        foreach (var exclusion in exclusionesParaActualizar)
         {
-            var exclusionActualizada = nuevasExclusiones.FirstOrDefault(nd => nd.ServicioId == exclusion.ServicioId && nd.CanalVentaId == exclusion.CanalVentaId && nd.FechaExclusion == exclusion.FechaExclusion);
-            if (exclusionActualizada != null)
+            var nuevaExclusion = nuevasExclusiones.FirstOrDefault(n => n.ServicioId == exclusion.ServicioId && n.FechaExclusion == exclusion.FechaExclusion && n.CanalVentaId == exclusion.CanalVentaId);
+            if (nuevaExclusion != null)
             {
-                exclusion.Update(exclusionActualizada);
+                exclusion.Update(nuevaExclusion);
             }
         }
 
-        return nuevasExclusiones;
-    }
-
-    /// <summary>
-    /// Crea múltiples exclusiones para un escenario de cupo.
-    /// </summary>
-    public async Task<ResultOf<IEnumerable<DetalleEscenarioCupoExclusionFecha>>> CreateExclusionesAsync(
-        int escenarioCupoId,
-        IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> exclusionesInfo,
-        CancellationToken cancellationToken)
-    {
-        var exclusiones = exclusionesInfo.Select(d => DetalleEscenarioCupoExclusionFecha.Create(
-            escenarioCupoId,
-            d.ServicioId,
-            d.CanalVentaId,
-            d.FechaExclusion,
-            d.HoraInicio,
-            d.HoraFin)).ToList();
-
-        var errors = new List<ValidationError>();
-
-        foreach (var exclusion in exclusiones)
-        {
-            await ValidateDuplicityAsync((exclusion.EscenarioCupoId, exclusion.ServicioId, exclusion.CanalVentaId, exclusion.FechaExclusion), errors, cancellationToken);
-        }
-
-        if (errors.Any())
-        {
-            return errors;
-        }
-
-        return exclusiones;
-    }
-
-    /// <summary>
-    /// Valida duplicidad al actualizar o crear exclusiones.
-    /// </summary>
-    private async Task ValidateDuplicityAsync(
-        (int EscenarioCupoId, int ServicioId, int CanalVentaId, DateTime FechaExclusion) exclusionToValidate,
-        IList<ValidationError> errors,
-        CancellationToken cancellationToken)
-    {
-        var exclusiones = await _detalleExclusionRepository.GetExclusionesByEscenarioCupoIdAsync(exclusionToValidate.EscenarioCupoId, cancellationToken);
-
-        var existente = exclusiones.FirstOrDefault(x =>
-            x.ServicioId == exclusionToValidate.ServicioId &&
-            x.CanalVentaId == exclusionToValidate.CanalVentaId &&
-            x.FechaExclusion.Date == exclusionToValidate.FechaExclusion.Date);
-
-        if (existente is not null && existente.EscenarioCupoId != exclusionToValidate.EscenarioCupoId)
-        {
-            errors.Add(new ValidationError(
-                nameof(DetalleEscenarioCupoExclusionFecha),
-                $"La exclusión con ServicioId {exclusionToValidate.ServicioId}, CanalVentaId {exclusionToValidate.CanalVentaId}, y FechaExclusion {exclusionToValidate.FechaExclusion.ToShortDateString()} ya existe para el EscenarioCupoId {exclusionToValidate.EscenarioCupoId}."));
-        }
+        return (exclusionesParaAgregar, exclusionesParaActualizar, exclusionesParaEliminar);
     }
 }

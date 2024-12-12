@@ -19,6 +19,54 @@ public sealed class DetalleEscenarioCupoExclusionRepository(OzyParkAdminContext 
             .ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Obtiene las exclusiones de fechas para un escenario de cupo específico.
+    /// </summary>
+    public async Task<IEnumerable<DetalleEscenarioCupoExclusionFullInfo>> GetExclusionesInfoByEscenarioCupoIdAsync(int escenarioCupoId, CancellationToken cancellationToken)
+    {
+        return await EntitySet
+            .AsSplitQuery()
+            .Where(x => x.EscenarioCupoId == escenarioCupoId)
+            .Select(x => new DetalleEscenarioCupoExclusionFullInfo
+            {
+                EscenarioCupoId = x.EscenarioCupoId,
+                CanalVentaId = x.CanalVentaId,
+                CanalVentaNombre = x.CanalVenta.Aka,
+                DiaSemanaId = x.DiaSemanaId,
+                DiaSemanaNombre = x.DiaSemana.Aka,
+                HoraFin = x.HoraFin,
+                HoraInicio = x.HoraInicio,
+                ServicioId = x.ServicioId,
+                ServicioNombre = x.Servicio.Nombre
+            })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Obtiene las exclusiones de fechas para un escenario de cupo específico.
+    /// </summary>
+    public async Task<IEnumerable<DetalleEscenarioCupoExclusionFullInfo>> List(int escenarioCupoId, CancellationToken cancellationToken)
+    {
+        return await EntitySet
+            .AsSplitQuery()
+            .Where(x => x.EscenarioCupoId == escenarioCupoId)
+            .Select(x => new DetalleEscenarioCupoExclusionFullInfo
+            {
+                EscenarioCupoId = x.EscenarioCupoId,
+                CanalVentaId = x.CanalVentaId,
+                CanalVentaNombre = x.CanalVenta.Aka,
+                DiaSemanaId = x.DiaSemanaId,
+                DiaSemanaNombre = x.DiaSemana.Aka,
+                HoraFin = x.HoraFin,
+                HoraInicio = x.HoraInicio,
+                ServicioId = x.ServicioId,
+                ServicioNombre = x.Servicio.Nombre
+            })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     /// <inheritdoc/>
     public async Task<PagedList<DetalleEscenarioCupoExclusionFullInfo>> SearchAsync(
         int[]? serviciosIds,

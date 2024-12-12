@@ -20,29 +20,13 @@ internal sealed class EscenarioCupoConfiguration : IEntityTypeConfiguration<Esce
                .WithMany()
                .HasForeignKey("CentroCostoId");
 
-        builder.Navigation(x => x.CentroCosto).AutoInclude();
+        //builder.Navigation(x => x.CentroCosto).AutoInclude(false);
 
         builder.HasOne(x => x.Zona)
                .WithMany()
                .HasForeignKey("ZonaId")
                .IsRequired(false);
 
-        builder.HasMany(x => x.DetallesEscenarioCupo)
-               .WithOne(x => x.EscenarioCupo)
-               .HasForeignKey(x => x.EscenarioCupoId);
 
-        builder.Navigation(x => x.DetallesEscenarioCupo).AutoInclude();
-
-        builder.HasMany(x => x.ExclusionesPorFecha)
-               .WithOne(x => x.EscenarioCupo)
-               .HasForeignKey(x => x.EscenarioCupoId);
-
-        builder.Navigation(x => x.ExclusionesPorFecha).AutoInclude(false);
-
-        builder.HasMany(x => x.Exclusiones)
-               .WithOne(x => x.EscenarioCupo)
-               .HasForeignKey(x => x.EscenarioCupoId);
-
-        builder.Navigation(x => x.Exclusiones).AutoInclude(false);
     }
 }

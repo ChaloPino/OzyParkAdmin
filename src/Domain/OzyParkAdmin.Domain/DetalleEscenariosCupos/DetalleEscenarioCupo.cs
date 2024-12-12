@@ -14,9 +14,9 @@ public sealed class DetalleEscenarioCupo
     public int EscenarioCupoId { get; private set; }
 
     /// <summary>
-    /// Escenario de cupo asociado.
+    /// Escenario cupo asociado.
     /// </summary>
-    public EscenarioCupo EscenarioCupo { get; set; }
+    public EscenarioCupo EscenarioCupo { get; private set; }
 
     /// <summary>
     /// ID del servicio asociado.

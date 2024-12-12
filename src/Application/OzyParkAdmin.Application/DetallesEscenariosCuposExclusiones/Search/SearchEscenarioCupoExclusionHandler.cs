@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using OzyParkAdmin.Application.DetallesEscenariosExclusiones.Search;
 using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
 using OzyParkAdmin.Domain.Shared;
 
-namespace OzyParkAdmin.Application.DetalleEscenarioExclusion.Search;
+namespace OzyParkAdmin.Application.DetalleEscenariosExclusiones.Search;
 public sealed class SearchEscenarioCupoExclusionHandler : QueryPagedOfHandler<SearchEscenarioCupoExclusion, DetalleEscenarioCupoExclusionFullInfo>
 {
     private readonly IDetalleEscenarioCupoExclusionRepository _repository;

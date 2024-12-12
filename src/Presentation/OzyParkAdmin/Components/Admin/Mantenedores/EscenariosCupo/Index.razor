@@ -9,7 +9,7 @@
 <MudText Typo="Typo.h4">Escenarios Cupos</MudText>
 
 <MudDataGrid @ref="dataGrid" T="EscenariosCupo.Models.EscenarioCupoModel" ReadOnly="true" Striped="true" Hover="true" ShowMenuIcon="true"
-             ServerData="SearchEscenariosCupoAsync" SortMode="SortMode.Multiple" MultiSelection="true" Loading="loading"
+             ServerData="SearchEscenariosCupoAsync" SortMode="SortMode.Multiple" MultiSelection="true" Loading="viewModel.Loading"
              SelectedItems="escenariosCupoToDelete"
              Groupable="true" Hideable="true" GroupExpanded="true" ColumnsPanelReordering="true"
              Filterable="true" FilterMode="DataGridFilterMode.ColumnFilterMenu"
@@ -17,7 +17,7 @@
     <ToolBarContent>
         <MudSpacer />
         <SearchControl @bind-SearchText="searchText" />
-        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="AddEscenarioCupo">Nuevo Escenario Cupo</MudButton>
+        <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Class="ml-3" OnClick="ShowCreateDialog">Nuevo Escenario Cupo</MudButton>
         <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" Variant="Variant.Filled" Class="ml-3" Disabled="escenariosCupoToDelete.Count == 0" OnClick="DeleteEscenarioCupo">Eliminar Escenarios Cupos</MudButton>
     </ToolBarContent>
     <Columns>
@@ -61,7 +61,7 @@
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Dangerous" OnClick="async () => await ShowEditingExclusionsAsync(context)" />
                     </MudTooltip>
                     <MudTooltip Text="Editar Escenario">
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEditingAsync(context)" />
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="async () => await ShowEscenarioCupoEditingAsync(context)" />
                     </MudTooltip>
                 </div>
             </CellTemplate>

@@ -2,10 +2,7 @@
 using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.Cupos;
 using OzyParkAdmin.Domain.DetallesEscenariosCupos;
-using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
-using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.EscenariosCupo;
-using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Domain.Zonas;
 using OzyParkAdmin.Infrastructure.Shared;
@@ -25,9 +22,8 @@ public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<E
     private IQueryable<EscenarioCupo> GetBaseQuery()
     {
         return Context.Set<EscenarioCupo>()
-            .IgnoreAutoIncludes()
-                      .AsSplitQuery()
-                      .Include(e => e.DetallesEscenarioCupo);
+            .Include(x => x.CentroCosto)
+            .AsNoTracking();
     }
 
     /// <inheritdoc/>
@@ -138,24 +134,7 @@ public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<E
             } : null,
             EsHoraInicio = ec.EsHoraInicio,
             MinutosAntes = ec.MinutosAntes,
-            EsActivo = ec.EsActivo,
-            Detalles = ec.DetallesEscenarioCupo.Select(d => new DetalleEscenarioCupoInfo
-            {
-                EscenarioCupoId = d.EscenarioCupoId,
-                ServicioId = d.ServicioId,
-                Servicio = new ServicioInfo
-                {
-                    Id = d.Servicio.Id,
-                    Aka = d.Servicio.Aka,
-                    Nombre = d.Servicio.Nombre
-                },
-                TopeDiario = d.TopeDiario,
-                UsaSobreCupo = d.UsaSobreCupo,
-                HoraMaximaVenta = d.HoraMaximaVenta,
-                HoraMaximaRevalidacion = d.HoraMaximaRevalidacion,
-                UsaTopeEnCupo = d.UsaTopeEnCupo,
-                TopeFlotante = d.TopeFlotante
-            }).ToList()
+            EsActivo = ec.EsActivo
         })
         .ToListAsync(cancellationToken)
         .ConfigureAwait(false);
@@ -180,6 +159,7 @@ public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<E
     {
         // Lista los escenarios de cupo, filtrando por centros de costo si se proporcionan
         return await Context.Set<EscenarioCupo>()
+            .Include(x => x.CentroCosto)
             .Where(e => centroCostoIds == null || centroCostoIds.Contains(e.CentroCosto.Id))
             .Select(e => new EscenarioCupoInfo { Id = e.Id, Nombre = e.Nombre })
             .ToListAsync(cancellationToken);
@@ -189,7 +169,7 @@ public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<E
     public async Task<int> GetLastIdAsync(CancellationToken cancellationToken)
     {
         // Obtiene el último ID del escenario cupo
-        return await Context.Set<EscenarioCupo>().MaxAsync(e => e.Id, cancellationToken);
+        return await Context.Set<EscenarioCupo>().AsNoTracking().MaxAsync(e => e.Id, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -240,99 +220,7 @@ public class EscenarioCupoRepository(OzyParkAdminContext context) : Repository<E
     }
 
 
-    /// <inheritdoc/>
-    private static void UpdateDetalles(EscenarioCupo existingEntity, IEnumerable<DetalleEscenarioCupo> nuevosDetalles)
-    {
-        // Eliminar detalles no incluidos en la nueva lista
-        var detallesParaEliminar = existingEntity.DetallesEscenarioCupo
-            .Where(d => !nuevosDetalles.Any(nd => nd.ServicioId == d.ServicioId))
-            .ToList();
 
-        foreach (var detalle in detallesParaEliminar)
-        {
-            existingEntity.DetallesEscenarioCupo.Remove(detalle);
-        }
-
-        // Actualizar o agregar nuevos detalles
-        foreach (var nuevoDetalle in nuevosDetalles)
-        {
-            var detalleExistente = existingEntity.DetallesEscenarioCupo
-                .FirstOrDefault(d => d.ServicioId == nuevoDetalle.ServicioId);
-
-            if (detalleExistente != null)
-            {
-                // Actualizar propiedades del detalle existente
-                detalleExistente.Update(nuevoDetalle);
-            }
-            else
-            {
-                // Agregar nuevo detalle
-                existingEntity.DetallesEscenarioCupo.Add(nuevoDetalle);
-            }
-        }
-    }
-
-    private static void UpdateExclusiones(EscenarioCupo existingEntity, IEnumerable<DetalleEscenarioCupoExclusionFecha> nuevasExclusiones)
-    {
-        // Eliminar exclusionesFecha no incluidas en la nueva lista
-        var exclusionesParaEliminar = existingEntity.ExclusionesPorFecha
-            .Where(e => !nuevasExclusiones.Any(ne => ne.ServicioId == e.ServicioId && ne.FechaExclusion == e.FechaExclusion))
-            .ToList();
-
-        foreach (var exclusion in exclusionesParaEliminar)
-        {
-            existingEntity.ExclusionesPorFecha.Remove(exclusion);
-        }
-
-        // Actualizar o agregar nuevas exclusionesFecha
-        foreach (var nuevaExclusion in nuevasExclusiones)
-        {
-            var exclusionExistente = existingEntity.ExclusionesPorFecha
-                .FirstOrDefault(e => e.ServicioId == nuevaExclusion.ServicioId && e.FechaExclusion == nuevaExclusion.FechaExclusion);
-
-            if (exclusionExistente != null)
-            {
-                // Actualizar propiedades de la exclusión existente
-                exclusionExistente.Update(nuevaExclusion);
-            }
-            else
-            {
-                // Agregar nueva exclusión
-                existingEntity.ExclusionesPorFecha.Add(nuevaExclusion);
-            }
-        }
-    }
-
-    private static void UpdateExclusiones(EscenarioCupo existingEntity, IEnumerable<DetalleEscenarioCupoExclusion> nuevasExclusiones)
-    {
-        // Eliminar exclusionesFecha no incluidas en la nueva lista
-        var exclusionesParaEliminar = existingEntity.Exclusiones
-            .Where(e => !nuevasExclusiones.Any(ne => ne.ServicioId == e.ServicioId && ne.DiaSemanaId == e.DiaSemanaId && ne.HoraInicio == e.HoraInicio))
-            .ToList();
-
-        foreach (var exclusion in exclusionesParaEliminar)
-        {
-            existingEntity.Exclusiones.Remove(exclusion);
-        }
-
-        // Actualizar o agregar nuevas exclusionesFecha
-        foreach (var nuevaExclusion in nuevasExclusiones)
-        {
-            var exclusionExistente = existingEntity.Exclusiones
-                .FirstOrDefault(e => e.ServicioId == nuevaExclusion.ServicioId && e.DiaSemanaId == nuevaExclusion.DiaSemanaId && e.HoraInicio == nuevaExclusion.HoraInicio);
-
-            if (exclusionExistente != null)
-            {
-                // Actualizar propiedades de la exclusión existente
-                exclusionExistente.Update(nuevaExclusion);
-            }
-            else
-            {
-                // Agregar nueva exclusión
-                existingEntity.Exclusiones.Add(nuevaExclusion);
-            }
-        }
-    }
 
     /// <inheritdoc/>
     public async Task<IEnumerable<EscenarioCupo>> FindByIdsAsync(int[] ids, CancellationToken cancellationToken)

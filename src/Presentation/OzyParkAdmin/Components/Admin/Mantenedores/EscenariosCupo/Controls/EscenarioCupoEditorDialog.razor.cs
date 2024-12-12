@@ -1,10 +1,13 @@
 ﻿using MassTransit;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using OzyParkAdmin.Application.DetalleEscenarioCupo.List;
 using OzyParkAdmin.Application.DetalleEscenarioExclusionFecha.List;
 using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models;
 using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.DetallesEscenariosCupos;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.Servicios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Domain.Zonas;
@@ -20,25 +23,48 @@ public partial class EscenarioCupoEditorDialog
     private bool _fieldsModified = false;
     private int _activeStep;
     private int _index;
+    private bool _loading;
     private bool _completed;
 
     [CascadingParameter] public MudDialogInstance MudDialog { get; set; } = default!;
-
     [Parameter] public EscenarioCupoModel SelectedEscenarioCupo { get; set; }
     [Parameter] public EscenarioCupoViewModel ViewModel { get; set; } = default!;
     [Parameter] public List<CentroCostoInfo> CentrosCostos { get; set; } = new();
     [Parameter] public List<ZonaInfo> Zonas { get; set; } = new();
     [Parameter] public List<ServicioInfo> Servicios { get; set; } = new();
     [Parameter] public List<CanalVenta> CanalesVenta { get; set; } = new();
+    private List<DetalleEscenarioCupoInfo> Detalles { get; set; } = new();
+    private List<DetalleEscenarioCupoExclusionFechaFullInfo> ExclusionesPorFecha { get; set; } = new();
+
+    private bool _detallesModified = false;
+    private bool _exclusionesModified = false;
 
     protected override async Task OnInitializedAsync()
     {
-        await CargarExclusionesPorFecha();
-        ValidarFormularioEscenarioCupo();
         _hasAttemptedValidation = false;
         _fieldsModified = false;
+
+        await ValidarFormularioInicialAsync();
+
+        ValidarFormularioEscenarioCupo();
+
         StateHasChanged();
     }
+
+    private async Task ValidarFormularioInicialAsync()
+    {
+        // Esperar para garantizar que el formulario esté completamente montado
+        await Task.Delay(500);
+
+        // Forzar una revalidación del formulario
+        if (_editEscenarioCupoForm != null)
+        {
+            await _editEscenarioCupoForm.form.Validate().ConfigureAwait(false);
+        }
+
+        _formEscenarioCupoValido = _editEscenarioCupoForm?.formEscenarioCupoValid == true;
+    }
+
 
     private void ValidarFormularioEscenarioCupo()
     {
@@ -58,6 +84,20 @@ public partial class EscenarioCupoEditorDialog
         }
     }
 
+    // Método llamado al agregar un detalle
+    private void OnDetalleAgregado()
+    {
+        _detallesModified = true;
+        StateHasChanged();
+    }
+
+    // Método llamado al agregar una exclusión
+    private void OnExclusionAgregada()
+    {
+        _exclusionesModified = true;
+        StateHasChanged();
+    }
+
     private async Task ControlStepCompletion(StepperInteractionEventArgs arg)
     {
         switch (arg.StepIndex)
@@ -66,14 +106,22 @@ public partial class EscenarioCupoEditorDialog
                 ValidarFormularioEscenarioCupo();
                 if (!_formEscenarioCupoValido && (_fieldsModified || !_hasAttemptedValidation))
                 {
-                    Snackbar.Add("Completa la información del escenario cupo antes de continuar", Severity.Error);
+                    Snackbar.Add("Completa la información del escenario cupo antes de continuar", Severity.Error, config =>
+                    {
+                        config.VisibleStateDuration = 2000;
+                        config.RequireInteraction = false;
+                    });
                     arg.Cancel = true;
                 }
                 break;
             case 1:
-                if (!SelectedEscenarioCupo.Detalles.Any() && _hasAttemptedValidation)
+                if (!Detalles.Any() && _hasAttemptedValidation)
                 {
-                    Snackbar.Add("Debe agregar al menos un detalle antes de continuar", Severity.Error);
+                    Snackbar.Add("Debe agregar al menos un detalle antes de continuar", Severity.Error, config =>
+                    {
+                        config.VisibleStateDuration = 2000;
+                        config.RequireInteraction = false;
+                    });
                     arg.Cancel = true;
                 }
                 break;
@@ -88,82 +136,88 @@ public partial class EscenarioCupoEditorDialog
                 ValidarFormularioEscenarioCupo();
                 if (!_formEscenarioCupoValido && (_fieldsModified || !_hasAttemptedValidation))
                 {
-                    Snackbar.Add("Primero complete la información del escenario cupo", Severity.Error);
+                    Snackbar.Add("Primero complete la información del escenario cupo", Severity.Error, config =>
+                    {
+                        config.VisibleStateDuration = 2000;
+                        config.RequireInteraction = false;
+                    });
                     arg.Cancel = true;
                 }
                 break;
             case 2:
-                if (!SelectedEscenarioCupo.Detalles.Any() && _hasAttemptedValidation)
+                if (!Detalles.Any() && _hasAttemptedValidation)
                 {
-                    Snackbar.Add("Debe agregar detalles antes de pasar a las exclusiones", Severity.Error);
+                    Snackbar.Add("Debe agregar detalles antes de pasar a las exclusiones", Severity.Error, config =>
+                    {
+                        config.VisibleStateDuration = 2000;
+                        config.RequireInteraction = false;
+                    });
                     arg.Cancel = true;
                 }
                 break;
         }
     }
 
+    // Método que confirma los cambios
     private async Task CommitItemChangesAsync()
     {
         _hasAttemptedValidation = true;
         ValidarFormularioEscenarioCupo();
-        if (_formEscenarioCupoValido && SelectedEscenarioCupo.Detalles.Any())
+
+        if (_formEscenarioCupoValido && (Detalles.Any() || ExclusionesPorFecha.Any()))
         {
             ViewModel.Loading = true;
-            Snackbar.Add("Guardando cambios...", Severity.Info);
-            MudDialog.Close(DialogResult.Ok(SelectedEscenarioCupo));
+
+            MudDialog.Close(DialogResult.Ok(new EscenarioCupoDataResponse
+            {
+                EscenarioCupo = SelectedEscenarioCupo,
+                Detalles = Detalles,
+                ExclusionesPorFecha = ExclusionesPorFecha
+            }));
+
             ViewModel.Loading = false;
+        }
+        else
+        {
+            Snackbar.Add("Debe completar todos los campos obligatorios antes de guardar.", Severity.Error);
         }
     }
 
     private void CancelEditingItem()
     {
         Snackbar.Add("Edición cancelada.", Severity.Warning);
-        CloseDialog();
     }
 
-    private void CloseDialog()
-    {
-        MudDialog.Close();
-    }
-
-    private void OnActiveIndexChanged(int newIndex)
+    private async void OnActiveIndexChanged(int newIndex)
     {
         _activeStep = newIndex;
-        if (IsAllStepsValid() && _activeStep == 2) // Assuming the last step index is 2
+
+        switch (newIndex)
         {
-            Snackbar.Add("Todos los pasos son válidos. Puede proceder a guardar.", Severity.Success);
+            case 1: await ListDetallesEscenarioCupo(); break;
+            case 2: await ListDetalleEscenarioCupoExclusionesFecha(); break;
         }
-    }
 
-    private void OnDetalleAgregado()
-    {
-        StateHasChanged();
-    }
+        if (IsAllStepsValid() && _activeStep == 2)
+        {
+            Snackbar.Add("Todos los pasos son válidos. Puede proceder a guardar.", Severity.Success, config =>
+            {
+                config.VisibleStateDuration = 5000;
+                config.RequireInteraction = false;
+            });
 
-    private void OnExclusionAgregada()
-    {
-        StateHasChanged();
-    }
+            _completed = true;
+        }
 
+
+
+    }
     private void OnFieldChanged(bool isValid)
     {
         _fieldsModified = true;
         _formEscenarioCupoValido = isValid;
         StateHasChanged();
     }
-
-    private async Task CargarExclusionesPorFecha()
-    {
-        ViewModel.Loading = true;
-        ListEscenarioCupoExclusionesPorFecha list = new(SelectedEscenarioCupo.Id);
-        var result = await Mediator.SendRequest(list);
-        ViewModel.Loading = false;
-
-        result.Switch(
-            onSuccess: SelectedEscenarioCupo.ExclusionesFecha.AddRange,
-            onFailure: failure => AddFailure(failure, "buscando exclusiones de fechas"));
-    }
-
     private bool AddFailure(Failure failure, string action)
     {
         Snackbar.AddFailure(failure, action);
@@ -172,7 +226,38 @@ public partial class EscenarioCupoEditorDialog
 
     private bool IsAllStepsValid()
     {
-        return _formEscenarioCupoValido && SelectedEscenarioCupo.Detalles.Any();
+        return _formEscenarioCupoValido && Detalles.Any();
     }
-}
 
+    private async Task ListDetallesEscenarioCupo()
+    {
+        ListDetalleEscenarioCupo list = new(SelectedEscenarioCupo.Id);
+
+        var result = await Mediator.SendRequest(list);
+        result.Switch(
+            onSuccess: list =>
+            {
+                Detalles = list;
+                _detallesModified = false;
+                StateHasChanged();
+            },
+            onFailure: failure => AddFailure(failure, "cargar detalles de escenario cupo"));
+    }
+
+    private async Task ListDetalleEscenarioCupoExclusionesFecha()
+    {
+        ListEscenarioCupoExclusionesPorFecha list = new(SelectedEscenarioCupo.Id);
+
+        var result = await Mediator.SendRequest(list);
+        result.Switch(
+            onSuccess: list =>
+            {
+                ExclusionesPorFecha = list;
+                _exclusionesModified = false;
+                StateHasChanged();
+            },
+            onFailure: failure => AddFailure(failure, "cargar exclusiones por fecha escenario cupo"));
+    }
+
+
+}

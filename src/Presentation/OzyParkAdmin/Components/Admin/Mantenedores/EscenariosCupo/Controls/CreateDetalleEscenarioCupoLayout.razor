@@ -1,106 +1,102 @@
 ﻿@using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models
 @using OzyParkAdmin.Domain.DetallesEscenariosCupos
 @using OzyParkAdmin.Domain.Servicios
+@using OzyParkAdmin.Shared
 @using MudBlazor
 
-<MudGrid Spacing="1" Class="mt-4">
-    <MudItem xs="4">
-        <MudSelect @bind-SelectedValues="ServiciosSeleccionados"
-                   Disabled="IsEditMode"
-                   SelectAll="true"
-                   SelectAllText="Seleccionar todos"
-                   Label="Servicios"
-                   MultiSelection="true"
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   Dense="true"
-                   ToStringFunc="x => x?.Nombre"
-                   MultiSelectionTextFunc="ServiciosVentaDescriptions"
-                   Required="true"
-                   @onchange="OnDetalleChanged">
-            @foreach (var servicio in Servicios)
-            {
-                <MudSelectItem T="ServicioInfo" Value="servicio">@servicio.Nombre</MudSelectItem>
-            }
-        </MudSelect>
+<MudGrid Spacing="5" Class="h-100vh">
+    <MudItem xs="4" Class="h-100vh overflow-y-auto">
+        <MudGrid Spacing="1" Class="mt-4">
+            <MudItem xs="12">
+                <MudSelect @bind-SelectedValues="ServiciosSeleccionados"
+                           Disabled="IsEditMode"
+                           SelectAll="true"
+                           SelectAllText="Seleccionar todos"
+                           Label="Servicios"
+                           MultiSelection="true"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Dense="true"
+                           ToStringFunc="x => x?.Nombre"
+                           MultiSelectionTextFunc="ServiciosVentaDescriptions"
+                           Required="true"
+                           @onchange="OnDetalleChanged">
+                    @foreach (var servicio in Servicios)
+                    {
+                        <MudSelectItem T="ServicioInfo" Value="servicio">@servicio.Nombre</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12">
+                <MudTimePicker @bind-Time="detalle.HoraMaximaVenta" Variant="Variant.Outlined" Margin="Margin.Dense" Required="true"
+                               Label="Hora máxima venta" For="() => detalle.HoraMaximaVenta" ImmediateText="true" @onchange="OnDetalleChanged" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTimePicker @bind-Time="detalle.HoraMaximaRevalidacion" Variant="Variant.Outlined" Margin="Margin.Dense" Required="true"
+                               Label="Hora máxima revalidación" For="() => detalle.HoraMaximaRevalidacion" ImmediateText="true" @onchange="OnDetalleChanged" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudNumericField @bind-Value="detalle.TopeDiario"
+                                 Label="Tope Diario"
+                                 Min="0" Max="int.MaxValue"
+                                 Variant="Variant.Outlined"
+                                 Margin="Margin.Dense"
+                                 @onchange="OnDetalleChanged" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudSwitch Label="Usa tope en cupo" @bind-Checked="detalle.UsaTopeEnCupo" T="bool" Color="Color.Primary" Class="ml-5 mt-2" @onchange="OnDetalleChanged" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudSwitch Label="Usa sobre cupo" @bind-Checked="detalle.UsaSobreCupo" T="bool" Color="Color.Primary" Class="ml-5 mt-2" @onchange="OnDetalleChanged" />
+            </MudItem>
+            <MudItem xs="12" Class="d-flex justify-space-between">
+                <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="CancelarEdicion" Disabled="!IsEditMode">
+                    <MudIcon Icon="@Icons.Material.Filled.Close" /> Cancelar edición
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(IsEditMode ? GuardarCambiosAsync : AgregarDetalle)" Disabled="!EsDetalleValido">
+                    <MudIcon Icon="@Icons.Material.Filled.Add" /> @(IsEditMode ? "Guardar cambios" : "Agregar detalle")
+                </MudButton>
+            </MudItem>
+        </MudGrid>
     </MudItem>
-
-    <MudItem xs="4">
-        <MudTimePicker @bind-Time="detalle.HoraMaximaVenta" Variant="Variant.Outlined" Margin="Margin.Dense" Required="true"
-                       Label="Hora máxima venta" For="() => detalle.HoraMaximaVenta" ImmediateText="true" @onchange="OnDetalleChanged" />
-    </MudItem>
-
-    <MudItem xs="4">
-        <MudTimePicker @bind-Time="detalle.HoraMaximaRevalidacion" Variant="Variant.Outlined" Margin="Margin.Dense" Required="true"
-                       Label="Hora máxima revalidación" For="() => detalle.HoraMaximaRevalidacion" ImmediateText="true" @onchange="OnDetalleChanged" />
-    </MudItem>
-
-    <MudItem xs="4">
-        <MudNumericField @bind-Value="detalle.TopeDiario"
-                         Label="Tope Diario"
-                         Min="0" Max="int.MaxValue"
-                         Variant="Variant.Outlined"
-                         Margin="Margin.Dense"
-                         @onchange="OnDetalleChanged" />
-    </MudItem>
-
-    <MudItem xs="4">
-        <MudSwitch Label="Usa tope en cupo" @bind-Checked="detalle.UsaTopeEnCupo" T="bool" Color="Color.Primary" Class="ml-5 mt-2" @onchange="OnDetalleChanged" />
-    </MudItem>
-
-    <MudItem xs="4">
-        <MudSwitch Label="Usa sobre cupo" @bind-Checked="detalle.UsaSobreCupo" T="bool" Color="Color.Primary" Class="ml-5 mt-2" @onchange="OnDetalleChanged" />
+    <MudItem xs="8" Style="max-height: 550px !important" Class="overflow-y-auto">
+        <MudGrid Spacing="1" Class="mt-4">
+            <MudItem xs="12">
+                <MudTable Items="Detalles" Class="mt-4" @bind-SelectedItems="DetallesSeleccionados" MultiSelection="true" T="DetalleEscenarioCupoInfo">
+                    <HeaderContent>
+                        <MudTh>Servicio</MudTh>
+                        <MudTh>Tope diario</MudTh>
+                        <MudTh>Usa tope en cupo</MudTh>
+                        <MudTh>Usa sobre cupo</MudTh>
+                        <MudTh>Hora máxima venta</MudTh>
+                        <MudTh>Hora máxima revalidación</MudTh>
+                        <MudTh>Acciones</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Servicio.Nombre</MudTd>
+                        <MudTd>@context.TopeDiario</MudTd>
+                        <MudTd>@(context.UsaTopeEnCupo ? "Sí" : "No")</MudTd>
+                        <MudTd>@(context.UsaSobreCupo ? "Sí" : "No")</MudTd>
+                        <MudTd>@(context.HoraMaximaVenta.HasValue ? context.HoraMaximaVenta.Value.ToString(@"hh\:mm") : "-")</MudTd>
+                        <MudTd>@(context.HoraMaximaRevalidacion.HasValue ? context.HoraMaximaRevalidacion.Value.ToString(@"hh\:mm") : "-")</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditarDetalle(context)" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => EliminarDetalle(context)" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudItem>
+        </MudGrid>
+        <MudGrid Class="mt-4">
+            <MudItem xs="12" Class="d-flex justify-end">
+                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="EliminarSeleccionados" Disabled="DetallesSeleccionados.Count == 0">
+                    <MudIcon Icon="@Icons.Material.Filled.Delete" /> Eliminar seleccionados
+                </MudButton>
+            </MudItem>
+        </MudGrid>
     </MudItem>
 </MudGrid>
 
-<MudGrid Spacing="1" Class="mt-4">
-    <MudItem xs="3">
-        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(IsEditMode ? GuardarCambiosAsync : AgregarDetalle)" Disabled="!EsDetalleValido">
-            <MudIcon Icon="@Icons.Material.Filled.Add" /> @(IsEditMode ? "Guardar cambios" : "Agregar detalle")
-        </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="CancelarEdicion" Disabled="!IsEditMode">
-            <MudIcon Icon="@Icons.Material.Filled.Close" /> Cancelar edición
-        </MudButton>
-    </MudItem>
-</MudGrid>
-
-<MudDivider Class="mt-5 mb-5" />
-
-<MudGrid Class="mt-4">
-    <MudItem xs="12" Class="d-flex justify-end">
-        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="EliminarSeleccionados" Disabled="DetallesSeleccionados.Count == 0">
-            <MudIcon Icon="@Icons.Material.Filled.Delete" /> Eliminar seleccionados
-        </MudButton>
-    </MudItem>
-</MudGrid>
-
-<MudItem xs="12">
-    <div style="max-height: 300px; overflow-y: auto;">
-        <MudTable Items="Detalles" Class="mt-4" @bind-SelectedItems="DetallesSeleccionados" MultiSelection="true" T="DetalleEscenarioCupoInfo">
-            <HeaderContent>
-                <MudTh>Servicio</MudTh>
-                <MudTh>Tope diario</MudTh>
-                <MudTh>Usa tope en cupo</MudTh>
-                <MudTh>Usa sobre cupo</MudTh>
-                <MudTh>Hora máxima venta</MudTh>
-                <MudTh>Hora máxima revalidación</MudTh>
-                <MudTh>Acciones</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd>@context.Servicio.Nombre</MudTd>
-                <MudTd>@context.TopeDiario</MudTd>
-                <MudTd>@(context.UsaTopeEnCupo ? "Sí" : "No")</MudTd>
-                <MudTd>@(context.UsaSobreCupo ? "Sí" : "No")</MudTd>
-                <MudTd>@(context.HoraMaximaVenta.HasValue ? context.HoraMaximaVenta.Value.ToString(@"hh\:mm") : "-")</MudTd>
-                <MudTd>@(context.HoraMaximaRevalidacion.HasValue ? context.HoraMaximaRevalidacion.Value.ToString(@"hh\:mm") : "-")</MudTd>
-                <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditarDetalle(context)" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => EliminarDetalle(context)" />
-                </MudTd>
-            </RowTemplate>
-        </MudTable>
-    </div>
-</MudItem>
 
 @code {
     [Inject] ISnackbar Snackbar { get; set; } = default!;

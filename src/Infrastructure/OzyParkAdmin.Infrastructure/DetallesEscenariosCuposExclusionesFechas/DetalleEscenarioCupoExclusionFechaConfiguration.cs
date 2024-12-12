@@ -21,28 +21,5 @@ internal sealed class DetalleEscenarioCupoExclusionFechaConfiguration : IEntityT
         builder.Property(x => x.HoraInicio).HasColumnName("HoraInicio");
         builder.Property(x => x.HoraFin).HasColumnName("HoraFin");
 
-        // Relación con Servicio
-        builder.HasOne(x => x.Servicio)
-               .WithMany()
-               .HasForeignKey(x => x.ServicioId)
-               .OnDelete(DeleteBehavior.Restrict)
-               .IsRequired();
-
-        builder.Navigation(x => x.Servicio).AutoInclude();
-
-        // Relación con CanalVenta
-        builder.HasOne(x => x.CanalVenta)
-               .WithMany()
-               .HasForeignKey(x => x.CanalVentaId)
-               .OnDelete(DeleteBehavior.Restrict)
-               .IsRequired();
-
-        builder.Navigation(x => x.CanalVenta).AutoInclude();
-
-        // Relación con EscenarioCupo
-        builder.HasOne(x => x.EscenarioCupo)
-               .WithMany(e => e.ExclusionesPorFecha)
-               .HasForeignKey(x => x.EscenarioCupoId)
-               .OnDelete(DeleteBehavior.Cascade);
     }
 }

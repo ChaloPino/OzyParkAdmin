@@ -1,7 +1,7 @@
 ﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
 
-namespace OzyParkAdmin.Application.DetalleEscenarioExclusion.Update;
+namespace OzyParkAdmin.Application.DetallesEscenariosExclusiones.Update;
 /// <summary>
 /// Actualiza un escenario cupo
 /// </summary>

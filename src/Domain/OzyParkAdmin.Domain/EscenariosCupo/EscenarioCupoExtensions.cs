@@ -1,5 +1,4 @@
 ﻿using OzyParkAdmin.Domain.CentrosCosto;
-using OzyParkAdmin.Domain.DetallesEscenariosCupos;
 using OzyParkAdmin.Domain.Zonas;
 
 namespace OzyParkAdmin.Domain.EscenariosCupo;
@@ -45,18 +44,7 @@ public static class EscenarioCupoExtensions
                 }
                 : null,
             EsHoraInicio = escenarioCupo.EsHoraInicio,
-            MinutosAntes = escenarioCupo.MinutosAntes,
-            Detalles = escenarioCupo.DetallesEscenarioCupo.Select(detalle => new DetalleEscenarioCupoInfo
-            {
-                EscenarioCupoId = detalle.EscenarioCupoId,
-                ServicioId = detalle.ServicioId,
-                TopeDiario = detalle.TopeDiario,
-                UsaSobreCupo = detalle.UsaSobreCupo,
-                HoraMaximaVenta = detalle.HoraMaximaVenta,
-                HoraMaximaRevalidacion = detalle.HoraMaximaRevalidacion,
-                UsaTopeEnCupo = detalle.UsaTopeEnCupo,
-                TopeFlotante = detalle.TopeFlotante
-            }).ToList()
+            MinutosAntes = escenarioCupo.MinutosAntes
         };
     }
 }

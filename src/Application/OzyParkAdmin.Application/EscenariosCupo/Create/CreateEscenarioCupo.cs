@@ -1,7 +1,5 @@
 ﻿using OzyParkAdmin.Application.Shared;
 using OzyParkAdmin.Domain.CentrosCosto;
-using OzyParkAdmin.Domain.DetallesEscenariosCupos;
-using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.EscenariosCupo;
 using OzyParkAdmin.Domain.Zonas;
 
@@ -19,8 +17,6 @@ namespace OzyParkAdmin.Application.EscenariosCupo.Create;
 public sealed record CreateEscenarioCupo(
     CentroCostoInfo CentroCosto,
     ZonaInfo ZonaInfo,
-    IEnumerable<DetalleEscenarioCupoInfo> Detalles,
-    IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> Exclusiones,
     string Nombre,
     bool EsHoraInicio,
     int MinutosAntes,

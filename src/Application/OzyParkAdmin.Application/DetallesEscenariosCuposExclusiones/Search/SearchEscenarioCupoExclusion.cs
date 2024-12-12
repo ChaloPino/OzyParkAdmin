@@ -2,7 +2,7 @@
 using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
 using OzyParkAdmin.Domain.Shared;
 
-namespace OzyParkAdmin.Application.DetalleEscenarioExclusion.Search;
+namespace OzyParkAdmin.Application.DetallesEscenariosExclusiones.Search;
 
 /// <summary>
 /// Busca fechas excluidas para cupos que cumplan con los criterios de búsqueda.

@@ -47,6 +47,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\BuildingBlocks\OzyParkAdmin.ChartJs\OzyParkAdmin.ChartJs.csproj" />
+    <ProjectReference Include="..\..\Domain\OzyParkAdmin.Domain\OzyParkAdmin.Domain.csproj" />
     <ProjectReference Include="..\..\Infrastructure\OzyParkAdmin.Infrastructure\OzyParkAdmin.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using MassTransit;
+using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using OzyParkAdmin.Application.DetallesEscenariosCuposExclusiones.List;
 using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models;
 using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
@@ -17,6 +19,8 @@ public partial class CreateEscenarioCupoExclusionsDialog
     [Parameter] public EscenarioCupoModel SelectedEscenarioCupo { get; set; } = default!;
     [Parameter] public DetalleEscenarioCupoExclusionModel? ExclusionToEdit { get; set; } = null;
 
+    private List<DetalleEscenarioCupoExclusionFullInfo> Exclusiones { get; set; }
+
     private DetalleEscenarioCupoExclusionModel Model { get; set; } = new DetalleEscenarioCupoExclusionModel();
     private MudForm _form;
     private bool _valid;
@@ -33,6 +37,7 @@ public partial class CreateEscenarioCupoExclusionsDialog
     /// </summary>
     private async Task SaveAsync()
     {
+
         // Generar modelos para cada combinación seleccionada evitando duplicados
         var modelos = new List<DetalleEscenarioCupoExclusionFullInfo>();
 
@@ -60,7 +65,7 @@ public partial class CreateEscenarioCupoExclusionsDialog
                     {
                         foreach (var dia in DiasSemanaSeleccionados)
                         {
-                            if (!SelectedEscenarioCupo.Exclusiones.Any(existing =>
+                            if (!Exclusiones.Any(existing =>
                                 existing.ServicioId == servicio.Id &&
                                 existing.CanalVentaId == canal.Id &&
                                 existing.DiaSemanaId == dia.Id &&
@@ -107,5 +112,13 @@ public partial class CreateEscenarioCupoExclusionsDialog
             Model.HoraInicio = ExclusionToEdit.HoraInicio;
             Model.HoraFin = ExclusionToEdit.HoraFin;
         }
+    }
+
+    private async Task ListExclusionesEscenarioCupo()
+    {
+        ListDetalleEscenarioCupoExclsiones list = new(SelectedEscenarioCupo.Id);
+
+        var result = await Mediator.SendRequest(list);
+
     }
 }

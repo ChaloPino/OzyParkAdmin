@@ -1,7 +1,6 @@
 ﻿using OzyParkAdmin.Domain.CentrosCosto;
 using OzyParkAdmin.Domain.DetallesEscenariosCupos;
 using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
-using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.EscenariosCupo;
 using OzyParkAdmin.Domain.Zonas;
 
@@ -57,20 +56,7 @@ public class EscenarioCupoModel
     /// </summary>
     public bool PuedeSerEliminado { get; set; } = true;
 
-    /// <summary>
-    /// Lista de detalles asociados al escenario de cupo.
-    /// </summary>
-    public List<DetalleEscenarioCupoInfo> Detalles { get; set; } = new();
 
-    /// <summary>
-    /// Lista de exclusiones fechas asociadas al escenario de cupo.
-    /// </summary>
-    public List<DetalleEscenarioCupoExclusionFechaFullInfo> ExclusionesFecha { get; set; } = new();
-
-    /// <summary>
-    /// Lista de exclusiones asociadas al escenario de cupo.
-    /// </summary>
-    public List<DetalleEscenarioCupoExclusionFullInfo> Exclusiones { get; set; } = new();
 
     /// <summary>
     /// Actualiza el modelo con la información completa de <see cref="EscenarioCupoFullInfo"/>.
@@ -83,9 +69,6 @@ public class EscenarioCupoModel
         EsActivo = info.EsActivo;
         CentroCosto = info.CentroCosto;
         Zona = info.Zona;
-        Detalles = info.Detalles?.ToList() ?? new List<DetalleEscenarioCupoInfo>();
-        Exclusiones = info.Exclusiones.ToList();
-        ExclusionesFecha = info.ExclusionesFechas.ToList();
     }
 
     /// <summary>
@@ -99,8 +82,14 @@ public class EscenarioCupoModel
         EsActivo = model.EsActivo;
         CentroCosto = model.CentroCosto;
         Zona = model.Zona;
-        Detalles = model.Detalles;
-        Exclusiones = model.Exclusiones;
-        ExclusionesFecha = model.ExclusionesFecha;
     }
+    /// <summary>
+    /// Devuelve true cuándo se han modificado detalles <see cref="DetalleEscenarioCupo"/>.
+    /// </summary>
+    public bool DetallesModificados { get; set; }
+
+    /// <summary>
+    /// Devuelve true si se han modificado las exclusiones por fecha <see cref="DetalleEscenarioCupoExclusion"/>.
+    /// </summary>
+    public bool ExclusionesPorFechasModificadas { get; set; }
 }

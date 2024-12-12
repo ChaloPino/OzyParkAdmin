@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using MudBlazor.Extensions;
-using OzyParkAdmin.Application.DetalleEscenarioExclusion.Search;
+using OzyParkAdmin.Application.DetallesEscenariosExclusiones.Search;
 using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models;
 using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
@@ -30,13 +30,16 @@ public partial class ListEscenarioCupoExclusionsDialog
     public List<DiaSemana> DiasSemana { get; set; } = default!;
 
     [Parameter]
-    public Func<EscenarioCupoModel, Task> OnExclusionesUpdated { get; set; } = async (model) => await Task.CompletedTask;
+    public Func<IEnumerable<DetalleEscenarioCupoExclusionFullInfo>, Task> OnExclusionesUpdated { get; set; } = async (model) => await Task.CompletedTask;
+
 
     private bool loading;
     private MudDataGrid<DetalleEscenarioCupoExclusionModel> dataGrid = new();
     private ObservableGridData<DetalleEscenarioCupoExclusionModel> currentExclusions = new();
     private string? searchText;
     private HashSet<DetalleEscenarioCupoExclusionModel> exclusionesToDelete = new();
+    private List<DetalleEscenarioCupoExclusionFullInfo> exclusiones = [];
+
 
     /// <summary>
     /// Busca los escenarios de cupo en base al estado de la grilla y los parámetros de búsqueda.
@@ -120,7 +123,7 @@ public partial class ListEscenarioCupoExclusionsDialog
     /// </summary>
     private async Task ProcessExclusions(IEnumerable<DetalleEscenarioCupoExclusionFullInfo> exclusions)
     {
-        var existingExclusions = SelectedEscenarioCupo.Exclusiones;
+        var existingExclusions = exclusiones;
 
         // Identificar las exclusiones a eliminar
         var exclusionsToRemove = existingExclusions
@@ -156,7 +159,7 @@ public partial class ListEscenarioCupoExclusionsDialog
         {
             loading = true;
 
-            await OnExclusionesUpdated.Invoke(SelectedEscenarioCupo);
+            await OnExclusionesUpdated.Invoke(existingExclusions);
 
             loading = false;
         }
@@ -174,7 +177,7 @@ public partial class ListEscenarioCupoExclusionsDialog
             foreach (var exclusion in exclusionesToDelete)
             {
                 // Buscar la exclusión correspondiente en la lista de exclusiones del escenario cupo
-                var exclusionToRemove = SelectedEscenarioCupo.Exclusiones.FirstOrDefault(existing =>
+                var exclusionToRemove = exclusiones.FirstOrDefault(existing =>
                     existing.ServicioId == exclusion.ServicioId &&
                     existing.CanalVentaId == exclusion.CanalVentaId &&
                     existing.DiaSemanaId == exclusion.DiaSemanaId &&
@@ -184,14 +187,14 @@ public partial class ListEscenarioCupoExclusionsDialog
                 // Eliminar la exclusión si existe
                 if (exclusionToRemove != null)
                 {
-                    SelectedEscenarioCupo.Exclusiones.Remove(exclusionToRemove);
+                    exclusiones.Remove(exclusionToRemove);
                 }
             }
 
             loading = true;
 
-            // Invocar el evento para que se actualice el escenario de cupo
-            await OnExclusionesUpdated.Invoke(SelectedEscenarioCupo);
+            // Invocar el evento para que se actualice la lista de exclusiones
+            await OnExclusionesUpdated.Invoke(exclusiones);
 
             loading = false;
 

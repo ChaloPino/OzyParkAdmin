@@ -13,7 +13,7 @@ public sealed class CentroCostoRepository(OzyParkAdminContext context) : Reposit
 {
     /// <inheritdoc/>
     public Task<CentroCosto?> FindByIdAsync(int centroCostoId, CancellationToken cancellationToken) =>
-        EntitySet.FirstOrDefaultAsync(x => x.Id ==  centroCostoId, cancellationToken);
+        EntitySet.AsNoTracking().FirstOrDefaultAsync(x => x.Id ==  centroCostoId, cancellationToken);
 
     /// <inheritdoc/>
     public async Task<IEnumerable<CentroCosto>> FindByIdsAsync(int[] centroCostoIds, CancellationToken cancellationToken) =>

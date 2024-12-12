@@ -5,7 +5,9 @@ using MudBlazor;
 using MudBlazor.Extensions;
 using OzyParkAdmin.Application.CanalesVenta.List;
 using OzyParkAdmin.Application.CentrosCosto.List;
-using OzyParkAdmin.Application.DetalleEscenarioExclusion.Update;
+using OzyParkAdmin.Application.DetalleEscenarioCupo.Update;
+using OzyParkAdmin.Application.DetalleEscenarioExclusionFecha.Update;
+using OzyParkAdmin.Application.DetallesEscenariosExclusiones.Update;
 using OzyParkAdmin.Application.DiasSemana.List;
 using OzyParkAdmin.Application.EscenariosCupo.Create;
 using OzyParkAdmin.Application.EscenariosCupo.Search;
@@ -18,6 +20,9 @@ using OzyParkAdmin.Components.Admin.Mantenedores.EscenariosCupo.Models;
 using OzyParkAdmin.Components.Admin.Mantenedores.ExclusionesCupo.Models;
 using OzyParkAdmin.Domain.CanalesVenta;
 using OzyParkAdmin.Domain.CentrosCosto;
+using OzyParkAdmin.Domain.DetallesEscenariosCupos;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.Entidades;
 using OzyParkAdmin.Domain.EscenariosCupo;
 using OzyParkAdmin.Domain.Servicios;
@@ -43,9 +48,6 @@ public partial class Index
     private List<CanalVenta> canalesVenta = [];
     private List<DiaSemana> diasSemana = [];
     private EscenarioCupoModel? selectedEscenarioCupo;
-
-    private bool openCreating;
-    private bool openEditing;
 
     private EscenarioCupoViewModel viewModel = new();
 
@@ -143,14 +145,7 @@ public partial class Index
         return currentEscenariosCupo;
     }
 
-    /// <summary>
-    /// Abre el formulario para crear un nuevo escenario de cupo.
-    /// </summary>
-    private Task AddEscenarioCupo()
-    {
-        openCreating = true;
-        return Task.CompletedTask;
-    }
+
 
     /// <summary>
     /// Guarda un nuevo escenario de cupo en el servidor.
@@ -170,11 +165,17 @@ public partial class Index
     /// Actualiza las exclusiones de un escenario de cupo en el servidor.
     /// </summary>
     /// <param name="escenarioCupo">El modelo de escenario de cupo que se desea actualizar.</param>
-    private async Task<bool> UpdateEscenarioCupoExclusionsAsync(EscenarioCupoModel escenarioCupo)
+    private async Task<bool> UpdateEscenarioCupoExclusionsAsync(IEnumerable<DetalleEscenarioCupoExclusionFullInfo> exclusiones)
     {
-        UpdateDetalleEscenarioExclusion changeStatus = escenarioCupo.ToUpdateExclusions();
+        UpdateDetalleEscenarioExclusion changeStatus = exclusiones.ToUpdateExclusions(exclusiones.First().EscenarioCupoId);
+
         var result = await Mediator.SendRequest(changeStatus);
-        return UpdateEscenarioCupoExclusions(escenarioCupo, result, "modificar escenario cupo exclusiones");
+
+        return result.Match(
+           onSuccess: (info) => true,
+           onFailure: (failure) => AddFailure(failure, "modificar escenario cupo exclusiones")
+       );
+        //return UpdateEscenarioCupoExclusions(escenarioCupo, result, "modificar escenario cupo exclusiones");
     }
 
     /// <summary>
@@ -273,6 +274,38 @@ public partial class Index
         return false;
     }
 
+
+    private async Task<bool> UpdateDetallesEscenarioCupo(int escenarioCupoId, IEnumerable<DetalleEscenarioCupoInfo> detalles)
+    {
+        UpdateDetalleEscenarioCupo request = new(escenarioCupoId, detalles);
+
+        var result = await Mediator.SendRequest(request);
+
+        return result.Match(
+            onSuccess: _ => true,
+            onFailure: failure =>
+            {
+                Snackbar.AddFailure(failure, "actualizar detalles del escenario");
+                return false;
+            });
+    }
+
+    private async Task<bool> UpdateExclusionesPorFechaEscenarioCupo(int escenarioCupoId, IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> exclusionesFecha)
+    {
+        UpdateDetalleEscenarioCupoExclusionFecha request = new(escenarioCupoId, exclusionesFecha);
+
+        var result = await Mediator.SendRequest(request);
+
+        return result.Match(
+            onSuccess: _ => true,
+            onFailure: failure =>
+            {
+                Snackbar.AddFailure(failure, "actualizar exclusiones por fecha del escenario");
+                return false;
+            });
+    }
+
+
     /// <summary>
     /// Elimina los escenarios de cupo seleccionados, después de solicitar confirmación al usuario.
     /// </summary>
@@ -282,14 +315,14 @@ public partial class Index
 
         if (res)
         {
-            loading = true;
+            viewModel.Loading = true;
 
             var result = await Mediator.SendRequest(escenariosCupoToDelete.ToDelete());
             await result.SwitchAsync(
                     onSuccess: DeleteFechasExcluidasSelectedAsync,
                     onFailure: failure => AddFailure(failure, "eliminar fechas excluidas para cupos"));
 
-            loading = false;
+            viewModel.Loading = false;
         }
     }
 
@@ -333,6 +366,7 @@ public partial class Index
     private bool AddFailure(Failure failure, string action)
     {
         Snackbar.AddFailure(failure, action);
+        loading = false;
         return false;
     }
 
@@ -340,7 +374,64 @@ public partial class Index
     /// Muestra el formulario para editar un escenario de cupo seleccionado.
     /// </summary>
     /// <param name="context">El contexto de la celda seleccionada.</param>
-    private async Task ShowEditingAsync(CellContext<EscenarioCupoModel> context)
+    private async Task ShowCreateDialog()
+    {
+        var parameters = new DialogParameters
+    {
+        { nameof(EscenarioCupoCreateDialog.CentrosCostos), centrosCosto },
+        { nameof(EscenarioCupoCreateDialog.Zonas), zonas },
+        { nameof(EscenarioCupoCreateDialog.Servicios), servicios },
+        { nameof(EscenarioCupoCreateDialog.CanalesVenta), canalesVenta },
+    };
+
+        var options = new DialogOptions
+        {
+            FullScreen = true,
+            CloseButton = true,
+            CloseOnEscapeKey = true,
+            NoHeader = true
+        };
+
+        var dialog = await DialogService.ShowAsync<EscenarioCupoCreateDialog>("Crear Escenario de Cupo", parameters, options);
+
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            EscenarioCupoModel? createdEscenarioCupo = result.Data as EscenarioCupoModel;
+            if (createdEscenarioCupo != null)
+            {
+                viewModel.Loading = true;
+
+                StateHasChanged();
+
+                Snackbar.Add($"Guardando Escenario '{createdEscenarioCupo.Nombre}' ...", Severity.Info, config =>
+                {
+                    config.VisibleStateDuration = 2000;
+                    config.RequireInteraction = false;
+                });
+
+                await SaveEscenarioCupoAsync(createdEscenarioCupo);
+
+                Snackbar.Add("Escenario guardado exitosamente.", Severity.Success, config =>
+                {
+                    config.VisibleStateDuration = 2000;
+                    config.RequireInteraction = false;
+                });
+
+
+                viewModel.Loading = false;
+
+                StateHasChanged();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Muestra el formulario para editar un escenario de cupo seleccionado.
+    /// </summary>
+    /// <param name="context">El contexto de la celda seleccionada.</param>
+    private async Task ShowEscenarioCupoEditingAsync(CellContext<EscenarioCupoModel> context)
     {
         var cloned = dataGrid.CloneStrategy.CloneObject(context.Item);
 
@@ -361,7 +452,6 @@ public partial class Index
             FullScreen = true,
             CloseButton = true,
             CloseOnEscapeKey = true,
-            NoHeader = true
         };
 
         var dialog = await DialogService.ShowAsync<EscenarioCupoEditorDialog>("Editar Escenario de Cupo", parameters, options);
@@ -370,13 +460,64 @@ public partial class Index
 
         if (result != null && !result.Canceled)
         {
-            var updatedEscenarioCupo = result.Data as EscenarioCupoModel;
+            var response = result.Data as EscenarioCupoDataResponse;
+
+            if (response is null)
+            {
+                Snackbar.Add("No se recibió data actualizada.", Severity.Warning, config =>
+                {
+                    config.VisibleStateDuration = 2000;
+                    config.RequireInteraction = false;
+                });
+
+                return;
+            }
+
+            EscenarioCupoModel? updatedEscenarioCupo = response.EscenarioCupo;
+            List<DetalleEscenarioCupoInfo> detalles = response.Detalles;
+            List<DetalleEscenarioCupoExclusionFechaFullInfo> exclusiones = response.ExclusionesPorFecha;
+
             if (updatedEscenarioCupo != null)
             {
-                await UpdateEscenarioCupoAsync(updatedEscenarioCupo);
+                Snackbar.Add($"Guardando Escenario '{updatedEscenarioCupo.Nombre}' ...", Severity.Info, config =>
+                {
+                    config.VisibleStateDuration = 2000;
+                    config.RequireInteraction = false;
+                });
+
+                viewModel.Loading = true;
+
+                bool isUpdated = await UpdateEscenarioCupoAsync(updatedEscenarioCupo);
+
+                if (isUpdated)
+                {
+                    Snackbar.Add("Escenario actualizado exitosamente.", Severity.Success, config =>
+                    {
+                        config.VisibleStateDuration = 2000;
+                        config.RequireInteraction = false;
+                    });
+                }
             }
+            else
+            {
+                Snackbar.Add("No se detectaron cambios en el escenario. Se actualizarán los detalles y exclusiones.", Severity.Warning);
+            }
+
+            bool detallesUpdated = await UpdateDetallesEscenarioCupo(selectedEscenarioCupo!.Id, detalles);
+            if (!detallesUpdated)
+            {
+                Snackbar.Add("Ocurrió un error al actualizar los detalles del escenario.", Severity.Error);
+            }
+            bool exclusionesUpdated = await UpdateExclusionesPorFechaEscenarioCupo(selectedEscenarioCupo!.Id, exclusiones);
+            if (!exclusionesUpdated)
+            {
+                Snackbar.Add("Ocurrió un error al actualizar las exclusiones del escenario.", Severity.Error);
+            }
+
+            viewModel.Loading = false;
         }
     }
+
 
     /// <summary>
     /// Muestra el formulario para editar las exclusiones de un escenario de cupo seleccionado.
@@ -396,15 +537,14 @@ public partial class Index
             return Task.CompletedTask;
         }
 
-        var detalleServices = cloned!.Detalles.Select(s => s.Servicio).ToList();
 
         var parameters = new DialogParameters
         {
-            { nameof(ListEscenarioCupoExclusionsDialog.Servicios), detalleServices },
+            { nameof(ListEscenarioCupoExclusionsDialog.Servicios), servicios },
             { nameof(ListEscenarioCupoExclusionsDialog.CanalesVenta), canalesVenta },
             { nameof(ListEscenarioCupoExclusionsDialog.DiasSemana), diasSemana },
             { nameof(ListEscenarioCupoExclusionsDialog.SelectedEscenarioCupo), selectedEscenarioCupo },
-            { nameof(ListEscenarioCupoExclusionsDialog.OnExclusionesUpdated), (Func<EscenarioCupoModel, Task>)HandleExclusionFromEscenarioCupo }
+            { nameof(ListEscenarioCupoExclusionsDialog.OnExclusionesUpdated), (Func<IEnumerable<DetalleEscenarioCupoExclusionFullInfo>, Task>)HandleExclusionFromEscenarioCupo }
         };
 
         var options = new DialogOptions
@@ -422,9 +562,9 @@ public partial class Index
     /// Maneja las exclusiones de un escenario de cupo y las actualiza en el servidor.
     /// </summary>
     /// <param name="updatedEscenario">El modelo de escenario de cupo actualizado con exclusiones modificadas.</param>
-    private async Task HandleExclusionFromEscenarioCupo(EscenarioCupoModel updatedEscenario)
+    private async Task HandleExclusionFromEscenarioCupo(IEnumerable<DetalleEscenarioCupoExclusionFullInfo> exclusiones)
     {
-        await UpdateEscenarioCupoExclusionsAsync(updatedEscenario);
+        await UpdateEscenarioCupoExclusionsAsync(exclusiones);
     }
 
     /// <summary>

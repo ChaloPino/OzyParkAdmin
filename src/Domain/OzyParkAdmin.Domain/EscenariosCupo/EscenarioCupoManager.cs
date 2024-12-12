@@ -1,7 +1,4 @@
 ﻿using OzyParkAdmin.Domain.CentrosCosto;
-using OzyParkAdmin.Domain.DetallesEscenariosCupos;
-using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusiones;
-using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.EscenariosCupo;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Domain.Zonas;
@@ -10,15 +7,13 @@ namespace OzyParkAdmin.Domain.ExclusionesCupo;
 
 /// <summary>
 /// Lógica de negocios para gestionar los <see cref="EscenarioCupo"/>.
-/// Esta clase proporciona métodos para crear y actualizar escenarios de cupo, así como para gestionar sus detalles y exclusionesFecha de fechas asociadas.
+/// Esta clase proporciona métodos para crear, actualizar y marcar escenarios de cupo.
 /// </summary>
 public sealed class EscenarioCupoManager : IBusinessLogic
 {
     private readonly ICentroCostoRepository _centroCostoRepository;
     private readonly IEscenarioCupoRepository _escenarioCupoRepository;
     private readonly IZonaRepository _zonaRepository;
-    private readonly DetalleEscenarioCupoManager _detalleEscenarioCupoManager;
-    private readonly DetalleEscenarioCupoExclusionFechaManager _exclusionManager;
 
     /// <summary>
     /// Inicializa una nueva instancia de <see cref="EscenarioCupoManager"/> con las dependencias necesarias.
@@ -26,42 +21,27 @@ public sealed class EscenarioCupoManager : IBusinessLogic
     public EscenarioCupoManager(
         IEscenarioCupoRepository escenarioCupoRepository,
         ICentroCostoRepository centroCostoRepository,
-        IZonaRepository zonaRepository,
-        DetalleEscenarioCupoManager detalleEscenarioCupoManager,
-        DetalleEscenarioCupoExclusionFechaManager exclusionManager)
+        IZonaRepository zonaRepository)
     {
         ArgumentNullException.ThrowIfNull(escenarioCupoRepository);
         ArgumentNullException.ThrowIfNull(centroCostoRepository);
         ArgumentNullException.ThrowIfNull(zonaRepository);
-        ArgumentNullException.ThrowIfNull(detalleEscenarioCupoManager);
-        ArgumentNullException.ThrowIfNull(exclusionManager);
 
-        _centroCostoRepository = centroCostoRepository;
         _escenarioCupoRepository = escenarioCupoRepository;
+        _centroCostoRepository = centroCostoRepository;
         _zonaRepository = zonaRepository;
-        _detalleEscenarioCupoManager = detalleEscenarioCupoManager;
-        _exclusionManager = exclusionManager;
-    }
-    /// <summary>
-    /// Busca si tiene un cupo asociado y por ende, de tenerlo no se puede eliminar
-    /// </summary>
-    public async Task<bool> CanDelete(int id, CancellationToken cancellationToken)
-    {
-        return await _escenarioCupoRepository.HasCupoRelated(id, cancellationToken);
     }
 
     /// <summary>
-    /// Crea un nuevo escenario de cupo con sus detalles y exclusionesFecha asociadas.
+    /// Crea un nuevo escenario de cupo con la información básica.
     /// </summary>
-    public async Task<ResultOf<EscenarioCupo>> CreateEscenarioCupoAsync(
+    public async Task<ResultOf<EscenarioCupo>> CreateAsync(
         CentroCostoInfo centroCostoInfo,
         ZonaInfo? zonaInfo,
         string nombre,
         bool esHoraInicio,
         int minutosAntes,
         bool esActivo,
-        IEnumerable<DetalleEscenarioCupoInfo> detalles,
-        IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> exclusiones,
         CancellationToken cancellationToken)
     {
         // Validar CentroCosto y Zona
@@ -75,21 +55,16 @@ public sealed class EscenarioCupoManager : IBusinessLogic
         {
             var (centroCosto, zona) = entidades;
 
-            // Crear el escenario de cupo con un ID nuevo
+            // Crear el escenario de cupo
             var lastId = await _escenarioCupoRepository.GetLastIdAsync(cancellationToken) + 1;
-            var escenarioCupoResult = EscenarioCupo.Create(lastId, centroCosto, zona, nombre, esHoraInicio, minutosAntes, esActivo, detalles, exclusiones);
-
-            if (escenarioCupoResult.IsSuccess(out var escenarioCupo))
-            {
-                return escenarioCupo;
-            }
+            return EscenarioCupo.Create(lastId, centroCosto, zona, nombre, esHoraInicio, minutosAntes, esActivo);
         }
 
-        return new Failure(); // Caso genérico de error
+        return new Failure();
     }
 
     /// <summary>
-    /// Crea un nuevo escenario de cupo con sus detalles y exclusionesFecha asociadas.
+    /// Actualiza la información básica de un escenario de cupo existente.
     /// </summary>
     public async Task<ResultOf<EscenarioCupo>> UpdateAsync(
         int id,
@@ -100,12 +75,8 @@ public sealed class EscenarioCupoManager : IBusinessLogic
         bool esHoraInicio,
         int minutosAntes,
         bool esActivo,
-        IEnumerable<DetalleEscenarioCupoInfo> detalles,
-        IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> exclusionesFecha,
-        IEnumerable<DetalleEscenarioCupoExclusionFullInfo> exclusiones,
         CancellationToken cancellationToken)
     {
-
         // Validar CentroCosto y Zona
         var zonaResult = await ValidateCentroCostoAndZonaAsync(centroCostoInfo, zonaInfo, cancellationToken);
         if (zonaResult.IsFailure(out var failure))
@@ -117,17 +88,26 @@ public sealed class EscenarioCupoManager : IBusinessLogic
         {
             var (centroCosto, zona) = entidades;
 
-            // Crear el escenario de cupo con un ID nuevo
-            var lastId = await _escenarioCupoRepository.GetLastIdAsync(cancellationToken) + 1;
-            var escenarioCupoResult = EscenarioCupo.CreateOrUpdate(lastId, centroCosto, zona, nombre, esHoraInicio, minutosAntes, esActivo, detalles, exclusionesFecha, exclusiones);
-
-            if (escenarioCupoResult.IsSuccess(out var escenarioCupo))
-            {
-                return escenarioCupo;
-            }
+            // Actualizar el escenario de cupo
+            return EscenarioCupo.Update(existente, centroCosto, zona, nombre, esHoraInicio, minutosAntes, esActivo);
         }
 
         return new Failure();
+    }
+
+    /// <summary>
+    /// Marca un escenario de cupo como eliminado.
+    /// </summary>
+    public ResultOf<EscenarioCupo> MarkAsDeleted(EscenarioCupo existente, bool tieneCuposAsociados)
+    {
+        if (tieneCuposAsociados)
+        {
+            return new ValidationError(nameof(EscenarioCupo), "El escenario de cupo tiene cupos asociados y no puede eliminarse.");
+        }
+
+        existente.MarcarComoEliminado();
+
+        return existente;
     }
 
     /// <summary>

@@ -81,7 +81,7 @@ internal sealed class ServicioConfiguration : IEntityTypeConfiguration<Servicio>
             navBuilder.ToTable("tkt_ServiciosBuses_td");
             navBuilder.HasKey("ServicioId");
             navBuilder.WithOwner().HasForeignKey("ServicioId");
-        });
+        }); 
 
         builder.OwnsOne<ServicioPolitica>("_servicioPolitica", navBuilder =>
         {

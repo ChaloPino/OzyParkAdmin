@@ -30,14 +30,8 @@ internal sealed class DetalleEscenarioCupoConfiguration : IEntityTypeConfigurati
                .OnDelete(DeleteBehavior.Restrict)
                .IsRequired();
 
-        builder.Navigation(x => x.Servicio).AutoInclude();
+        //builder.Navigation(x => x.Servicio).AutoInclude(false);
 
-        // Relación con EscenarioCupo
-        builder.HasOne(x => x.EscenarioCupo)
-               .WithMany(e => e.DetallesEscenarioCupo)
-               .HasForeignKey(x => x.EscenarioCupoId)
-               .OnDelete(DeleteBehavior.Restrict);
-
-        builder.Navigation(x => x.EscenarioCupo).AutoInclude();
+        //builder.Navigation(x => x.EscenarioCupo).AutoInclude();
     }
 }

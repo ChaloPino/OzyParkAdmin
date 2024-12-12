@@ -34,7 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DetalleEscenarioExclusionFecha\Create\" />
     <Folder Include="DetallesEscenariosCuposExclusiones\Create\" />
     <Folder Include="DetallesEscenariosCuposExclusiones\Delete\" />
   </ItemGroup>

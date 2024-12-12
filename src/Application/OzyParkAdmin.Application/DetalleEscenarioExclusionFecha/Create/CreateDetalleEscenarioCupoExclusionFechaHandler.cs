@@ -1,41 +1,41 @@
 ﻿using Microsoft.Extensions.Logging;
 using OzyParkAdmin.Application.Shared;
-using OzyParkAdmin.Domain.DetallesEscenariosCupos;
+using OzyParkAdmin.Domain.DetallesEscenariosCuposExclusionesFechas;
 using OzyParkAdmin.Domain.Shared;
 
-namespace OzyParkAdmin.Application.DetalleEscenarioCupo.Create;
+namespace OzyParkAdmin.Application.DetalleEscenarioExclusionFecha.Create;
 
 /// <summary>
-/// Handler encargado de la creación de detalles para un escenario de cupo.
+/// Handler encargado de la creación de exclusiones por fecha de un escenario de cupo.
 /// </summary>
-public sealed class CreateDetalleEscenarioCupoHandler : CommandHandler<CreateDetalleEscenarioCupo>
+public sealed class CreateDetalleEscenarioCupoExclusionFechaHandler : CommandHandler<CreateDetalleEscenarioCupoExclusionFecha>
 {
     private readonly IOzyParkAdminContext _context;
-    private readonly DetalleEscenarioCupoManager _detalleCupoManager;
+    private readonly DetalleEscenarioCupoExclusionFechaManager _exclusionFechaManager;
 
     /// <summary>
-    /// Constructor de la clase <see cref="CreateDetalleEscenarioCupoHandler"/>.
+    /// Constructor de la clase <see cref="CreateDetalleEscenarioCupoExclusionFechaHandler"/>.
     /// </summary>
     /// <param name="context">Contexto de datos de la aplicación.</param>
     /// <param name="logger">Logger de la clase.</param>
-    /// <param name="detalleCupoManager">Manager de detalles del escenario de cupo.</param>
-    public CreateDetalleEscenarioCupoHandler(
+    /// <param name="exclusionFechaManager">Manager de exclusiones por fecha.</param>
+    public CreateDetalleEscenarioCupoExclusionFechaHandler(
         IOzyParkAdminContext context,
-        ILogger<CreateDetalleEscenarioCupoHandler> logger,
-        DetalleEscenarioCupoManager detalleCupoManager)
+        ILogger<CreateDetalleEscenarioCupoExclusionFechaHandler> logger,
+        DetalleEscenarioCupoExclusionFechaManager exclusionFechaManager)
         : base(logger)
     {
         ArgumentNullException.ThrowIfNull(context);
-        ArgumentNullException.ThrowIfNull(detalleCupoManager);
+        ArgumentNullException.ThrowIfNull(exclusionFechaManager);
 
         _context = context;
-        _detalleCupoManager = detalleCupoManager;
+        _exclusionFechaManager = exclusionFechaManager;
     }
 
     /// <inheritdoc/>
-    protected override async Task<SuccessOrFailure> ExecuteAsync(CreateDetalleEscenarioCupo command, CancellationToken cancellationToken)
+    protected override async Task<SuccessOrFailure> ExecuteAsync(CreateDetalleEscenarioCupoExclusionFecha command, CancellationToken cancellationToken)
     {
-        var result = await _detalleCupoManager.SyncDetallesAsync(command.EscenarioCupoId, command.Detalles, cancellationToken);
+        var result = await _exclusionFechaManager.SyncExclusionesAsync(command.EscenarioCupoId, command.Exclusiones, cancellationToken);
 
         var (nuevas, actualizar, eliminar) = result;
 

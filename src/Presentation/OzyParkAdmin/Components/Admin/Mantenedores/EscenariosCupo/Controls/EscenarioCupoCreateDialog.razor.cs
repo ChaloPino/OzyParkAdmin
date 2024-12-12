@@ -122,19 +122,14 @@ public partial class EscenarioCupoCreateDialog
         ValidarFormularioEscenarioCupo();
         if (_formEscenarioCupoValido && detalles.Any())
         {
-            MudDialog.Close(DialogResult.Ok(SelectedEscenarioCupo));
+
+            MudDialog.Close(DialogResult.Ok(new EscenarioCupoDataResponse
+            {
+                EscenarioCupo = SelectedEscenarioCupo,
+                Detalles = detalles,
+                ExclusionesPorFecha = exclusionesPorFecha
+            }));
         }
-    }
-
-    private void CancelEditingItem()
-    {
-        Snackbar.Add("Edición cancelada.", Severity.Warning);
-        CloseDialog();
-    }
-
-    private void CloseDialog()
-    {
-        MudDialog.Close();
     }
 
     private void OnActiveIndexChanged(int newIndex)

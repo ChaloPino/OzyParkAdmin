@@ -1,11 +1,14 @@
-﻿using MassTransit;
+﻿using DocumentFormat.OpenXml.Office2013.Excel;
+using MassTransit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using MudBlazor.Extensions;
 using OzyParkAdmin.Application.CanalesVenta.List;
 using OzyParkAdmin.Application.CentrosCosto.List;
+using OzyParkAdmin.Application.DetalleEscenarioCupo.Create;
 using OzyParkAdmin.Application.DetalleEscenarioCupo.Update;
+using OzyParkAdmin.Application.DetalleEscenarioExclusionFecha.Create;
 using OzyParkAdmin.Application.DetalleEscenarioExclusionFecha.Update;
 using OzyParkAdmin.Application.DetallesEscenariosExclusiones.Update;
 using OzyParkAdmin.Application.DiasSemana.List;
@@ -151,15 +154,70 @@ public partial class Index
     /// Guarda un nuevo escenario de cupo en el servidor.
     /// </summary>
     /// <param name="escenarioCupo">El modelo de escenario de cupo que se desea guardar.</param>
-    private async Task<bool> SaveEscenarioCupoAsync(EscenarioCupoModel escenarioCupo)
+    private async Task<bool> SaveEscenarioCupoAsync(EscenarioCupoModel escenarioCupo, IEnumerable<DetalleEscenarioCupoInfo> detalles, IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> exclusiones)
     {
         CreateEscenarioCupo changeStatus = escenarioCupo.ToCreate();
         var result = await Mediator.SendRequest(changeStatus);
         return await result.MatchAsync(
-           onSuccess: RefreshAsync,
+           onSuccess: async (y, x) =>
+           {
+               await SaveEscenarioCupoDetallesAsync(y.Id, detalles);
+
+               await SaveDetallesEscenarioCupoExclusionesPorFechaAsync(y.Id, exclusiones);
+
+               return true;
+
+           },
            onFailure: (failure) => AddFailure(failure, "crear escenario cupo")
        );
     }
+
+
+    /// <summary>
+    /// Guarda los detalles del escenario cupo que se acaba de crear.
+    /// </summary>
+    /// <param name="escenarioCupo">El modelo de escenario de cupo que se desea guardar.</param>
+    private async Task<bool> SaveEscenarioCupoDetallesAsync(int escenarioCupoId, IEnumerable<DetalleEscenarioCupoInfo> detalles)
+    {
+
+        foreach (var detalle in detalles)
+        {
+            detalle.EscenarioCupoId = escenarioCupoId;
+        }
+
+        CreateDetalleEscenarioCupo changeStatus = new(escenarioCupoId, detalles);
+
+        var result = await Mediator.SendRequest(changeStatus);
+
+        return result.Match(
+           onSuccess: (y) => true,
+           onFailure: (failure) => AddFailure(failure, "guardar detalles escenario cupo")
+       );
+    }
+
+    /// <summary>
+    /// Guarda las exclusiones por fecha del escenario cupo que se acaba de crear.
+    /// </summary>
+    /// <param name="escenarioCupo">El modelo de escenario de cupo que se desea guardar.</param>
+    private async Task<bool> SaveDetallesEscenarioCupoExclusionesPorFechaAsync(int escenarioCupoId, IEnumerable<DetalleEscenarioCupoExclusionFechaFullInfo> exclusiones)
+    {
+
+        foreach (var exclusion in exclusiones)
+        {
+            exclusion.EscenarioCupoId = escenarioCupoId;
+        }
+
+        CreateDetalleEscenarioCupoExclusionFecha changeStatus = new(escenarioCupoId, exclusiones);
+
+        var result = await Mediator.SendRequest(changeStatus);
+
+        return result.Match(
+           onSuccess: _ => true,
+           onFailure: (failure) => AddFailure(failure, "guardar detalles escenario cupo")
+       );
+    }
+
+
 
     /// <summary>
     /// Actualiza las exclusiones de un escenario de cupo en el servidor.
@@ -175,7 +233,6 @@ public partial class Index
            onSuccess: (info) => true,
            onFailure: (failure) => AddFailure(failure, "modificar escenario cupo exclusiones")
        );
-        //return UpdateEscenarioCupoExclusions(escenarioCupo, result, "modificar escenario cupo exclusiones");
     }
 
     /// <summary>
@@ -396,35 +453,62 @@ public partial class Index
 
         var result = await dialog.Result;
 
+
         if (result != null && !result.Canceled)
         {
-            EscenarioCupoModel? createdEscenarioCupo = result.Data as EscenarioCupoModel;
-            if (createdEscenarioCupo != null)
+            var response = result.Data as EscenarioCupoDataResponse;
+
+            if (response is null)
             {
-                viewModel.Loading = true;
-
-                StateHasChanged();
-
-                Snackbar.Add($"Guardando Escenario '{createdEscenarioCupo.Nombre}' ...", Severity.Info, config =>
+                Snackbar.Add("No se recibió data actualizada.", Severity.Warning, config =>
                 {
                     config.VisibleStateDuration = 2000;
                     config.RequireInteraction = false;
                 });
 
-                await SaveEscenarioCupoAsync(createdEscenarioCupo);
-
-                Snackbar.Add("Escenario guardado exitosamente.", Severity.Success, config =>
-                {
-                    config.VisibleStateDuration = 2000;
-                    config.RequireInteraction = false;
-                });
-
-
-                viewModel.Loading = false;
-
-                StateHasChanged();
+                return;
             }
+
+            EscenarioCupoModel? createdEscenarioCupo = response.EscenarioCupo;
+            List<DetalleEscenarioCupoInfo> detalles = response.Detalles;
+            List<DetalleEscenarioCupoExclusionFechaFullInfo> exclusiones = response.ExclusionesPorFecha;
+
+            await SaveEscenarioCupoAsync(createdEscenarioCupo, detalles, exclusiones);
+
         }
+
+
+        //--------------------------------------
+
+        //if (result != null && !result.Canceled)
+        //{
+        //    EscenarioCupoModel? createdEscenarioCupo = result.Data as EscenarioCupoModel;
+        //    if (createdEscenarioCupo != null)
+        //    {
+        //        viewModel.Loading = true;
+
+        //        StateHasChanged();
+
+        //        Snackbar.Add($"Guardando Escenario '{createdEscenarioCupo.Nombre}' ...", Severity.Info, config =>
+        //        {
+        //            config.VisibleStateDuration = 2000;
+        //            config.RequireInteraction = false;
+        //        });
+
+        //        await SaveEscenarioCupoAsync(createdEscenarioCupo, createdEscenarioCupo);
+
+        //        Snackbar.Add("Escenario guardado exitosamente.", Severity.Success, config =>
+        //        {
+        //            config.VisibleStateDuration = 2000;
+        //            config.RequireInteraction = false;
+        //        });
+
+
+        //        viewModel.Loading = false;
+
+        //        StateHasChanged();
+        //    }
+        //}
     }
 
     /// <summary>

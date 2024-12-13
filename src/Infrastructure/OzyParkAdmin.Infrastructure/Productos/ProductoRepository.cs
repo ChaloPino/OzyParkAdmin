@@ -3,13 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using OzyParkAdmin.Domain.CatalogoImagenes;
 using OzyParkAdmin.Domain.CategoriasProducto;
 using OzyParkAdmin.Domain.CentrosCosto;
-using OzyParkAdmin.Domain.Franquicias;
 using OzyParkAdmin.Domain.Productos;
 using OzyParkAdmin.Domain.Seguridad.Usuarios;
 using OzyParkAdmin.Domain.Shared;
 using OzyParkAdmin.Infrastructure.Shared;
 using System.Data;
-using System.Threading;
 
 namespace OzyParkAdmin.Infrastructure.Productos;
 
@@ -85,7 +83,7 @@ public sealed class ProductoRepository(OzyParkAdminContext context) : Repository
             .AsNoTracking()
             .AsSplitQuery()
             .Where(x => x.FranquiciaId == franquiciaId && x.Id != exceptoProductoId && x.TipoProducto.ControlaInventario)
-            .Select(x => new ProductoInfo {  Id = x.Id, Aka = x.Aka, Sku = x.Sku, Nombre = x.Nombre, EsActivo = x.EsActivo })
+            .Select(x => new ProductoInfo { Id = x.Id, Aka = x.Aka, Sku = x.Sku, Nombre = x.Nombre, EsActivo = x.EsActivo })
             .ToListAsync(cancellationToken);
     }
 
@@ -139,7 +137,7 @@ public sealed class ProductoRepository(OzyParkAdminContext context) : Repository
             Nombre = x.Nombre,
             CentroCosto = new CentroCostoInfo { Id = x.CentroCosto.Id, Descripcion = x.CentroCosto.Descripcion },
             FranquiciaId = x.FranquiciaId,
-            Categoria = new CategoriaProductoInfo {  Id = x.Categoria.Id, Aka = x.Categoria.Aka, Nombre = x.Categoria.Nombre, EsActivo = x.Categoria.EsActivo },
+            Categoria = new CategoriaProductoInfo { Id = x.Categoria.Id, Aka = x.Categoria.Aka, Nombre = x.Categoria.Nombre, EsActivo = x.Categoria.EsActivo },
             CategoriaDespliegue = new CategoriaProductoInfo { Id = x.CategoriaDespliegue.Id, Aka = x.CategoriaDespliegue.Aka, Nombre = x.CategoriaDespliegue.Nombre, EsActivo = x.CategoriaDespliegue.EsActivo },
             Imagen = new CatalogoImagenInfo { Aka = x.Imagen.Aka, Base64 = x.Imagen.Base64, MimeType = x.Imagen.MimeType, Tipo = x.Imagen.Tipo },
             TipoProducto = x.TipoProducto,
@@ -149,13 +147,13 @@ public sealed class ProductoRepository(OzyParkAdminContext context) : Repository
             EnInventario = x.EnInventario,
             FechaAlta = x.FechaAlta,
             FechaSistema = x.FechaSistema,
-            UsuarioCreacion = new UsuarioInfo {  Id = x.UsuarioCreacion.Id, UserName = x.UsuarioCreacion.UserName, FriendlyName = x.UsuarioCreacion.FriendlyName },
+            UsuarioCreacion = new UsuarioInfo { Id = x.UsuarioCreacion.Id, UserName = x.UsuarioCreacion.UserName, FriendlyName = x.UsuarioCreacion.FriendlyName },
             UltimaModificacion = x.UltimaModificacion,
             UsuarioModificacion = new UsuarioInfo { Id = x.UsuarioModificacion.Id, UserName = x.UsuarioModificacion.UserName, FriendlyName = x.UsuarioModificacion.FriendlyName },
             EsActivo = x.EsActivo,
             Complementos = x.Complementos.Select(c => new ProductoComplementarioInfo
             {
-                Complemento = new ProductoInfo {  Id = c.Complemento.Id, Aka = c.Complemento.Aka, Sku = c.Complemento.Sku, Nombre = c.Complemento.Nombre, EsActivo = c.Complemento.EsActivo },
+                Complemento = new ProductoInfo { Id = c.Complemento.Id, Aka = c.Complemento.Aka, Sku = c.Complemento.Sku, Nombre = c.Complemento.Nombre, EsActivo = c.Complemento.EsActivo },
                 Orden = c.Orden,
             })
         }).ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -167,5 +165,38 @@ public sealed class ProductoRepository(OzyParkAdminContext context) : Repository
             TotalCount = count,
             Items = list,
         };
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<ProductoInfo>> SearchProductosAsync(int centroCostoId, string? searchText, CancellationToken cancellationToken)
+    {
+
+        IQueryable<Producto> query = EntitySet.AsNoTracking();
+
+        query = query.Where(x => x.CentroCosto.Id == centroCostoId);
+
+        if (searchText is not null)
+        {
+            query = query.Where(x =>
+                x.Sku.Contains(searchText) ||
+                x.Aka.Contains(searchText) ||
+                x.Nombre.Contains(searchText) ||
+                x.UsuarioCreacion.FriendlyName.Contains(searchText) ||
+                x.UsuarioModificacion.FriendlyName.Contains(searchText) ||
+                x.TipoProducto.Nombre.Contains(searchText) ||
+                x.Categoria.Nombre.Contains(searchText) ||
+                EF.Property<ProductoAgrupacion>(x, "_productoAgrupacion").AgrupacionContable.Aka.Contains(searchText));
+        }
+
+        List<ProductoInfo> list = await query.Select(x => new ProductoInfo
+        {
+            Id = x.Id,
+            Aka = x.Aka,
+            Sku = x.Sku,
+            Nombre = x.Nombre,
+            EsActivo = x.EsActivo,
+        }).ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        return list;
     }
 }

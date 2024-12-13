@@ -1,0 +1,45 @@
+﻿@using OzyParkAdmin.Components.Admin.Mantenedores.TarifasProducto.Models
+@using OzyParkAdmin.Domain.CentrosCosto
+<MudSelect T="CentroCostoInfo"
+           Value="CentroCosto"
+           ValueChanged="SearchChangedAsync"
+           Variant="Variant.Outlined"
+           Margin="Margin.Dense"
+           Dense="true"
+           Label="Centro de costo"
+           ToStringFunc="@(x => x?.Descripcion)"
+           Immediate="true"
+           Class="@Class">
+    <ForIn Items="CentrosCosto" Context="centroCosto">
+        <MudSelectItem T="CentroCostoInfo" Value="centroCosto" />
+    </ForIn>
+</MudSelect>
+
+
+@code {
+    [Parameter]
+    public CentroCostoInfo CentroCosto { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<CentroCostoInfo> CentroCostoChanged { get; set; }
+
+    [Parameter]
+    public List<CentroCostoInfo> CentrosCosto { get; set; } = [];
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [CascadingParameter]
+    private MudDataGrid<TarifaProductoViewModel>? DataGrid { get; set; }
+
+    private async Task SearchChangedAsync(CentroCostoInfo centroCosto)
+    {
+        CentroCosto = centroCosto;
+        await CentroCostoChanged.InvokeAsync(centroCosto);
+
+        if (DataGrid is not null)
+        {
+            await DataGrid.ReloadServerData();
+        }
+    }
+}

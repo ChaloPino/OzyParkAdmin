@@ -105,5 +105,16 @@ public interface IProductoRepository
     /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
     /// <returns>La lista paginada de <see cref="ProductoFullInfo"/> que coinciden con los criterios de búsqueda.</returns>
     Task<PagedList<ProductoFullInfo>> SearchProductosAsync(int[]? centroCostoIds, string? searchText, FilterExpressionCollection<Producto> filterExpressions, SortExpressionCollection<Producto> sortExpressions, int page, int pageSize, CancellationToken cancellationToken);
-    
+    /// <summary>
+    /// Busca productos que coincidan con los criterios de búsqueda.
+    /// </summary>
+    /// <param name="centroCostoId">Id de centro de costo.</param>
+    /// <param name="searchText">El texto de búsqueda.</param>
+    /// <param name="cancellationToken">El <see cref="CancellationToken"/> usado para propagar notificaciones de que la operación debería ser cancelada.</param>
+    /// <returns>La lista paginada de <see cref="ProductoFullInfo"/> que coinci
+    Task<List<ProductoInfo>> SearchProductosAsync(int centroCostoId, string? searchText, CancellationToken cancellationToken);
+
+
+
+
 }

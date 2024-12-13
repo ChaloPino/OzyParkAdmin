@@ -87,7 +87,8 @@ public sealed class DeleteEscenarioCupoHandler : CommandHandler<DeleteEscenarioC
             }
             else
             {
-                await _detalleRepository.RemoveDetallesAsync(detalles, cancellationToken);
+                _context.RemoveRange(detalles);
+              
             }
         }
 
@@ -118,6 +119,8 @@ public sealed class DeleteEscenarioCupoHandler : CommandHandler<DeleteEscenarioC
                 _context.RemoveRange(exclusionesFecha);
             }
         }
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
 
@@ -126,6 +129,11 @@ public sealed class DeleteEscenarioCupoHandler : CommandHandler<DeleteEscenarioC
     /// </summary>
     private async Task<SuccessOrFailure> DeleteEscenariosCuposAsync(IEnumerable<EscenarioCupo> escenariosCupos, CancellationToken cancellationToken)
     {
+        //foreach (var escenario in escenariosCupos)
+        //{
+        //    _context.Attach()
+        //}
+
         if (escenariosCupos.Count() < 30)
         {
             _context.RemoveRange(escenariosCupos);

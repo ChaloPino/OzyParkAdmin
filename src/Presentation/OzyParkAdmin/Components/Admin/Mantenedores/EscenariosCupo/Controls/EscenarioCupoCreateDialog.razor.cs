@@ -26,6 +26,7 @@ public partial class EscenarioCupoCreateDialog
     [Parameter] public List<ZonaInfo> Zonas { get; set; } = new();
     [Parameter] public List<ServicioInfo> Servicios { get; set; } = new();
     [Parameter] public List<CanalVenta> CanalesVenta { get; set; } = new();
+    [Parameter] public bool IsLoading { get; set; } = false;
 
     private List<DetalleEscenarioCupoInfo> detalles { get; set; } = new();
 
@@ -137,12 +138,6 @@ public partial class EscenarioCupoCreateDialog
         _activeStep = newIndex;
         if (IsAllStepsValid() && _activeStep == 2)
         {
-            Snackbar.Add("Todos los pasos son válidos. Puede proceder a guardar.", Severity.Success, config =>
-            {
-                config.VisibleStateDuration = 5000;
-                config.RequireInteraction = false;
-            });
-
             _completed = true;
         }
     }

@@ -13,16 +13,16 @@
         <MudGrid Spacing="1" Class="mt-4">
             <MudItem xs="12">
                 <MudSelect @bind-SelectedValues="ServiciosSeleccionados"
-                           SelectAll="true"
-                           SelectAllText="Seleccionar todos"
-                           Label="Servicios"
-                           MultiSelection="true"
-                           Variant="Variant.Outlined"
-                           Margin="Margin.Dense"
-                           Dense="true"
-                           ToStringFunc="x => x?.Nombre"
-                           MultiSelectionTextFunc="ServiciosVentaDescriptions"
-                           Required="true">
+                SelectAll="true"
+                SelectAllText="Seleccionar todos"
+                Label="Servicios"
+                MultiSelection="true"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"
+                Dense="true"
+                ToStringFunc="x => x?.Nombre"
+                MultiSelectionTextFunc="ServiciosVentaDescriptions"
+                Required="true">
                     @foreach (var servicio in ServiciosDisponibles)
                     {
                         <MudSelectItem T="ServicioInfo" Value="servicio">@servicio.Nombre</MudSelectItem>
@@ -31,15 +31,15 @@
             </MudItem>
             <MudItem xs="12">
                 <MudSelect @bind-SelectedValues="CanalesVentaSeleccionados"
-                           SelectAll="true"
-                           SelectAllText="Seleccionar todos"
-                           Label="Canales de Venta"
-                           MultiSelection="true"
-                           Variant="Variant.Outlined"
-                           Margin="Margin.Dense"
-                           Dense="true"
-                           ToStringFunc="x => x?.Nombre"
-                           Required="true">
+                SelectAll="true"
+                SelectAllText="Seleccionar todos"
+                Label="Canales de Venta"
+                MultiSelection="true"
+                Variant="Variant.Outlined"
+                Margin="Margin.Dense"
+                Dense="true"
+                ToStringFunc="x => x?.Nombre"
+                Required="true">
                     @foreach (var canal in CanalesVentaDisponibles)
                     {
                         <MudSelectItem T="CanalVenta" Value="canal">@canal.Nombre</MudSelectItem>
@@ -68,27 +68,27 @@
     <MudItem xs="8" Style="max-height: 550px !important" Class="overflow-y-auto">
         <MudGrid Spacing="1" Class="mt-4">
             <MudItem xs="12">
-                <MudTable Items="Exclusiones" Class="mt-4" @bind-SelectedItems="DetallesSeleccionados" MultiSelection="true" T="DetalleEscenarioCupoExclusionFechaFullInfo">
-                    <HeaderContent>
-                        <MudTh>Servicio</MudTh>
-                        <MudTh>Canal de Venta</MudTh>
-                        <MudTh>Fecha de Exclusión</MudTh>
-                        <MudTh>Hora Inicio</MudTh>
-                        <MudTh>Hora Fin</MudTh>
-                        <MudTh>Acciones</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@context.ServicioNombre</MudTd>
-                        <MudTd>@context.CanalVentaNombre</MudTd>
-                        <MudTd>@(context.FechaExclusion.HasValue ? context.FechaExclusion.Value.ToString("dd/MM/yyyy") : "-")</MudTd>
-                        <MudTd>@(context.HoraInicio.HasValue ? context.HoraInicio.Value.ToString(@"hh\:mm") : "-")</MudTd>
-                        <MudTd>@(context.HoraFin.HasValue ? context.HoraFin.Value.ToString(@"hh\:mm") : "-")</MudTd>
-                        <MudTd>
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditarExclusion(context)" />
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => EliminarExclusion(context)" />
-                        </MudTd>
-                    </RowTemplate>
-                </MudTable>
+                    <MudTable Items="Exclusiones" Class="mt-4" @bind-SelectedItems="DetallesSeleccionados" MultiSelection="true" T="DetalleEscenarioCupoExclusionFechaFullInfo">
+                        <HeaderContent>
+                            <MudTh>Servicio</MudTh>
+                            <MudTh>Canal de Venta</MudTh>
+                            <MudTh>Fecha de Exclusión</MudTh>
+                            <MudTh>Hora Inicio</MudTh>
+                            <MudTh>Hora Fin</MudTh>
+                            <MudTh>Acciones</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.ServicioNombre</MudTd>
+                            <MudTd>@context.CanalVentaNombre</MudTd>
+                            <MudTd>@(context.FechaExclusion.HasValue ? context.FechaExclusion.Value.ToString("dd/MM/yyyy") : "-")</MudTd>
+                            <MudTd>@(context.HoraInicio.HasValue ? context.HoraInicio.Value.ToString(@"hh\:mm") : "-")</MudTd>
+                            <MudTd>@(context.HoraFin.HasValue ? context.HoraFin.Value.ToString(@"hh\:mm") : "-")</MudTd>
+                            <MudTd>
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditarExclusion(context)" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => EliminarExclusion(context)" />
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
             </MudItem>
         </MudGrid>
         <MudGrid Class="mt-4">

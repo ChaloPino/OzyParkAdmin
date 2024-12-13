@@ -15,6 +15,7 @@ using OzyParkAdmin.Application.DiasSemana.List;
 using OzyParkAdmin.Application.EscenariosCupo.Create;
 using OzyParkAdmin.Application.EscenariosCupo.Search;
 using OzyParkAdmin.Application.EscenariosCupo.Update;
+using OzyParkAdmin.Application.Identity;
 using OzyParkAdmin.Application.Servicios.List;
 using OzyParkAdmin.Application.Zonas.List;
 using OzyParkAdmin.Components.Admin.Mantenedores.Cupos.Models;
@@ -70,9 +71,16 @@ public partial class Index
     /// </summary>
     private async Task LoadReferencesAsync()
     {
+
+        var user = (await AuthenticationState).User;
+
+        var franquicias = user.GetFranquicias();
+
+        var franquicia = franquicias is null ? 1 : franquicias[0];
+
         Task[] loadingTasks =
         [
-            LoadCentrosCosto(), LoadEscenariosCupoAsync(), LoadServiciosAsync(1), LoadCanalesVentaAsync(), LoadDiasSemana()
+            LoadCentrosCosto(), LoadEscenariosCupoAsync(), LoadServiciosAsync(franquicia), LoadCanalesVentaAsync(), LoadDiasSemana()
         ];
 
         await Task.WhenAll(loadingTasks);
@@ -445,8 +453,7 @@ public partial class Index
         {
             FullScreen = true,
             CloseButton = true,
-            CloseOnEscapeKey = true,
-            NoHeader = true
+            CloseOnEscapeKey = true
         };
 
         var dialog = await DialogService.ShowAsync<EscenarioCupoCreateDialog>("Crear Escenario de Cupo", parameters, options);

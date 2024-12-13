@@ -13,6 +13,7 @@ public sealed class DetalleEscenarioCupoExclusionRepository(OzyParkAdminContext 
     public async Task<IEnumerable<DetalleEscenarioCupoExclusion>> GetExclusionesByEscenarioCupoIdAsync(int escenarioCupoId, CancellationToken cancellationToken)
     {
         return await EntitySet
+            .AsNoTracking()
             .AsSplitQuery()
             .Where(x => x.EscenarioCupoId == escenarioCupoId)
             .ToListAsync(cancellationToken)

@@ -23,7 +23,6 @@ public partial class EscenarioCupoEditorDialog
     private bool _fieldsModified = false;
     private int _activeStep;
     private int _index;
-    private bool _loading;
     private bool _completed;
 
     [CascadingParameter] public MudDialogInstance MudDialog { get; set; } = default!;
@@ -33,6 +32,7 @@ public partial class EscenarioCupoEditorDialog
     [Parameter] public List<ZonaInfo> Zonas { get; set; } = new();
     [Parameter] public List<ServicioInfo> Servicios { get; set; } = new();
     [Parameter] public List<CanalVenta> CanalesVenta { get; set; } = new();
+    public bool Loading { get; set; }
     private List<DetalleEscenarioCupoInfo> Detalles { get; set; } = new();
     private List<DetalleEscenarioCupoExclusionFechaFullInfo> ExclusionesPorFecha { get; set; } = new();
 
@@ -182,12 +182,6 @@ public partial class EscenarioCupoEditorDialog
             Snackbar.Add("Debe completar todos los campos obligatorios antes de guardar.", Severity.Error);
         }
     }
-
-    private void CancelEditingItem()
-    {
-        Snackbar.Add("Edición cancelada.", Severity.Warning);
-    }
-
     private async void OnActiveIndexChanged(int newIndex)
     {
         _activeStep = newIndex;
@@ -200,17 +194,8 @@ public partial class EscenarioCupoEditorDialog
 
         if (IsAllStepsValid() && _activeStep == 2)
         {
-            Snackbar.Add("Todos los pasos son válidos. Puede proceder a guardar.", Severity.Success, config =>
-            {
-                config.VisibleStateDuration = 5000;
-                config.RequireInteraction = false;
-            });
-
             _completed = true;
         }
-
-
-
     }
     private void OnFieldChanged(bool isValid)
     {
@@ -221,6 +206,7 @@ public partial class EscenarioCupoEditorDialog
     private bool AddFailure(Failure failure, string action)
     {
         Snackbar.AddFailure(failure, action);
+        Loading = false;
         return false;
     }
 
@@ -233,31 +219,38 @@ public partial class EscenarioCupoEditorDialog
     {
         ListDetalleEscenarioCupo list = new(SelectedEscenarioCupo.Id);
 
+        Loading = true;
+
         var result = await Mediator.SendRequest(list);
         result.Switch(
             onSuccess: list =>
             {
-                Detalles = list;
                 _detallesModified = false;
-                StateHasChanged();
+                Detalles = list;
             },
             onFailure: failure => AddFailure(failure, "cargar detalles de escenario cupo"));
+
+        Loading = false;
+        StateHasChanged();
+
+
     }
 
     private async Task ListDetalleEscenarioCupoExclusionesFecha()
     {
         ListEscenarioCupoExclusionesPorFecha list = new(SelectedEscenarioCupo.Id);
 
+        Loading = true;
+
         var result = await Mediator.SendRequest(list);
         result.Switch(
             onSuccess: list =>
             {
-                ExclusionesPorFecha = list;
+                Loading = false;
                 _exclusionesModified = false;
+                ExclusionesPorFecha = list;
                 StateHasChanged();
             },
             onFailure: failure => AddFailure(failure, "cargar exclusiones por fecha escenario cupo"));
     }
-
-
 }
